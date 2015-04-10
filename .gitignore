@@ -1,0 +1,8 @@
+Hardware/Locket.bak
+RFSimulation/Round7.hfssresults/
+RFSimulation/Round5.hfssresults/
+RFSimulation/Round8.hfssresults/
+RFSimulation/Round6.hfssresults/
+*.lock
+Hardware/Locket.kicad_pcb-bak
+*.auto
