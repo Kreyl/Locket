@@ -6,3 +6,6 @@ RFSimulation/Round6.hfssresults/
 *.lock
 Hardware/Locket.kicad_pcb-bak
 *.auto
+Hardware/$Locket.sch
+RFSimulation/Round9.hfssresults/
+RFSimulation/conv.dat

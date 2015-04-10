@@ -127,18 +127,19 @@ $begin 'AnsoftProject'
 			$end 'DesignDatasets'
 			$begin 'Properties'
 				VariableProp('PortX', 'UD', '', '-13mm', oa(i=true, int=false, Min='-20mm', Max='-9mm', MinStep='0.15mm', MaxStep='1.5mm', MinFocus='-20mm', MaxFocus='-9mm'))
-				VariableProp('L1', 'UD', '', '1mm', oa(i=false, int=false, Min='-4mm', Max='4mm', MinStep='0.08mm', MaxStep='0.8mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L2', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.07mm', MaxStep='0.7mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L3', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.07mm', MaxStep='0.7mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L4', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.07mm', MaxStep='0.7mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L5', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.07mm', MaxStep='0.7mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L6', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.05mm', MaxStep='0.5mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L7', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.05mm', MaxStep='0.5mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L8', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.04mm', MaxStep='0.4mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L9', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.04mm', MaxStep='0.4mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L10', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.02mm', MaxStep='0.2mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L11', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.03mm', MaxStep='0.3mm', MinFocus='-4mm', MaxFocus='4mm'))
-				VariableProp('L12', 'UD', '', '1mm', oa(i=true, int=false, Min='-4mm', Max='4mm', MinStep='0.03mm', MaxStep='0.3mm', MinFocus='-4mm', MaxFocus='4mm'))
+				VariableProp('X0', 'UD', '', 'PortX')
+				VariableProp('X1', 'UD', '', '-12mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.12mm', MaxStep='1.2mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X2', 'UD', '', '-11mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.11mm', MaxStep='1.1mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X3', 'UD', '', '-10mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.1mm', MaxStep='1mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X4', 'UD', '', '-9mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.09mm', MaxStep='0.9mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X5', 'UD', '', '-8mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.08mm', MaxStep='0.8mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X7', 'UD', '', '-7mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.07mm', MaxStep='0.7mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X6', 'UD', '', '-6mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.06mm', MaxStep='0.6mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X8', 'UD', '', '-5mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.05mm', MaxStep='0.5mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X9', 'UD', '', '-4mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.04mm', MaxStep='0.4mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X10', 'UD', '', '-3mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.03mm', MaxStep='0.3mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X11', 'UD', '', '-2mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.02mm', MaxStep='0.2mm', MinFocus='-18mm', MaxFocus='22mm'))
+				VariableProp('X12', 'UD', '', '-1mm', oa(i=true, int=false, Min='-18mm', Max='22mm', MinStep='0.01mm', MaxStep='0.1mm', MinFocus='-18mm', MaxFocus='22mm'))
 				VariableProp('HG', 'UD', '', '0.354933317056795mm', oa(i=true, int=false, Min='0.3mm', Max='1.5mm', MinStep='0.0075mm', MaxStep='0.075mm', MinFocus='0.3mm', MaxFocus='1.5mm'))
 				VariableProp('DistG', 'UD', '', '2.11206396679586mm', oa(i=true, int=false, Min='0.8mm', Max='3mm', MinStep='0.005mm', MaxStep='0.05mm', MinFocus='0.8mm', MaxFocus='3mm'))
 				VariableProp('yo1', 'UD', '', '10.3079927976318mm', oa(i=true, int=false, Min='1mm', Max='16mm', MinStep='0.15mm', MaxStep='1.5mm', MinFocus='1mm', MaxFocus='16mm'))
@@ -160,19 +161,6 @@ $begin 'AnsoftProject'
 				VariableProp('Radius', 'UD', '', '28mm')
 				VariableProp('W', 'UD', '', '0.5mm')
 				VariableProp('PortW', 'UD', '', '0.2mm')
-				VariableProp('X0', 'UD', '', 'PortX')
-				VariableProp('X1', 'UD', '', 'max(Xmin, min((X0+L1), Xmax))')
-				VariableProp('X2', 'UD', '', 'max(Xmin, min((X1+L2), Xmax))')
-				VariableProp('X3', 'UD', '', 'max(Xmin, min((X2+L3),Xmax))')
-				VariableProp('X4', 'UD', '', 'max(Xmin, min((X3+L4),Xmax))')
-				VariableProp('X5', 'UD', '', 'max(Xmin, min((X4+L5),Xmax))')
-				VariableProp('X6', 'UD', '', 'max(Xmin, min((X5+L6),Xmax))')
-				VariableProp('X7', 'UD', '', 'max(Xmin, min((X6+L7),Xmax))')
-				VariableProp('X8', 'UD', '', 'max(Xmin, min((X7+L8),Xmax))')
-				VariableProp('X9', 'UD', '', 'max(Xmin, min((X8+L9),Xmax))')
-				VariableProp('X10', 'UD', '', 'max(Xmin, min((X9+L10),Xmax))')
-				VariableProp('X11', 'UD', '', 'max(Xmin, min((X10+L11),Xmax))')
-				VariableProp('X12', 'UD', '', 'max(Xmin, min((X11+L12),Xmax))')
 				VariableProp('Y0', 'UD', '', 'sqrt(Radius^2-X0^2)+CenterY')
 				VariableProp('Y1', 'UD', '', 'min(yo1, ymax1)')
 				VariableProp('Y2', 'UD', '', 'min(yo2, ymax2)')
@@ -248,7 +236,7 @@ $begin 'AnsoftProject'
 			WorkingCS=1
 			$begin 'GeometryCore'
 				BlockVersionID=3
-				DataVersion=216
+				DataVersion=217
 				NativeKernel='ACIS'
 				NativeKernelVersionID=5
 				Units='mm'
@@ -265,7 +253,7 @@ $begin 'AnsoftProject'
 							IDServerObjectTypeID=0
 							IDServerRangeMin=0
 							IDServerRangeMax=2146483647
-							NextUniqueID=5960
+							NextUniqueID=6015
 							MoveBackwards=false
 						$end 'AnsoftRangedIDServer'
 						$begin 'AnsoftRangedIDServer'
@@ -643,14 +631,14 @@ $begin 'AnsoftProject'
 											NumFaces=1
 											NumWires=0
 											NumLoops=1
-											NumCoedges=57
-											NumEdges=57
-											NumVertices=57
+											NumCoedges=56
+											NumEdges=56
+											NumVertices=56
 										$end 'Topology'
 										BodyID=-1
 										StartFaceID=-1
 										StartEdgeID=-1
-										StartVertexID=5958
+										StartVertexID=6013
 										NumNewFaces=0
 										NumNewEdges=0
 										NumNewVertices=2
@@ -665,12 +653,12 @@ $begin 'AnsoftProject'
 											$begin 'NewVertices'
 												$begin 'Vertex'
 													NormalizedSerialNum=0
-													ID=5958
+													ID=6013
 													VtPos(-13.2528917847922, 11.9605804776971, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=1
-													ID=5959
+													ID=6014
 													VtPos(-12.75, 10.9775281400303, 0)
 												$end 'Vertex'
 											$end 'NewVertices'
@@ -1975,17 +1963,17 @@ $begin 'AnsoftProject'
 											NumFaces=1
 											NumWires=0
 											NumLoops=1
-											NumCoedges=44
-											NumEdges=44
-											NumVertices=44
+											NumCoedges=43
+											NumEdges=43
+											NumVertices=43
 										$end 'Topology'
 										BodyID=-1
 										StartFaceID=-1
-										StartEdgeID=5902
-										StartVertexID=5916
+										StartEdgeID=5960
+										StartVertexID=5972
 										NumNewFaces=0
-										NumNewEdges=14
-										NumNewVertices=42
+										NumNewEdges=12
+										NumNewVertices=41
 										FaceNameAndIDMap()
 										EdgeNameAndIDMap()
 										VertexNameAndIDMap()
@@ -1995,57 +1983,47 @@ $begin 'AnsoftProject'
 											$begin 'NewEdges'
 												$begin 'Edge'
 													NormalizedSerialNum=0
-													ID=5902
+													ID=5960
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-1.77731910708275, 12.156890683598, 0, 0)
 														TolVt(-1.71902269090923, 12.2527937669073, 0, 0)
 													$end 'EdTolVts'
-													EdgeMidPoint(-1.74364624742448, 12.2020918343168, 0)
+													EdgeMidPoint(-1.74364624742449, 12.2020918343168, 0)
 												$end 'Edge'
 												$begin 'Edge'
 													NormalizedSerialNum=1
-													ID=5903
+													ID=5961
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-2.01241677301417, 12.6576640085722, 0, 0)
 														TolVt(-2.27180434542655, 12.2309470746799, 0, 0)
 													$end 'EdTolVts'
-													EdgeMidPoint(-2.25635375257551, 12.5137503239522, 0)
+													EdgeMidPoint(-2.25635375257552, 12.5137503239522, 0)
 												$end 'Edge'
 												$begin 'Edge'
 													NormalizedSerialNum=2
-													ID=5904
+													ID=5962
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
-														TolVt(-5.71412545233886, 8.61022216292404, 0, 0)
-														TolVt(-5.88049309837299, 8.97636249522523, 0, 0)
+														TolVt(-6.70068691896542, 8.68090338654525, 0, 0)
+														TolVt(-6.70001591003801, 8.70428289662276, 0, 0)
 													$end 'EdTolVts'
-													EdgeMidPoint(-5.72687326093708, 8.82529719956033, 0)
+													EdgeMidPoint(-6.70012348347363, 8.69258659979788, 0)
 												$end 'Edge'
 												$begin 'Edge'
 													NormalizedSerialNum=3
-													ID=5905
+													ID=5963
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
-														TolVt(-6.70001591003801, 10.2398987495456, 0, 0)
-														TolVt(-6.81907354778107, 10.4822907311648, 0, 0)
+														TolVt(-7.70010652641349, 13.0983593355938, 0, 0)
+														TolVt(-8.05513887901296, 13.3852546146406, 0, 0)
 													$end 'EdTolVts'
-													EdgeMidPoint(-6.73072837954307, 10.3752487006514, 0)
+													EdgeMidPoint(-7.81144383283475, 13.3237031985176, 0)
 												$end 'Edge'
 												$begin 'Edge'
 													NormalizedSerialNum=4
-													ID=5906
-													EdgeFaces(2553)
-													$begin 'EdTolVts'
-														TolVt(-7.70917411988403, 13.0167425692093, 0, 0)
-														TolVt(-8.05513887901296, 13.3852546146406, 0, 0)
-													$end 'EdTolVts'
-													EdgeMidPoint(-7.78128243662381, 13.295700708939, 0)
-												$end 'Edge'
-												$begin 'Edge'
-													NormalizedSerialNum=5
-													ID=5907
+													ID=5964
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-8.74976590028389, 13.6796249461151, 0, 0)
@@ -2054,8 +2032,8 @@ $begin 'AnsoftProject'
 													EdgeMidPoint(-8.99180862653181, 13.8140353152755, 0)
 												$end 'Edge'
 												$begin 'Edge'
-													NormalizedSerialNum=6
-													ID=5908
+													NormalizedSerialNum=5
+													ID=5965
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-9.92884568518323, 13.444833300763, 0, 0)
@@ -2064,8 +2042,8 @@ $begin 'AnsoftProject'
 													EdgeMidPoint(-10.2360652460021, 13.3385238846814, 0)
 												$end 'Edge'
 												$begin 'Edge'
-													NormalizedSerialNum=7
-													ID=5909
+													NormalizedSerialNum=6
+													ID=5966
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-11.7279650836562, 10.1815135333637, 0, 0)
@@ -2074,8 +2052,8 @@ $begin 'AnsoftProject'
 													EdgeMidPoint(-11.7203669521704, 10.4166452645228, 0)
 												$end 'Edge'
 												$begin 'Edge'
-													NormalizedSerialNum=8
-													ID=5910
+													NormalizedSerialNum=7
+													ID=5967
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-12.2999961964797, 10.3064821362788, 0, 0)
@@ -2084,8 +2062,8 @@ $begin 'AnsoftProject'
 													EdgeMidPoint(-12.2796330478296, 10.1993403307408, 0)
 												$end 'Edge'
 												$begin 'Edge'
-													NormalizedSerialNum=9
-													ID=5911
+													NormalizedSerialNum=8
+													ID=5968
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-9.76885885341857, 12.9621509611036, 0, 0)
@@ -2094,8 +2072,8 @@ $begin 'AnsoftProject'
 													EdgeMidPoint(-9.76393475399789, 12.9682634378067, 0)
 												$end 'Edge'
 												$begin 'Edge'
-													NormalizedSerialNum=10
-													ID=5912
+													NormalizedSerialNum=9
+													ID=5969
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-9.07115431481676, 13.2227075276067, 0, 0)
@@ -2104,245 +2082,230 @@ $begin 'AnsoftProject'
 													EdgeMidPoint(-9.00819137346819, 13.2142590189759, 0)
 												$end 'Edge'
 												$begin 'Edge'
-													NormalizedSerialNum=11
-													ID=5913
+													NormalizedSerialNum=10
+													ID=5970
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
 														TolVt(-8.25023409971611, 12.924887527569, 0, 0)
-														TolVt(-8.18092645221892, 12.8510629478415, 0, 0)
+														TolVt(-8.1092604633743, 12.8109692594439, 0, 0)
 													$end 'EdTolVts'
-													EdgeMidPoint(-8.21871756337618, 12.8850299041779, 0)
+													EdgeMidPoint(-8.18855616716525, 12.8570274145992, 0)
 												$end 'Edge'
 												$begin 'Edge'
-													NormalizedSerialNum=12
-													ID=5914
+													NormalizedSerialNum=11
+													ID=5971
 													EdgeFaces(2553)
 													$begin 'EdTolVts'
-														TolVt(-7.29082588011597, 10.316611109797, 0, 0)
-														TolVt(-7.11950690162701, 9.96781915094318, 0, 0)
+														TolVt(-7.11950690162701, 8.97636249522523, 0, 0)
+														TolVt(-7.13509229340205, 8.43333123411173, 0, 0)
 													$end 'EdTolVts'
-													EdgeMidPoint(-7.26927162045693, 10.1107280442444, 0)
-												$end 'Edge'
-												$begin 'Edge'
-													NormalizedSerialNum=13
-													ID=5915
-													EdgeFaces(2553)
-													$begin 'EdTolVts'
-														TolVt(-6.29998408996198, 8.70428289662276, 0, 0)
-														TolVt(-6.19498372444425, 8.47319909133454, 0, 0)
-													$end 'EdTolVts'
-													EdgeMidPoint(-6.27312673906292, 8.57708934788069, 0)
+													EdgeMidPoint(-7.29987651652637, 8.70979994764314, 0)
 												$end 'Edge'
 											$end 'NewEdges'
 											$begin 'NewVertices'
 												$begin 'Vertex'
 													NormalizedSerialNum=0
-													ID=5916
+													ID=5972
 													VtPos(-1.77731910708275, 12.156890683598, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=1
-													ID=5917
+													ID=5973
 													VtPos(-1.71902269090923, 12.2527937669073, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=2
-													ID=5918
+													ID=5974
 													VtPos(-2.01241677301417, 12.6576640085722, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=3
-													ID=5919
+													ID=5975
 													VtPos(-2.27180434542655, 12.2309470746799, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=4
-													ID=5920
-													VtPos(-2.99238830587613, 7.41950371072331, 0)
+													ID=5976
+													VtPos(-2.99238830587614, 7.41950371072331, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=5
-													ID=5921
+													ID=5977
 													VtPos(-3.72931776917273, 12.6524743067453, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=6
-													ID=5922
+													ID=5978
 													VtPos(-4.26951956781579, 12.6500688492071, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=7
-													ID=5923
-													VtPos(-5.0902429504514, 6.42081669730193, 0)
+													ID=5979
+													VtPos(-5.15078024016311, 5.96134149507705, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=8
-													ID=5924
-													VtPos(-5.71412545233886, 8.61022216292404, 0)
+													ID=5980
+													VtPos(-6.70068691896542, 8.68090338654525, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=9
-													ID=5925
-													VtPos(-5.88049309837299, 8.97636249522523, 0)
+													ID=5981
+													VtPos(-6.70001591003801, 8.70428289662276, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=10
-													ID=5926
-													VtPos(-6.70001591003801, 10.2398987495456, 0)
+													ID=5982
+													VtPos(-5.88049309837299, 9.96781915094318, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=11
-													ID=5927
-													VtPos(-6.81907354778107, 10.4822907311648, 0)
+													ID=5983
+													VtPos(-5.8907395366257, 10.5223844195624, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=12
-													ID=5928
-													VtPos(-7.70917411988403, 13.0167425692093, 0)
+													ID=5984
+													VtPos(-7.70010652641349, 13.0983593355938, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=13
-													ID=5929
+													ID=5985
 													VtPos(-8.05513887901296, 13.3852546146406, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=14
-													ID=5930
+													ID=5986
 													VtPos(-8.74976590028389, 13.6796249461151, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=15
-													ID=5931
+													ID=5987
 													VtPos(-9.24082774793818, 13.6930381837337, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=16
-													ID=5932
+													ID=5988
 													VtPos(-9.92884568518323, 13.444833300763, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=17
-													ID=5933
+													ID=5989
 													VtPos(-10.2660771904096, 13.0148190288478, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=18
-													ID=5934
-													VtPos(-11.0440082960088, 5.67068002420691, 0)
+													ID=5990
+													VtPos(-11.0440082960088, 5.67068002420692, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=19
-													ID=5935
+													ID=5991
 													VtPos(-11.7279650836562, 10.1815135333637, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=20
-													ID=5936
+													ID=5992
 													VtPos(-11.8847265616171, 10.5849621721182, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=21
-													ID=5937
+													ID=5993
 													VtPos(-12.7000038035203, 11.8007041966275, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=22
-													ID=5938
+													ID=5994
 													VtPos(-13.1152734383829, 11.5222241607881, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=23
-													ID=5939
+													ID=5995
 													VtPos(-12.2999961964797, 10.3064821362788, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=24
-													ID=5940
+													ID=5996
 													VtPos(-12.2223147628386, 10.1065575816838, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=25
-													ID=5941
+													ID=5997
 													VtPos(-11.2720349163438, 3.83926957158954, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=26
-													ID=5942
+													ID=5998
 													VtPos(-10.7339228095904, 3.85136493971762, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=27
-													ID=5943
+													ID=5999
 													VtPos(-9.76885885341857, 12.9621509611036, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=28
-													ID=5944
+													ID=6000
 													VtPos(-9.75917225206182, 12.9745026446361, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=29
-													ID=5945
+													ID=6001
 													VtPos(-9.07115431481676, 13.2227075276067, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=30
-													ID=5946
+													ID=6002
 													VtPos(-8.94486112098704, 13.2192578590435, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=31
-													ID=5947
+													ID=6003
 													VtPos(-8.25023409971611, 12.924887527569, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=32
-													ID=5948
-													VtPos(-8.18092645221892, 12.8510629478415, 0)
+													ID=6004
+													VtPos(-8.1092604633743, 12.8109692594439, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=33
-													ID=5949
-													VtPos(-7.29082588011597, 10.316611109797, 0)
+													ID=6005
+													VtPos(-6.30159441641922, 10.2374159561065, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=34
-													ID=5950
-													VtPos(-7.11950690162701, 9.96781915094318, 0)
+													ID=6006
+													VtPos(-7.11950690162701, 8.97636249522523, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=35
-													ID=5951
-													VtPos(-6.29998408996198, 8.70428289662276, 0)
+													ID=6007
+													VtPos(-7.13509229340205, 8.43333123411173, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=36
-													ID=5952
-													VtPos(-6.19498372444425, 8.47319909133454, 0)
+													ID=6008
+													VtPos(-5.29931308103458, 5.21215975625085, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=37
-													ID=5953
-													VtPos(-5.28587454766113, 5.28284097987206, 0)
+													ID=6009
+													VtPos(-4.73048043218421, 5.32362419562462, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
 													NormalizedSerialNum=38
-													ID=5954
-													VtPos(-4.7304804321842, 5.32362419562462, 0)
-												$end 'Vertex'
-												$begin 'Vertex'
-													NormalizedSerialNum=39
-													ID=5955
+													ID=6010
 													VtPos(-3.99175629353163, 10.9305059145155, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
-													NormalizedSerialNum=40
-													ID=5956
-													VtPos(-3.27068223082726, 5.81012525989187, 0)
+													NormalizedSerialNum=39
+													ID=6011
+													VtPos(-3.27068223082727, 5.81012525989187, 0)
 												$end 'Vertex'
 												$begin 'Vertex'
-													NormalizedSerialNum=41
-													ID=5957
+													NormalizedSerialNum=40
+													ID=6012
 													VtPos(-2.72819565457345, 5.8077503953357, 0)
 												$end 'Vertex'
 											$end 'NewVertices'
@@ -2662,7 +2625,7 @@ $begin 'AnsoftProject'
 															FcUVMid(-10.5, 8.43309198428272, 0)
 															$begin 'FcTolVts'
 																TolVt(-10.7513908315045, 3.68645627344927, 0, 0)
-																TolVt(-9.7513908315045, 13.1270596273719, 0, 0)
+																TolVt(-9.75139083150451, 13.1270596273719, 0, 0)
 																TolVt(-10.2486091684955, 13.1797276951162, 0, 0)
 																TolVt(-11.2486091684955, 3.73912434119351, 0, 0)
 															$end 'FcTolVts'
@@ -2826,7 +2789,7 @@ $begin 'AnsoftProject'
 															$begin 'FcTolVts'
 																TolVt(-9.91516328343929, 12.9182283331806, 0, 0)
 																TolVt(-8.91516328343929, 13.2789818390622, 0, 0)
-																TolVt(-9.0848367165607, 13.7493124951892, 0, 0)
+																TolVt(-9.08483671656071, 13.7493124951892, 0, 0)
 																TolVt(-10.0848367165607, 13.3885589893075, 0, 0)
 															$end 'FcTolVts'
 														$end 'FaceGeometry'
@@ -2987,8 +2950,8 @@ $begin 'AnsoftProject'
 															Area=0.543044902688971
 															FcUVMid(-8.5, 13.3022562368421, 0)
 															$begin 'FcTolVts'
-																TolVt(-9.09754761035157, 13.2839636235899, 0, 0)
-																TolVt(-8.09754761035157, 12.8601817630226, 0, 0)
+																TolVt(-9.09754761035158, 13.2839636235899, 0, 0)
+																TolVt(-8.09754761035158, 12.8601817630226, 0, 0)
 																TolVt(-7.90245238964842, 13.3205488500942, 0, 0)
 																TolVt(-8.90245238964842, 13.7443307106615, 0, 0)
 															$end 'FcTolVts'
@@ -3147,13 +3110,13 @@ $begin 'AnsoftProject'
 													$begin 'FaceGeomTopol'
 														FaceTopol(1, 4, 4, 4)
 														$begin 'FaceGeometry'
-															Area=1.50893633107104
-															FcUVMid(-7.5, 11.6666768395032, 0)
+															Area=1.7397956349026
+															FcUVMid(-7, 11.6666768395032, 0)
 															$begin 'FcTolVts'
-																TolVt(-8.23587616616745, 13.0075254958745, 0, 0)
-																TolVt(-7.23587616616744, 10.160148561764, 0, 0)
-																TolVt(-6.76412383383255, 10.3258281831318, 0, 0)
-																TolVt(-7.76412383383255, 13.1732051172423, 0, 0)
+																TolVt(-8.2045769684804, 12.9466702684834, 0, 0)
+																TolVt(-6.2045769684804, 10.0992933343729, 0, 0)
+																TolVt(-5.7954230315196, 10.3866834105229, 0, 0)
+																TolVt(-7.7954230315196, 13.2340603446334, 0, 0)
 															$end 'FcTolVts'
 														$end 'FaceGeometry'
 													$end 'FaceGeomTopol'
@@ -3310,13 +3273,13 @@ $begin 'AnsoftProject'
 													$begin 'FaceGeomTopol'
 														FaceTopol(1, 4, 4, 4)
 														$begin 'FaceGeometry'
-															Area=0.918848753394677
+															Area=0.918848753394679
 															FcUVMid(-6.5, 9.4720908230842, 0)
 															$begin 'FcTolVts'
-																TolVt(-7.2097454957945, 10.1069485731467, 0, 0)
-																TolVt(-6.2097454957945, 8.56515347441928, 0, 0)
-																TolVt(-5.7902545042055, 8.83723307302174, 0, 0)
-																TolVt(-6.7902545042055, 10.3790281717491, 0, 0)
+																TolVt(-6.2097454957945, 10.3790281717491, 0, 0)
+																TolVt(-7.2097454957945, 8.83723307302174, 0, 0)
+																TolVt(-6.7902545042055, 8.56515347441928, 0, 0)
+																TolVt(-5.7902545042055, 10.1069485731467, 0, 0)
 															$end 'FcTolVts'
 														$end 'FaceGeometry'
 													$end 'FaceGeomTopol'
@@ -3473,13 +3436,13 @@ $begin 'AnsoftProject'
 													$begin 'FaceGeomTopol'
 														FaceTopol(1, 4, 4, 4)
 														$begin 'FaceGeometry'
-															Area=1.82451026020605
-															FcUVMid(-5.5, 6.94653157139805, 0)
+															Area=2.01961325248107
+															FcUVMid(-6, 6.94653157139805, 0)
 															$begin 'FcTolVts'
-																TolVt(-6.24042913605269, 8.63268173792576, 0, 0)
-																TolVt(-5.24042913605269, 5.12335833328084, 0, 0)
-																TolVt(-4.7595708639473, 5.26038140487034, 0, 0)
-																TolVt(-5.7595708639473, 8.76970480951526, 0, 0)
+																TolVt(-7.21720268721832, 8.57740719750375, 0, 0)
+																TolVt(-5.21720268721832, 5.06808379285883, 0, 0)
+																TolVt(-4.78279731278168, 5.31565594529235, 0, 0)
+																TolVt(-6.78279731278168, 8.82497934993727, 0, 0)
 															$end 'FcTolVts'
 														$end 'FaceGeometry'
 													$end 'FaceGeomTopol'
@@ -3639,8 +3602,8 @@ $begin 'AnsoftProject'
 															Area=3.8277732168191
 															FcUVMid(-4.5, 8.98684652241585, 0)
 															$begin 'FcTolVts'
-																TolVt(-4.75214201322943, 5.15921380694245, 0, 0)
-																TolVt(-3.75214201322943, 12.749167113623, 0, 0)
+																TolVt(-4.75214201322944, 5.15921380694245, 0, 0)
+																TolVt(-3.75214201322944, 12.749167113623, 0, 0)
 																TolVt(-4.24785798677056, 12.8144792378892, 0, 0)
 																TolVt(-5.24785798677056, 5.22452593120873, 0, 0)
 															$end 'FcTolVts'
@@ -3804,8 +3767,8 @@ $begin 'AnsoftProject'
 															$begin 'FcTolVts'
 																TolVt(-4.24755733606972, 12.7469610851983, 0, 0)
 																TolVt(-3.24755733606972, 5.64591430032324, 0, 0)
-																TolVt(-2.75244266393027, 5.7156384814389, 0, 0)
-																TolVt(-3.75244266393027, 12.8166852663139, 0, 0)
+																TolVt(-2.75244266393028, 5.7156384814389, 0, 0)
+																TolVt(-3.75244266393028, 12.8166852663139, 0, 0)
 															$end 'FcTolVts'
 														$end 'FaceGeometry'
 													$end 'FaceGeomTopol'
@@ -4129,7 +4092,7 @@ $begin 'AnsoftProject'
 															FcUVMid(-1.5, 12.7202520828883, 0)
 															$begin 'FcTolVts'
 																TolVt(-1.85330295894753, 12.155485958302, 0, 0)
-																TolVt(-0.853302958947527, 12.8801479658095, 0, 0)
+																TolVt(-0.853302958947531, 12.8801479658095, 0, 0)
 																TolVt(-1.14669704105247, 13.2850182074745, 0, 0)
 																TolVt(-2.14669704105247, 12.560356199967, 0, 0)
 															$end 'FcTolVts'
@@ -4771,9 +4734,9 @@ $begin 'AnsoftProject'
 														FaceTopol(1, 1, 1, 1)
 														$begin 'FaceGeometry'
 															Area=0.282743338823081
-															FcUVMid(-7, 10.2429883724479, 0)
+															FcUVMid(-6, 10.2429883724479, 0)
 															$begin 'FcTolVts'
-																TolVt(-6.7, 10.2429883724479, 0, 0)
+																TolVt(-5.7, 10.2429883724479, 0, 0)
 															$end 'FcTolVts'
 														$end 'FaceGeometry'
 													$end 'FaceGeomTopol'
@@ -4878,9 +4841,9 @@ $begin 'AnsoftProject'
 														FaceTopol(1, 1, 1, 1)
 														$begin 'FaceGeometry'
 															Area=0.282743338823081
-															FcUVMid(-6, 8.70119327372051, 0)
+															FcUVMid(-7, 8.70119327372051, 0)
 															$begin 'FcTolVts'
-																TolVt(-5.7, 8.70119327372051, 0, 0)
+																TolVt(-6.7, 8.70119327372051, 0, 0)
 															$end 'FcTolVts'
 														$end 'FaceGeometry'
 													$end 'FaceGeomTopol'
@@ -6269,7 +6232,7 @@ $begin 'AnsoftProject'
 					ID=105
 					Name='LastAdaptive'
 					$begin 'SimDataExtractor'
-						SimValue('GainTotal', 1, 90, true, SimValueID=2867, 0, 0, 2, 0, false, false, 0, 1, 0, 1, 1, '', 0, 0)
+						SimValue('GainTotal', 1, 90, true, SimValueID=2870, 0, 0, 2, 0, false, false, 0, 1, 0, 1, 1, '', 0, 0)
 						$begin 'Sweeps'
 							$begin 'Sweep'
 								Variable='Freq'
@@ -6318,63 +6281,68 @@ $begin 'AnsoftProject'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L1'
-								Column='1mm'
+								Variable='X0'
+								Column='-13mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L2'
-								Column='1mm'
+								Variable='X1'
+								Column='-12mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L3'
-								Column='1mm'
+								Variable='X2'
+								Column='-11mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L4'
-								Column='1mm'
+								Variable='X3'
+								Column='-10mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L5'
-								Column='1mm'
+								Variable='X4'
+								Column='-9mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L6'
-								Column='1mm'
+								Variable='X5'
+								Column='-8mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L7'
-								Column='1mm'
+								Variable='X7'
+								Column='-7mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L8'
-								Column='1mm'
+								Variable='X6'
+								Column='-6mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L9'
-								Column='1mm'
+								Variable='X8'
+								Column='-5mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L10'
-								Column='1mm'
+								Variable='X9'
+								Column='-4mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L11'
-								Column='1mm'
+								Variable='X10'
+								Column='-3mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L12'
-								Column='1mm'
+								Variable='X11'
+								Column='-2mm'
+								Units='mm'
+							$end 'Sweep'
+							$begin 'Sweep'
+								Variable='X12'
+								Column='-1mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6483,71 +6451,6 @@ $begin 'AnsoftProject'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='X0'
-								Column='-13mm'
-								Units='mm'
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X1'
-								Column='-0.012'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X2'
-								Column='-0.011'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X3'
-								Column='-0.01'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X4'
-								Column='-0.009'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X5'
-								Column='-0.008'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X6'
-								Column='-0.007'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X7'
-								Column='-0.006'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X8'
-								Column='-0.005'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X9'
-								Column='-0.004'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X10'
-								Column='-0.003'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X11'
-								Column='-0.002'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X12'
-								Column='-0.000999999999999997'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
 								Variable='Y0'
 								Column='0.0117991935352745'
 								Units=''
@@ -6649,12 +6552,12 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ymax6'
-								Column='0.0141108834234519'
+								Column='0.0143495886623547'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ymax7'
-								Column='0.0143495886623547'
+								Column='0.0141108834234519'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6699,7 +6602,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='R3'
-								Column='0.00106308188396093'
+								Column='0.00106308188396092'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6709,7 +6612,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='R5'
-								Column='0.00301787266214208'
+								Column='0.00347959126980519'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6719,7 +6622,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='R7'
-								Column='0.0036490205204121'
+								Column='0.00403922650496213'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6759,7 +6662,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ll3'
-								Column='0.0848367165607069mm'
+								Column='0.084836716560707mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6769,7 +6672,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ll5'
-								Column='-0.235876166167449mm'
+								Column='-0.204576968480404mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6779,7 +6682,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ll7'
-								Column='-0.240429136052693mm'
+								Column='-0.217202687218318mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -6809,58 +6712,58 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh1'
-								Column='0.0374779758399171mm'
-								Units='mm'
+								Column='3.74779758399171e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh2'
-								Column='0.026334033872125mm'
-								Units='mm'
+								Column='2.63340338721249e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh3'
-								Column='0.235165328063468mm'
-								Units='mm'
+								Column='0.000235165328063467'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh4'
-								Column='0.230183543535799mm'
-								Units='mm'
+								Column='0.000230183543535799'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh5'
-								Column='0.0828398106839109mm'
-								Units='mm'
+								Column='0.000143695038074973'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh6'
-								Column='0.136039799301233mm'
-								Units='mm'
+								Column='-0.000136039799301233'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh7'
-								Column='0.0685115357947525mm'
-								Units='mm'
+								Column='0.00012378607621676'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh8'
-								Column='0.0326560621331365mm'
-								Units='mm'
+								Column='3.26560621331365e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh9'
-								Column='0.034862090557833mm'
-								Units='mm'
+								Column='3.4862090557833e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh10'
-								Column='0.0370281955409553mm'
-								Units='mm'
+								Column='3.70281955409553e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh11'
-								Column='0.202435120832454mm'
-								Units='mm'
+								Column='0.000202435120832454'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='YB'
@@ -6894,8 +6797,8 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='Xmin'
-								Column='-0.022'
-								Units=''
+								Column='-22mm'
+								Units='mm'
 							$end 'Sweep'
 						$end 'Sweeps'
 						IsPortOnly=false
@@ -6905,7 +6808,7 @@ $begin 'AnsoftProject'
 					ID=107
 					Name='Sweep'
 					$begin 'SimDataExtractor'
-						SimValue('S(1,1)', 2, 90, false, SimValueID=2866, 3, 0, 2, 0, false, false, -1, 1, 0, 1, 1, '', 0, 0)
+						SimValue('S(1,1)', 2, 90, false, SimValueID=2869, 3, 0, 2, 0, false, false, -1, 1, 0, 1, 1, '', 0, 0)
 						$begin 'Sweeps'
 							$begin 'PostprocessSweep'
 								Variable='Freq'
@@ -6958,63 +6861,68 @@ $begin 'AnsoftProject'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L1'
-								Column='1mm'
+								Variable='X0'
+								Column='-13mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L2'
-								Column='1mm'
+								Variable='X1'
+								Column='-12mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L3'
-								Column='1mm'
+								Variable='X2'
+								Column='-11mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L4'
-								Column='1mm'
+								Variable='X3'
+								Column='-10mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L5'
-								Column='1mm'
+								Variable='X4'
+								Column='-9mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L6'
-								Column='1mm'
+								Variable='X5'
+								Column='-8mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L7'
-								Column='1mm'
+								Variable='X7'
+								Column='-7mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L8'
-								Column='1mm'
+								Variable='X6'
+								Column='-6mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L9'
-								Column='1mm'
+								Variable='X8'
+								Column='-5mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L10'
-								Column='1mm'
+								Variable='X9'
+								Column='-4mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L11'
-								Column='1mm'
+								Variable='X10'
+								Column='-3mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='L12'
-								Column='1mm'
+								Variable='X11'
+								Column='-2mm'
+								Units='mm'
+							$end 'Sweep'
+							$begin 'Sweep'
+								Variable='X12'
+								Column='-1mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7123,71 +7031,6 @@ $begin 'AnsoftProject'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
-								Variable='X0'
-								Column='-13mm'
-								Units='mm'
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X1'
-								Column='-0.012'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X2'
-								Column='-0.011'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X3'
-								Column='-0.01'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X4'
-								Column='-0.009'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X5'
-								Column='-0.008'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X6'
-								Column='-0.007'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X7'
-								Column='-0.006'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X8'
-								Column='-0.005'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X9'
-								Column='-0.004'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X10'
-								Column='-0.003'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X11'
-								Column='-0.002'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
-								Variable='X12'
-								Column='-0.000999999999999997'
-								Units=''
-							$end 'Sweep'
-							$begin 'Sweep'
 								Variable='Y0'
 								Column='0.0117991935352745'
 								Units=''
@@ -7289,12 +7132,12 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ymax6'
-								Column='0.0141108834234519'
+								Column='0.0143495886623547'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ymax7'
-								Column='0.0143495886623547'
+								Column='0.0141108834234519'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7339,7 +7182,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='R3'
-								Column='0.00106308188396093'
+								Column='0.00106308188396092'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7349,7 +7192,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='R5'
-								Column='0.00301787266214208'
+								Column='0.00347959126980519'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7359,7 +7202,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='R7'
-								Column='0.0036490205204121'
+								Column='0.00403922650496213'
 								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7399,7 +7242,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ll3'
-								Column='0.0848367165607069mm'
+								Column='0.084836716560707mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7409,7 +7252,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ll5'
-								Column='-0.235876166167449mm'
+								Column='-0.204576968480404mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7419,7 +7262,7 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='ll7'
-								Column='-0.240429136052693mm'
+								Column='-0.217202687218318mm'
 								Units='mm'
 							$end 'Sweep'
 							$begin 'Sweep'
@@ -7449,58 +7292,58 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh1'
-								Column='0.0374779758399171mm'
-								Units='mm'
+								Column='3.74779758399171e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh2'
-								Column='0.026334033872125mm'
-								Units='mm'
+								Column='2.63340338721249e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh3'
-								Column='0.235165328063468mm'
-								Units='mm'
+								Column='0.000235165328063467'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh4'
-								Column='0.230183543535799mm'
-								Units='mm'
+								Column='0.000230183543535799'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh5'
-								Column='0.0828398106839109mm'
-								Units='mm'
+								Column='0.000143695038074973'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh6'
-								Column='0.136039799301233mm'
-								Units='mm'
+								Column='-0.000136039799301233'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh7'
-								Column='0.0685115357947525mm'
-								Units='mm'
+								Column='0.00012378607621676'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh8'
-								Column='0.0326560621331365mm'
-								Units='mm'
+								Column='3.26560621331365e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh9'
-								Column='0.034862090557833mm'
-								Units='mm'
+								Column='3.4862090557833e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh10'
-								Column='0.0370281955409553mm'
-								Units='mm'
+								Column='3.70281955409553e-005'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='hh11'
-								Column='0.202435120832454mm'
-								Units='mm'
+								Column='0.000202435120832454'
+								Units=''
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='YB'
@@ -7534,8 +7377,8 @@ $begin 'AnsoftProject'
 							$end 'Sweep'
 							$begin 'Sweep'
 								Variable='Xmin'
-								Column='-0.022'
-								Units=''
+								Column='-22mm'
+								Units='mm'
 							$end 'Sweep'
 						$end 'Sweeps'
 						IsPortOnly=false
@@ -7573,7 +7416,7 @@ $begin 'AnsoftProject'
 		Notes=$begin_cdata$		$end_cdata$
 		$begin 'AnimationSetups'
 		$end 'AnimationSetups'
-		CacheHeaderFile='HDR2CF6278014286957979.tmp'
+		CacheHeaderFile='HDR3043195214286960562.tmp'
 	$end 'HFSSModel'
 	$begin 'DataInstances'
 		$begin 'Instance'
@@ -7604,7 +7447,7 @@ $begin 'AnsoftProject'
 										$end 'DESIGN_SOLUTION_SIM_VALUE_CONTEXT'
 									$end 'DesignSolnDefn'
 									ID=0
-									VersionID=1382
+									VersionID=1386
 									Name='dB(S(1,1))'
 									TieNameToExpr=true
 									$begin 'Components'
@@ -7697,7 +7540,7 @@ $begin 'AnsoftProject'
 										$end 'DESIGN_SOLUTION_SIM_VALUE_CONTEXT'
 									$end 'DesignSolnDefn'
 									ID=4
-									VersionID=1383
+									VersionID=1387
 									Name='dB(GainTotal)'
 									TieNameToExpr=true
 									$begin 'Components'
@@ -7794,7 +7637,7 @@ $begin 'AnsoftProject'
 						NextUniqueID=6
 						MoveBackwards=false
 						$begin 'NextVersID'
-							NextUniqueID=1384
+							NextUniqueID=1388
 							MoveBackwards=false
 						$end 'NextVersID'
 					$end 'ReportManager'
