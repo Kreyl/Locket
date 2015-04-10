@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (after 2015-mar-04 BZR unknown)-product   date = 10.04.2015 23:33:48
+Cmp-Mod V01 Created by Cvpcb (after 2015-mar-04 BZR unknown)-product   date = 11.04.2015 1:10:02
 
 BeginCmp
 TimeStamp = /5519A9DA;
@@ -302,6 +302,13 @@ IdModule  = Inductors:SMD_0402;
 EndCmp
 
 BeginCmp
+TimeStamp = /5528C8A4;
+Reference = M1;
+ValeurCmp = MOTOR_PAD;
+IdModule  = Installations:MOTOR_KHN4NX;
+EndCmp
+
+BeginCmp
 TimeStamp = /551AB468;
 Reference = Q1;
 ValeurCmp = LED_RGB 5050;
@@ -432,6 +439,13 @@ TimeStamp = /55255003;
 Reference = SW3;
 ValeurCmp = DIPx4;
 IdModule  = Switches:DIP_SMD_X4;
+EndCmp
+
+BeginCmp
+TimeStamp = /5528A9A9;
+Reference = SW4;
+ValeurCmp = SWITCH;
+IdModule  = Switches:SW_SS-1P2T;
 EndCmp
 
 BeginCmp
