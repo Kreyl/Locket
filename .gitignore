@@ -9,3 +9,7 @@ Hardware/Locket.kicad_pcb-bak
 Hardware/$Locket.sch
 RFSimulation/Round9.hfssresults/
 RFSimulation/conv.dat
+Hardware/Locket.dsn
+Hardware/Locket.ses
+Hardware/Topor/.Locket.fsxview
+RFSimulation/debug_log.scr

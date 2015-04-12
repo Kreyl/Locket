@@ -10,6 +10,4 @@
   (lib (name Installations)(type KiCad)(uri D:\Libs\Kicad\Installation.pretty)(options "")(descr ""))
   (lib (name PCB)(type KiCad)(uri D:\Libs\Kicad\PCB.pretty)(options "")(descr ""))
   (lib (name Switches)(type KiCad)(uri D:\Libs\Kicad\BtnsSwitches.pretty)(options "")(descr ""))
-  (lib (name Tittar_old)(type Legacy)(uri d:\Libs\Kicad\Tittar_kl.mod)(options "")(descr ""))
-  (lib (name Bat_old)(type Legacy)(uri d:\Libs\Kicad\Batteries_kl.mod)(options "")(descr ""))
 )

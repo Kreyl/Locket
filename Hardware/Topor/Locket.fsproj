@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xsi:noNamespaceSchemaLocation="Project.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Version current="1"/>
+	<Format>Project</Format>
+	<Header>
+		<Program name="TopoR" version="6.1"/>
+		<GUID>{21E98826-2968-449E-9BB0-762F923FB36A}</GUID>
+		<Annotation>Project file</Annotation>
+	</Header>
+	<Document>
+		<LocalLibrary />
+		<Pcb>
+			<File path=".\Locket.fsx" Folder="-1" isopened="1"/>
+		</Pcb>
+		<Import>
+			<Specctra>
+			<Path name="D:\Nute\Lockets\Locket\Hardware\Locket.dsn"/>
+			</Specctra>
+		</Import>
+		<Export path="D:\Nute\Lockets\Locket\Hardware\"/>
+		<ARouteSessions>
+		</ARouteSessions>
+	</Document>
+</Project>
