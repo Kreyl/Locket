@@ -10,7 +10,7 @@
 	<Document>
 		<LocalLibrary />
 		<Pcb>
-			<File path=".\Locket.fsx" Folder="-1" isopened="1"/>
+			<File path=".\Locket.fsx" Folder="-1" isopened="0"/>
 		</Pcb>
 		<Import>
 			<Specctra>
