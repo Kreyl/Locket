@@ -11,10 +11,12 @@
 #include "SimpleSensors.h"
 #include "Sequences.h"
 #include "led.h"
+#include "vibro.h"
 //#include "radio_lvl1.h"
 
 App_t App;
 //Beeper_t Beeper;
+Vibro_t Vibro;
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 // Universal VirtualTimer callback
@@ -47,6 +49,16 @@ int main(void) {
 
     Led.Init();
     Led.StartSequence(lsqStart);
+//    Vibro.Init();
+//    Vibro.StartSequence(vsqBrrBrr);
+//    PinSetupOut(GPIOB, 8, omPushPull, pudNone);
+//    PinClear(GPIOB, 8);
+
+//    PwmPin_t IPin;
+//    IPin.Init(GPIOB, 8, TIM4, 3, 22);
+//    IPin.SetFreqHz(450);
+//    IPin.Set(11);
+
 //    Radio.Init();
 
     // Main cycle

@@ -14,7 +14,7 @@
 enum ChunkSort_t {csSetup, csWait, csGoto, csEnd};
 
 // The beginning of any sort of chunk. Everyone must contain it.
-#define BaseChunk_t \
+#define BaseChunk_Vars \
     ChunkSort_t ChunkSort;          \
     union {                         \
         uint32_t Value;             \
@@ -23,23 +23,26 @@ enum ChunkSort_t {csSetup, csWait, csGoto, csEnd};
         uint32_t ChunkToJumpTo;     \
     }
 
-
 // ==== Different types of chunks ====
+struct BaseChunk_t {
+    BaseChunk_Vars;
+};
+
 // RGB LED chunk
 struct LedRGBChunk_t {
-    BaseChunk_t;
+    BaseChunk_Vars;
     Color_t Color;
 } __attribute__((packed));
 
 // LED Smooth
 struct LedSmoothChunk_t {
-    BaseChunk_t;
+    BaseChunk_Vars;
     uint8_t Brightness;
 } __attribute__((packed));
 
 // Beeper
-struct BeepChunk_t {
-    BaseChunk_t;    // Volume
+struct BeepChunk_t {   // Value == Volume
+    BaseChunk_Vars;
     uint16_t Freq_Hz;
 } __attribute__((packed));
 

@@ -270,4 +270,26 @@ const BeepChunk_t bsqBeepBeep[] = {
 };
 #endif
 
+#if 1 // ============================== Vibro ==================================
+#define VIBRO_VOLUME    11  // 1 to 22
+
+#define VIBRO_SHORT_MS  540
+const BaseChunk_t vsqBrr[] = {
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csEnd}
+};
+const BaseChunk_t vsqBrrBrr[] = {
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csEnd}
+};
+#endif
+
 #endif /* SEQUENCES_H_ */

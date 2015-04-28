@@ -9,6 +9,7 @@
 #define KL_LIB_BEEPER_H_
 
 #include "ChunkTypes.h"
+#include "hal.h"
 
 #define BEEP_TOP_VALUE   22
 
@@ -24,7 +25,7 @@ private:
     }
 public:
     Beeper_t() : BaseSequencer_t(), IPin() {}
-    void Init() { IPin.Init(GPIOB, 3, TIM2, 2, BEEP_TOP_VALUE); }
+    void Init() { IPin.Init(GPIOB, 3, TIM2, 2, BEEP_TOP_VALUE, invInverted); }
 };
 
 
