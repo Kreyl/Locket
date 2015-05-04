@@ -1,6 +1,4 @@
 EESchema Schematic File Version 2
-LIBS:Antennas_kl - Copy
-LIBS:Connectors_kl - Copy
 LIBS:pcb_details
 LIBS:power
 LIBS:Power_kl
@@ -10,6 +8,7 @@ LIBS:Tittar_kl
 LIBS:Transistors_kl
 LIBS:Switches
 LIBS:Sensors
+LIBS:Antennas_kl
 LIBS:Locket-cache
 EELAYER 25 0
 EELAYER END

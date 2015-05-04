@@ -12,11 +12,11 @@
 #include "Sequences.h"
 #include "led.h"
 #include "vibro.h"
-//#include "radio_lvl1.h"
+#include "radio_lvl1.h"
 
 App_t App;
 //Beeper_t Beeper;
-Vibro_t Vibro;
+Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 // Universal VirtualTimer callback
@@ -37,29 +37,18 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     Uart.Init(115200);
-    Uart.Printf("\rLocket AHB=%u", Clk.AHBFreqHz);
+    Uart.Printf("\r%S AHB=%u", VERSION_STRING, Clk.AHBFreqHz);
 
     App.InitThread();
 
-//    App.LoadSettings();
-
-//    PinSensors.Init();
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
-
     Led.Init();
     Led.StartSequence(lsqStart);
-//    Vibro.Init();
-//    Vibro.StartSequence(vsqBrrBrr);
-//    PinSetupOut(GPIOB, 8, omPushPull, pudNone);
-//    PinClear(GPIOB, 8);
+    Vibro.Init();
 
-//    PwmPin_t IPin;
-//    IPin.Init(GPIOB, 8, TIM4, 3, 22);
-//    IPin.SetFreqHz(450);
-//    IPin.Set(11);
-
-//    Radio.Init();
+    if(Radio.Init() != OK) Vibro.StartSequence(vsqError);
+    else Vibro.StartSequence(vsqBrrBrr);
 
     // Main cycle
     App.ITask();
@@ -70,55 +59,6 @@ void App_t::ITask() {
     while(true) {
         chThdSleepMilliseconds(999);
 //        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-#if 0 // ==== Buttons ====
-        if(EvtMsk & EVTMSK_BUTTONS) {
-            BtnEvtInfo_t EInfo;
-            while(ButtonEvtBuf.Get(&EInfo) == OK) {
-//                Uart.Printf("\rEinfo: %u, %u,  %A", EInfo.Type, EInfo.BtnCnt, EInfo.BtnID, EInfo.BtnCnt, '-');
-                Beeper.StartSequence(bsqButton);
-                // Switch backlight on
-                Lcd.Backlight(81);
-                chVTRestart(&ITmrBacklight, MS2ST(4500), EVTMSK_BCKLT_OFF);
-                // Process buttons
-                switch(EInfo.BtnID[0]) {
-                    case btnLTop:   // Iterate IDs
-                        if(Settings.ID < ID_MAX) Settings.ID++;
-                        else Settings.ID = ID_MIN;
-                        SettingsHasChanged = true;
-                        SaveSettings();
-                        Interface.ShowID();
-                        break;
-
-                    case btnLBottom: // Deadtime on/off
-                        Settings.DeadtimeEnabled = !Settings.DeadtimeEnabled;
-                        SettingsHasChanged = true;
-                        SaveSettings();
-                        Interface.ShowDeadtimeSettings();
-                        break;
-
-                    case btnRTop:
-                        if(Settings.DurationActive_s < DURATION_ACTIVE_MAX_S) {
-                            Settings.DurationActive_s += 10;
-                            SettingsHasChanged = true;
-                            SaveSettings();
-                            Interface.ShowDurationActive();
-                        }
-                        break;
-
-                    case btnRBottom:
-                        if(Settings.DurationActive_s > DURATION_ACTIVE_MIN_S) {
-                            Settings.DurationActive_s -= 10;
-                            SettingsHasChanged = true;
-                            SaveSettings();
-                            Interface.ShowDurationActive();
-                        }
-                        break;
-
-                    default: break;
-                } // switch
-            } // while get
-        } // if buttons
-#endif
 
 #if 0 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {

@@ -10,13 +10,14 @@
 
 #include "ChunkTypes.h"
 #include "hal.h"
+#include "kl_lib_L15x.h"
 
 #define VIBRO_TOP_VALUE     22
 #define VIBRO_FREQ_HZ       3600
 
 class Vibro_t : public BaseSequencer_t<BaseChunk_t> {
 private:
-    PwmPin_t IPin;
+    PinOutputPWM_t<VIBRO_TOP_VALUE, invInverted, omPushPull> IPin;
     void ISwitchOff() { IPin.Set(0); }
     SequencerLoopTask_t ISetup() {
         IPin.Set(IPCurrentChunk->Volume);
@@ -24,10 +25,11 @@ private:
         return sltProceed;  // Always proceed
     }
 public:
-    Vibro_t() : BaseSequencer_t(), IPin() {}
+    Vibro_t(GPIO_TypeDef *APGpio, uint16_t APin, TIM_TypeDef *APTimer, uint32_t ATmrChnl) :
+        BaseSequencer_t(), IPin(APGpio, APin, APTimer, ATmrChnl) {}
     void Init() {
-        IPin.Init(GPIOB, 8, TIM4, 3, VIBRO_TOP_VALUE);
-        IPin.SetFreqHz(VIBRO_FREQ_HZ);
+        IPin.Init();
+        IPin.SetFrequencyHz(VIBRO_FREQ_HZ);
     }
 };
 

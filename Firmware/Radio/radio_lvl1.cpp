@@ -10,11 +10,12 @@
 #include "main.h"
 #include "cc1101.h"
 #include "uart.h"
+#include "led.h"
 
 #define DBG_PINS
 
 #ifdef DBG_PINS
-#define DBG_GPIO1   GPIOC
+#define DBG_GPIO1   GPIOB
 #define DBG_PIN1    15
 #define DBG1_SET()  PinSet(DBG_GPIO1, DBG_PIN1)
 #define DBG1_CLR()  PinClear(DBG_GPIO1, DBG_PIN1)
@@ -24,72 +25,55 @@ rLevel1_t Radio;
 
 #if 1 // ================================ Task =================================
 static WORKING_AREA(warLvl1Thread, 256);
+__attribute__((__noreturn__))
 static void rLvl1Thread(void *arg) {
     chRegSetThreadName("rLvl1");
     Radio.ITask();
 }
 
-__attribute__((__noreturn__)) void rLevel1_t::ITask() {
+#define TX
+#define LED_RX
+//extern LedRGB_t Led;
+
+__attribute__((__noreturn__))
+void rLevel1_t::ITask() {
     while(true) {
-#if 0 // ======== TX cycle ========
-        switch(App.Type) {
-            case dtLustraClean:
-            case dtLustraWeak:
-            case dtLustraStrong:
-            case dtLustraLethal:
-                // Setup channel, do nothing if bad ID
-                if((App.ID >= LUSTRA_MIN_ID) and (App.ID <= LUSTRA_MAX_ID)) {
-                    CC.SetChannel(LUSTRA_ID_TO_RCHNL(App.ID));
-                    // Transmit corresponding pkt
-                    uint8_t Indx = App.Type - dtLustraClean;
-                    CC.TransmitSync((void*)&PktLustra[Indx]);
-                }
-                else {
-                    Indication.LustraBadID();
-                    chThdSleepMilliseconds(999);
-                    continue;
-                }
-                break;
-
-            case dtPelengator:
-                CC.SetChannel(RCHNL_PELENG);
-                for(uint8_t i=0; i<PELENG_TX_CNT; i++) CC.TransmitSync((void*)&PktDummy);
-                break;
-
-            case dtEmpGrenade:
-                if(App.Grenade.State == gsRadiating) {
-                    CC.SetChannel(RCHNL_EMP);
-                    CC.TransmitSync((void*)&PktDummy);
-                }
-                else {
-                    CC.Sleep();
-                    chThdSleepMilliseconds(450);
-                }
-                break;
-
-            default: break;
-        } // switch
+#ifdef TX
+        CC.SetChannel(ID2RCHNL(App.ID));
+        // Transmit
+        DBG1_SET();
+        CC.TransmitSync(&Pkt);
+        DBG1_CLR();
+        //chThdSleepMilliseconds(99);
+#elif defined LED_RX
+        Color_t Clr;
+        int8_t Rssi;
+//        if(Enabled) {
+            uint8_t RxRslt = CC.ReceiveSync(306, &Pkt, &Rssi);
+            if(RxRslt == OK) {
+                Uart.Printf("%d\r", Rssi);
+                Clr = clWhite;
+                if     (Rssi < -100) Clr = clRed;
+                else if(Rssi < -90) Clr = clYellow;
+                else if(Rssi < -80) Clr = clGreen;
+                else if(Rssi < -70) Clr = clCyan;
+                else if(Rssi < -60) Clr = clBlue;
+                else if(Rssi < -50) Clr = clMagenta;
+            }
+            else {
+                Clr = clBlack;
+    //            Uart.Printf("Halt\r");
+            }
+            Led.SetColor(Clr);
+//        }
+        chThdSleepMilliseconds(99);
 #endif
-
-#if 1 // ============ RX cycle ============
-        uint8_t RxRslt;
-        CC.SetChannel(ID2RCHNL(App.Settings.ID));
-        RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt);
-        if(RxRslt == OK) {
-//            Uart.Printf("\rRx ID=%u; TestWord=%X", Pkt.ID, Pkt.TestWord);
-            if(Pkt.TestWord == TEST_WORD and Pkt.ID == App.Settings.ID) {
-                App.SignalEvt(EVTMSK_RADIO_RX);
-            } // if test word
-        } // if OK
-        CC.EnterPwrDown();
-        chThdSleepMilliseconds(RX_SLEEP_T_MS);
-#endif // RX
     } // while true
 }
 #endif // task
 
 #if 1 // ============================
-void rLevel1_t::Init() {
+uint8_t rLevel1_t::Init() {
     // Init radioIC
     if(CC.Init() == OK) {
         CC.SetTxPower(CC_Pwr0dBm);
@@ -100,7 +84,11 @@ void rLevel1_t::Init() {
         PinSetupOut(DBG_GPIO1, DBG_PIN1, omPushPull);
 #endif
 //        Uart.Printf("\rCC init OK");
+        return OK;
     }
-    else Uart.Printf("\rCC init error");
+    else {
+        Uart.Printf("\rCC init error");
+        return FAILURE;
+    }
 }
 #endif

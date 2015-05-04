@@ -50,6 +50,11 @@
 enum BitOrder_t {boMSB, boLSB};
 enum LowHigh_t  {Low, High};
 enum RiseFall_t {Rising, Falling};
+enum Inverted_t {invNotInverted, invInverted};
+enum PinOutMode_t {
+    omPushPull  = 0,
+    omOpenDrain = 1
+};
 
 typedef void (*ftVoidVoid)(void);
 typedef void (*ftVoidPVoid)(void*p);
@@ -174,11 +179,63 @@ static inline void Delay_ms(uint32_t Ams) {
 }
 #endif
 
-#if 1 // ===================== Single pin manipulations ========================
-enum PinOutMode_t {
-    omPushPull  = 0,
-    omOpenDrain = 1
+#if 1 // ============================== Timers =================================
+enum TmrTrigInput_t {tiITR0=0x00, tiITR1=0x10, tiITR2=0x20, tiITR3=0x30, tiTIED=0x40, tiTI1FP1=0x50, tiTI2FP2=0x60, tiETRF=0x70};
+enum TmrMasterMode_t {mmReset=0x00, mmEnable=0x10, mmUpdate=0x20, mmComparePulse=0x30, mmCompare1=0x40, mmCompare2=0x50, mmCompare3=0x60, mmCompare4=0x70};
+enum TmrSlaveMode_t {smDisable=0, smEncoder1=1, smEncoder2=2, smEncoder3=3, smReset=4, smGated=5, smTrigger=6, smExternal=7};
+enum ExtTrigPol_t {etpInverted=0x8000, etpNotInverted=0x0000};
+enum ExtTrigPsc_t {etpOff=0x0000, etpDiv2=0x1000, etpDiv4=0x2000, etpDiv8=0x30000};
+
+#define TMR_PCCR(PTimer, AChannel)  ((uint32_t*)(&PTimer->CCR1 + AChannel-1))
+#define TMR_ENABLE(PTimer)          PTimer->CR1 |=  TIM_CR1_CEN;
+#define TMR_DISABLE(PTimer)         PTimer->CR1 &= ~TIM_CR1_CEN;
+
+class Timer_t {
+protected:
+    TIM_TypeDef* ITmr;
+    uint32_t *PClk;
+public:
+    // Common
+    void Init();
+    void Deinit();
+    void Enable()  { TMR_ENABLE(ITmr); }
+    void Disable() { TMR_DISABLE(ITmr); }
+    void SetUpdateFrequency(uint32_t FreqHz);
+    void SetTopValue(uint32_t Value) { ITmr->ARR = Value; }
+    uint32_t GetTopValue() { return ITmr->ARR; }
+    void SetupPrescaler(uint32_t PrescaledFreqHz) { ITmr->PSC = (*PClk / PrescaledFreqHz) - 1; }
+    void SetCounter(uint32_t Value) { ITmr->CNT = Value; }
+    uint32_t GetCounter() { return ITmr->CNT; }
+    // Master/Slave
+    void SetTriggerInput(TmrTrigInput_t TrgInput) {
+        uint16_t tmp = ITmr->SMCR;
+        tmp &= ~TIM_SMCR_TS;   // Clear bits
+        tmp |= (uint16_t)TrgInput;
+        ITmr->SMCR = tmp;
+    }
+    void MasterModeSelect(TmrMasterMode_t MasterMode) {
+        uint16_t tmp = ITmr->CR2;
+        tmp &= ~TIM_CR2_MMS;
+        tmp |= (uint16_t)MasterMode;
+        ITmr->CR2 = tmp;
+    }
+    void SlaveModeSelect(TmrSlaveMode_t SlaveMode) {
+        uint16_t tmp = ITmr->SMCR;
+        tmp &= ~TIM_SMCR_SMS;
+        tmp |= (uint16_t)SlaveMode;
+        ITmr->SMCR = tmp;
+    }
+    // DMA, Irq, Evt
+    void DmaOnTriggerEnable() { ITmr->DIER |= TIM_DIER_TDE; }
+    void GenerateUpdateEvt()  { ITmr->EGR = TIM_EGR_UG; }
+    void IrqOnTriggerEnable() { ITmr->DIER |= TIM_DIER_UIE; }
+    void ClearIrqPendingBit() { ITmr->SR &= ~TIM_SR_UIF;    }
+    // PWM
+    void InitPwm(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATopValue, Inverted_t Inverted, PinOutMode_t OutputType);
 };
+#endif
+
+#if 1 // ===================== Simple pin manipulations ========================
 enum PinPullUpDown_t {
     pudNone = 0b00,
     pudPullUp = 0b01,
@@ -282,18 +339,40 @@ static inline void PinSetupAlterFunc(
     PGpioPort->AFR[n] &= ~(0b1111 << Offset);
     PGpioPort->AFR[n] |= (uint32_t)AAlterFunc << Offset;
 }
+#endif
 
-class PwmPin_t {
-private:
-    uint32_t *PClk;
-    TIM_TypeDef* Tim;
+#if 1 // ===================== Output pin manipulations ========================
+// Example:
+class PinOutputPushPull_t {
 public:
-    __IO uint32_t *PCCR;    // Made public to allow DMA
-    void SetFreqHz(uint32_t FreqHz);
-    void Init(GPIO_TypeDef *GPIO, uint16_t N, TIM_TypeDef* PTim, uint8_t Chnl, uint16_t TopValue, bool Inverted=false);
-    void Set(uint16_t Value) { *PCCR = Value; }
-    void Off() { *PCCR = 0; }
+    GPIO_TypeDef *PGpio;
+    uint16_t Pin;
+    void Init() const { PinSetupOut(PGpio, Pin, omPushPull); }
+    void Set(uint8_t AValue) { if(AValue != 0) PinSet(PGpio, Pin); else PinClear(PGpio, Pin); }
+    void SetHi() { PinSet(PGpio, Pin); }
+    void SetLo() { PinClear(PGpio, Pin); }
+    PinOutputPushPull_t(GPIO_TypeDef *APGpio, uint16_t APin) : PGpio(APGpio), Pin(APin) {}
 };
+
+// Example: PinOutputPWM_t<LED_TOP_VALUE, LED_INVERTED_PWM> IChnl({GPIOB, 15, TIM11, 1});
+template <uint32_t TopValue, Inverted_t Inverted, PinOutMode_t OutputType>
+class PinOutputPWM_t : private Timer_t {
+private:
+    GPIO_TypeDef *PGpio;
+    uint16_t Pin;
+    uint32_t TmrChnl;
+public:
+    void Set(const uint8_t AValue) { *TMR_PCCR(ITmr, TmrChnl) = AValue; }    // CCR[N] = AValue
+    void Init() {
+        Timer_t::Init();
+        InitPwm(PGpio, Pin, TmrChnl, TopValue, Inverted, OutputType);
+        Enable();
+    }
+    void SetFrequencyHz(uint32_t FreqHz) { Timer_t::SetUpdateFrequency(FreqHz); }
+    PinOutputPWM_t(GPIO_TypeDef *APGpio, uint16_t APin, TIM_TypeDef *APTimer, uint32_t ATmrChnl) :
+        PGpio(APGpio), Pin(APin), TmrChnl(ATmrChnl) { ITmr = APTimer; }
+};
+#endif
 
 #if 1 // ==== External IRQ ====
 enum ExtiTrigType_t {ttRising, ttFalling, ttRisingFalling};
@@ -349,71 +428,6 @@ public:
     void CleanIrqFlag() { EXTI->PR = (1 << IPinNumber); }
 };
 #endif // EXTI
-#endif
-
-#if 1 // ============================== Timers =================================
-enum TmrTrigInput_t {tiITR0=0x00, tiITR1=0x10, tiITR2=0x20, tiITR3=0x30, tiTIED=0x40, tiTI1FP1=0x50, tiTI2FP2=0x60, tiETRF=0x70};
-enum TmrMasterMode_t {mmReset=0x00, mmEnable=0x10, mmUpdate=0x20, mmComparePulse=0x30, mmCompare1=0x40, mmCompare2=0x50, mmCompare3=0x60, mmCompare4=0x70};
-enum TmrSlaveMode_t {smDisable=0, smEncoder1=1, smEncoder2=2, smEncoder3=3, smReset=4, smGated=5, smTrigger=6, smExternal=7};
-enum Inverted_t {invNotInverted, invInverted};
-enum ExtTrigPol_t {etpInverted=0x8000, etpNotInverted=0x0000};
-enum ExtTrigPsc_t {etpOff=0x0000, etpDiv2=0x1000, etpDiv4=0x2000, etpDiv8=0x30000};
-
-#define TMR_PCCR(PTimer, AChannel)  ((uint32_t*)(&PTimer->CCR1 + AChannel-1))
-#define TMR_ENABLE(PTimer)          PTimer->CR1 |=  TIM_CR1_CEN;
-#define TMR_DISABLE(PTimer)         PTimer->CR1 &= ~TIM_CR1_CEN;
-
-class Timer_t {
-private:
-    TIM_TypeDef* ITmr;
-    uint32_t *PClk;
-public:
-    // Common
-    static void InitClock(TIM_TypeDef* Tmr);
-    void Init(TIM_TypeDef* Tmr) {
-        ITmr = Tmr;
-        // Clock src
-        if(ANY_OF_3(ITmr, TIM9, TIM10, TIM11)) PClk = &Clk.APB2FreqHz;
-        else PClk = &Clk.APB1FreqHz;
-        InitClock(Tmr);
-    }
-    void Deinit();
-    inline void Enable()  { ITmr->CR1 |=  TIM_CR1_CEN; }
-    inline void Disable() { ITmr->CR1 &= ~TIM_CR1_CEN; }
-    inline void SetUpdateFrequency(uint32_t FreqHz) { SetTopValue(*PClk / FreqHz); }
-    inline void SetTopValue(uint32_t Value) { ITmr->ARR = Value; }
-    inline uint32_t GetTopValue() { return ITmr->ARR; }
-    inline void SetupPrescaler(uint32_t PrescaledFreqHz) { ITmr->PSC = (*PClk / PrescaledFreqHz) - 1; }
-    inline void SetCounter(uint32_t Value) { ITmr->CNT = Value; }
-    inline uint32_t GetCounter() { return ITmr->CNT; }
-    // Master/Slave
-    inline void SetTriggerInput(TmrTrigInput_t TrgInput) {
-        uint16_t tmp = ITmr->SMCR;
-        tmp &= ~TIM_SMCR_TS;   // Clear bits
-        tmp |= (uint16_t)TrgInput;
-        ITmr->SMCR = tmp;
-    }
-    inline void MasterModeSelect(TmrMasterMode_t MasterMode) {
-        uint16_t tmp = ITmr->CR2;
-        tmp &= ~TIM_CR2_MMS;
-        tmp |= (uint16_t)MasterMode;
-        ITmr->CR2 = tmp;
-    }
-    inline void SlaveModeSelect(TmrSlaveMode_t SlaveMode) {
-        uint16_t tmp = ITmr->SMCR;
-        tmp &= ~TIM_SMCR_SMS;
-        tmp |= (uint16_t)SlaveMode;
-        ITmr->SMCR = tmp;
-    }
-    // DMA, Irq, Evt
-    inline void DmaOnTriggerEnable() { ITmr->DIER |= TIM_DIER_TDE; }
-    inline void GenerateUpdateEvt()  { ITmr->EGR = TIM_EGR_UG; }
-    inline void IrqOnTriggerEnable() { ITmr->DIER |= TIM_DIER_UIE; }
-    inline void ClearIrqPendingBit() { ITmr->SR &= ~TIM_SR_UIF;    }
-    // PWM
-    static void InitPwm(TIM_TypeDef* Tmr, GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATopValue, Inverted_t Inverted);
-};
-#endif
 
 #if 0 // ============================== IWDG ===================================
 enum IwdgPre_t {

@@ -22,6 +22,7 @@
 #endif
 #include <PinSnsSettings.h>
 
+#if SIMPLESENSORS_ENABLED
 class SimpleSensors_t {
 private:
     PinSnsState_t States[PIN_SNS_CNT];
@@ -33,5 +34,6 @@ public:
 };
 
 extern SimpleSensors_t PinSensors;
+#endif
 
 #endif /* KL_LIB_SIMPLESENSORS_H_ */

@@ -19,6 +19,8 @@
 #include "cc1101_rf_settings.h"
 #include "cc_gpio.h"
 
+#define CC_BUSYWAIT_TIMEOUT     99000   // tics, not ms
+
 class cc1101_t {
 private:
     uint8_t IState; // Inner CC state, returned as first byte
@@ -29,20 +31,25 @@ private:
     PinIrq_t IGdo0;
     void CsHi() { PinSet(CC_GPIO, CC_CS); }
     void CsLo() { PinClear(CC_GPIO, CC_CS); }
-    void BusyWait() { while(PinIsSet(CC_GPIO, CC_MISO)); }
+    uint8_t BusyWait() {
+        for(uint32_t i=0; i<CC_BUSYWAIT_TIMEOUT; i++) {
+            if(!PinIsSet(CC_GPIO, CC_MISO)) return OK;
+        }
+        return FAILURE;
+    }
     // General
     void RfConfig();
     int8_t RSSI_dBm(uint8_t ARawRSSI);
     // Registers and buffers
-    void WriteRegister (const uint8_t Addr, const uint8_t AData);
+    uint8_t WriteRegister (const uint8_t Addr, const uint8_t AData);
     uint8_t ReadRegister (const uint8_t Addr);
-    void WriteStrobe(uint8_t AStrobe);
-    void WriteTX(uint8_t* Ptr, uint8_t Length);
+    uint8_t WriteStrobe(uint8_t AStrobe);
+    uint8_t WriteTX(uint8_t* Ptr, uint8_t Length);
     // Strobes
-    void CReset()      { WriteStrobe(CC_SRES); }
-    void EnterTX()     { WriteStrobe(CC_STX);  }
-    void EnterRX()     { WriteStrobe(CC_SRX);  }
-    void FlushRxFIFO() { WriteStrobe(CC_SFRX); }
+    uint8_t Reset()       { return WriteStrobe(CC_SRES); }
+    uint8_t EnterTX()     { return WriteStrobe(CC_STX);  }
+    uint8_t EnterRX()     { return WriteStrobe(CC_SRX);  }
+    uint8_t FlushRxFIFO() { return WriteStrobe(CC_SFRX); }
 public:
     uint8_t Init();
     void SetChannel(uint8_t AChannel);
@@ -51,12 +58,14 @@ public:
     // State change
     void TransmitSync(void *Ptr);
     uint8_t ReceiveSync(uint32_t Timeout_ms, void *Ptr, int8_t *PRssi=nullptr);
-    void EnterIdle()    { WriteStrobe(CC_SIDLE); }
-    void EnterPwrDown() { WriteStrobe(CC_SPWD);  }
-    void Recalibrate() {
-        while(IState != CC_STB_IDLE) EnterIdle();
-        WriteStrobe(CC_SCAL);
-        BusyWait();
+    uint8_t EnterIdle()    { return WriteStrobe(CC_SIDLE); }
+    uint8_t EnterPwrDown() { return WriteStrobe(CC_SPWD);  }
+    uint8_t Recalibrate() {
+        while(IState != CC_STB_IDLE) {
+            if(EnterIdle() != OK) return FAILURE;
+        }
+        if(WriteStrobe(CC_SCAL) != OK) return FAILURE;
+        return BusyWait();
     }
     uint8_t ReadFIFO(void *Ptr, int8_t *PRssi);
     // Inner use

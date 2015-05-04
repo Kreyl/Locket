@@ -6,6 +6,7 @@
  */
 
 #include <buttons.h>
+#if BUTTONS_ENABLED
 #include "ch.h"
 #include "evt_mask.h"
 #include "uart.h"
@@ -142,3 +143,5 @@ void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx) {
     App.SignalEvtI(EVTMSK_BUTTONS);
     chSysUnlock();
 }
+
+#endif

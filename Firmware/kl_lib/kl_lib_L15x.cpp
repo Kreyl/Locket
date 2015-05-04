@@ -11,127 +11,66 @@
 #include <uart.h>
 
 #if 1 // ============================= Timer ===================================
-void Timer_t::InitClock(TIM_TypeDef *Tmr) {
-    if     (Tmr == TIM2)  { rccEnableTIM2(FALSE); }
-    else if(Tmr == TIM3)  { rccEnableTIM3(FALSE); }
-    else if(Tmr == TIM4)  { rccEnableTIM4(FALSE); }
-    else if(Tmr == TIM6)  { rccEnableAPB1(RCC_APB1ENR_TIM6EN,  FALSE); }
-    else if(Tmr == TIM7)  { rccEnableAPB1(RCC_APB1ENR_TIM7EN,  FALSE); }
-    else if(Tmr == TIM9)  { rccEnableAPB2(RCC_APB2ENR_TIM9EN,  FALSE); }
-    else if(Tmr == TIM10) { rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE); }
-    else if(Tmr == TIM11) { rccEnableAPB2(RCC_APB2ENR_TIM11EN, FALSE); }
+void Timer_t::Init() {
+    if(ANY_OF_3(ITmr, TIM9, TIM10, TIM11)) PClk = &Clk.APB2FreqHz;
+    else PClk = &Clk.APB1FreqHz;
+    if     (ITmr == TIM2)  { rccEnableTIM2(FALSE); }
+    else if(ITmr == TIM3)  { rccEnableTIM3(FALSE); }
+    else if(ITmr == TIM4)  { rccEnableTIM4(FALSE); }
+    else if(ITmr == TIM6)  { rccEnableAPB1(RCC_APB1ENR_TIM6EN,  FALSE); }
+    else if(ITmr == TIM7)  { rccEnableAPB1(RCC_APB1ENR_TIM7EN,  FALSE); }
+    else if(ITmr == TIM9)  { rccEnableAPB2(RCC_APB2ENR_TIM9EN,  FALSE); }
+    else if(ITmr == TIM10) { rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE); }
+    else if(ITmr == TIM11) { rccEnableAPB2(RCC_APB2ENR_TIM11EN, FALSE); }
 }
 
-void Timer_t::InitPwm(TIM_TypeDef* Tmr, GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATopValue, Inverted_t Inverted) {
+void Timer_t::InitPwm(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATopValue, Inverted_t Inverted, PinOutMode_t OutputType) {
     // GPIO
-    if              (Tmr == TIM2)              PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF1);
-    else if(ANY_OF_2(Tmr, TIM3, TIM4))         PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
-    else if(ANY_OF_3(Tmr, TIM9, TIM10, TIM11)) PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-    Tmr->ARR = ATopValue;
+    if              (ITmr == TIM2)              PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
+    else if(ANY_OF_2(ITmr, TIM3, TIM4))         PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
+    else if(ANY_OF_3(ITmr, TIM9, TIM10, TIM11)) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF3);
+    ITmr->ARR = ATopValue;
     // Output
     uint16_t tmp = (Inverted == invInverted)? 0b111 : 0b110; // PWM mode 1 or 2
     switch(Chnl) {
         case 1:
-            Tmr->CCMR1 |= (tmp << 4);
-            Tmr->CCER  |= TIM_CCER_CC1E;
+            ITmr->CCMR1 |= (tmp << 4);
+            ITmr->CCER  |= TIM_CCER_CC1E;
             break;
 
         case 2:
-            Tmr->CCMR1 |= (tmp << 12);
-            Tmr->CCER  |= TIM_CCER_CC2E;
+            ITmr->CCMR1 |= (tmp << 12);
+            ITmr->CCER  |= TIM_CCER_CC2E;
             break;
 
         case 3:
-            Tmr->CCMR2 |= (tmp << 4);
-            Tmr->CCER  |= TIM_CCER_CC3E;
+            ITmr->CCMR2 |= (tmp << 4);
+            ITmr->CCER  |= TIM_CCER_CC3E;
             break;
 
         case 4:
-            Tmr->CCMR2 |= (tmp << 12);
-            Tmr->CCER  |= TIM_CCER_CC4E;
+            ITmr->CCMR2 |= (tmp << 12);
+            ITmr->CCER  |= TIM_CCER_CC4E;
             break;
 
         default: break;
     }
 }
-#endif
 
-#if 1 // ============================= PWM pin =================================
-void PwmPin_t::Init(GPIO_TypeDef *GPIO, uint16_t N, TIM_TypeDef* PTim, uint8_t Chnl, uint16_t TopValue, bool Inverted) {
-    Tim = PTim;
-    if(Tim == TIM2) {
-        rccEnableTIM2(FALSE);
-        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF1);
-    }
-    else if(Tim == TIM3) {
-        rccEnableTIM3(FALSE);
-        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
-    }
-    else if(Tim == TIM4) {
-        rccEnableTIM4(FALSE);
-        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
-    }
-    else if(Tim == TIM9) {
-        rccEnableTIM9(FALSE);
-        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-    }
-    else if(Tim == TIM10) {
-        rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE);
-        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-    }
-    else if(Tim == TIM11) {
-        rccEnableAPB2(RCC_APB2ENR_TIM11EN, FALSE);
-        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-    }
-    // Clock src
-    if(ANY_OF_3(Tim, TIM2, TIM3, TIM4)) PClk = &Clk.APB1FreqHz;
-    else PClk = &Clk.APB2FreqHz;
-
-    // Common
-    Tim->CR1 = TIM_CR1_CEN; // Enable timer, set clk division to 0, AutoReload not buffered
-    Tim->CR2 = 0;
-    Tim->ARR = TopValue;
-
-    // Output
-    uint16_t tmp = Inverted? 0b111 : 0b110; // PWM mode 1 or 2
-    switch(Chnl) {
-        case 1:
-            PCCR = &Tim->CCR1;
-            Tim->CCMR1 |= (tmp << 4);
-            Tim->CCER  |= TIM_CCER_CC1E;
-            break;
-
-        case 2:
-            PCCR = &Tim->CCR2;
-            Tim->CCMR1 |= (tmp << 12);
-            Tim->CCER  |= TIM_CCER_CC2E;
-            break;
-
-        case 3:
-            PCCR = &Tim->CCR3;
-            Tim->CCMR2 |= (tmp << 4);
-            Tim->CCER  |= TIM_CCER_CC3E;
-            break;
-
-        case 4:
-            PCCR = &Tim->CCR4;
-            Tim->CCMR2 |= (tmp << 12);
-            Tim->CCER  |= TIM_CCER_CC4E;
-            break;
-
-        default: break;
-    }
-    *PCCR = 0;
+void Timer_t::SetUpdateFrequency(uint32_t FreqHz) {
+    uint32_t UpdFreqMax = *PClk / (ITmr->ARR + 1);
+    uint32_t div = UpdFreqMax / FreqHz;
+    if(div != 0) div--;
+    ITmr->PSC = div;
+//    uint32_t divider = ITmr->ARR * FreqHz;
+//    if(divider == 0) return;
+//    uint32_t FPrescaler = *PClk / divider;
+//    if(FPrescaler != 0) FPrescaler--;   // do not decrease in case of high freq
+//    ITmr->PSC = (uint16_t)FPrescaler;
 }
 
-void PwmPin_t::SetFreqHz(uint32_t FreqHz) {
-    uint32_t divider = Tim->ARR * FreqHz;
-    if(divider == 0) return;
-    uint32_t FPrescaler = *PClk / divider;
-    if(FPrescaler != 0) FPrescaler--;   // do not decrease in case of high freq
-    Tim->PSC = (uint16_t)FPrescaler;
-}
 #endif
+
 
 #if CH_DBG_ENABLED // ========================= DEBUG ==========================
 void chDbgPanic(const char *msg1) {

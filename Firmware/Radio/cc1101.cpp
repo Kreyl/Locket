@@ -6,6 +6,7 @@
  */
 
 #include "cc1101.h"
+#include "uart.h"
 
 #define GPIO0_IRQ_MASK  ((uint32_t)0x10)    // Line 4
 
@@ -24,7 +25,10 @@ uint8_t cc1101_t::Init() {
     ISpi.Setup(CC_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv2);
     ISpi.Enable();
     // ==== Init CC ====
-    CReset();
+    if(Reset() != OK) {
+        ISpi.Disable();
+        return FAILURE;
+    }
     // Check if success
     WriteRegister(CC_PKTLEN, 7);
     uint8_t Rpl = ReadRegister(CC_PKTLEN);
@@ -101,10 +105,13 @@ uint8_t cc1101_t::ReadFIFO(void *Ptr, int8_t *PRssi) {
      //    Uart.Printf("St: %X  ", b);
      if(b & 0x80) {  // CRC OK
          // Read FIFO
-         CsLo();                                            // Start transmission
-         BusyWait();                                        // Wait for chip to become ready
+         CsLo();                // Start transmission
+         if(BusyWait() != OK) { // Wait for chip to become ready
+             CsHi();
+             return FAILURE;
+         }
          ISpi.ReadWriteByte(CC_FIFO|CC_READ_FLAG|CC_BURST_FLAG); // Address with read & burst flags
-         for(uint8_t i=0; i<IPktSz; i++) {                // Read bytes
+         for(uint8_t i=0; i<IPktSz; i++) { // Read bytes
              b = ISpi.ReadWriteByte(0);
              *p++ = b;
              // Uart.Printf(" %X", b);
@@ -122,30 +129,44 @@ uint8_t cc1101_t::ReadFIFO(void *Ptr, int8_t *PRssi) {
 // =========================== Registers & Strobes =============================
 uint8_t cc1101_t::ReadRegister (uint8_t ARegAddr) {
     CsLo();                                 // Start transmission
-    BusyWait();                             // Wait for chip to become ready
+    if(BusyWait() != OK) { // Wait for chip to become ready
+        CsHi();
+        return FAILURE;
+    }
     ISpi.ReadWriteByte(ARegAddr | CC_READ_FLAG); // Transmit header byte
     uint8_t FReply = ISpi.ReadWriteByte(0);      // Read reply
     CsHi();                                 // End transmission
     return FReply;
 }
-void cc1101_t::WriteRegister (uint8_t ARegAddr, uint8_t AData) {
+uint8_t cc1101_t::WriteRegister (uint8_t ARegAddr, uint8_t AData) {
     CsLo();                     // Start transmission
-    BusyWait();                 // Wait for chip to become ready
-    ISpi.ReadWriteByte(ARegAddr);    // Transmit header byte
-    ISpi.ReadWriteByte(AData);       // Write data
-    CsHi();                     // End transmission
+    if(BusyWait() != OK) { // Wait for chip to become ready
+        CsHi();
+        return FAILURE;
+    }
+    ISpi.ReadWriteByte(ARegAddr);   // Transmit header byte
+    ISpi.ReadWriteByte(AData);      // Write data
+    CsHi();                         // End transmission
+    return OK;
 }
-void cc1101_t::WriteStrobe (uint8_t AStrobe) {
+uint8_t cc1101_t::WriteStrobe (uint8_t AStrobe) {
     CsLo();                             // Start transmission
-    BusyWait();                         // Wait for chip to become ready
+    if(BusyWait() != OK) { // Wait for chip to become ready
+        CsHi();
+        return FAILURE;
+    }
     IState = ISpi.ReadWriteByte(AStrobe);    // Write strobe
     CsHi();                             // End transmission
     IState &= 0b01110000;               // Mask needed bits
+    return OK;
 }
 
-void cc1101_t::WriteTX(uint8_t* Ptr, uint8_t Length) {
+uint8_t cc1101_t::WriteTX(uint8_t* Ptr, uint8_t Length) {
     CsLo();                                                     // Start transmission
-    BusyWait();                                                 // Wait for chip to become ready
+    if(BusyWait() != OK) { // Wait for chip to become ready
+        CsHi();
+        return FAILURE;
+    }
     ISpi.ReadWriteByte(CC_FIFO|CC_WRITE_FLAG|CC_BURST_FLAG);    // Address with write & burst flags
     //Uart.Printf("TX: ");
     for(uint8_t i=0; i<Length; i++) {
@@ -155,6 +176,7 @@ void cc1101_t::WriteTX(uint8_t* Ptr, uint8_t Length) {
     }
     CsHi();    // End transmission
     //Uart.Printf("\r");
+    return OK;
 }
 
 // ==== Used to setup CC with needed values ====

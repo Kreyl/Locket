@@ -7,6 +7,8 @@
 
 #include "SimpleSensors.h"
 
+#if SIMPLESENSORS_ENABLED
+
 SimpleSensors_t PinSensors;
 
 // ==== Sensors Thread ====
@@ -24,7 +26,7 @@ void SimpleSensors_t::Init() {
         States[i] = pssLo;
     }
     // Create and start thread
-    chThdCreateStatic(waPinSnsThread, sizeof(waPinSnsThread), LOWPRIO, (tfunc_t)SensorsThread, NULL);
+    chThdCreateStatic(waPinSnsThread, sizeof(waPinSnsThread), HIGHPRIO, (tfunc_t)SensorsThread, NULL);
 }
 
 __attribute__((noreturn))
@@ -39,11 +41,11 @@ void SimpleSensors_t::ITask() {
         while(i < PIN_SNS_CNT) {
             // Check pin
             if(PinSns[i].IsHi()) {
-                if(States[i] == pssLo) States[i] = pssRising;
+                if(States[i] == pssLo or States[i] == pssFalling) States[i] = pssRising;
                 else States[i] = pssHi;
             }
             else { // is low
-                if(States[i] == pssHi) States[i] = pssFalling;
+                if(States[i] == pssHi or States[i] == pssRising) States[i] = pssFalling;
                 else States[i] = pssLo;
             }
             GroupLen++;
@@ -59,3 +61,5 @@ void SimpleSensors_t::ITask() {
         } // while i
     } // while true
 }
+
+#endif
