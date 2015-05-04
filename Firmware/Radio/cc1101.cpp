@@ -19,7 +19,8 @@ uint8_t cc1101_t::Init() {
     PinSetupAlterFunc(CC_GPIO, CC_MISO, omPushPull, pudNone, AF5);
     PinSetupAlterFunc(CC_GPIO, CC_MOSI, omPushPull, pudNone, AF5);
     PinSetupIn       (CC_GPIO, CC_GDO0, pudNone);
-    PinSetupIn       (CC_GPIO, CC_GDO2, pudNone);
+//    PinSetupIn       (CC_GPIO, CC_GDO2, pudNone);
+    PinSetupAnalog   (CC_GPIO, CC_GDO2);    // GDO2 not used
     CsHi();
     // ==== SPI ====    MSB first, master, ClkLowIdle, FirstEdge, Baudrate=f/2
     ISpi.Setup(CC_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv2);

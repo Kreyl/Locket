@@ -15,7 +15,7 @@
 #include "evt_mask.h"
 #include "uart.h"
 
-#define VERSION_STRING  "SalemLocket v1.0"
+#define VERSION_STRING  "SalemTX v1.0"
 
 // ==== Constants and default values ====
 #define ID_MIN                  1
@@ -27,6 +27,7 @@ private:
     Thread *PThread;
 public:
     uint32_t ID;
+    uint8_t GetDipSwitch();
     // Eternal methods
     void InitThread() { PThread = chThdSelf(); }
     void SignalEvt(eventmask_t Evt) {

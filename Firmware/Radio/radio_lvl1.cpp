@@ -40,6 +40,8 @@ void rLevel1_t::ITask() {
     while(true) {
 #ifdef TX
         CC.SetChannel(ID2RCHNL(App.ID));
+        Pkt.ID = App.ID;
+        Pkt.TestWord = TEST_WORD;
         // Transmit
         DBG1_SET();
         CC.TransmitSync(&Pkt);

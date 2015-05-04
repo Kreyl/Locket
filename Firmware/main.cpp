@@ -15,6 +15,19 @@
 #include "radio_lvl1.h"
 
 App_t App;
+// Dip Switch
+#define DIPSWITCH_GPIO  GPIOA
+#define DIPSWITCH_PIN1  8
+#define DIPSWITCH_PIN2  11
+#define DIPSWITCH_PIN3  12
+#define DIPSWITCH_PIN4  15
+
+// LED Enable
+#define LED_EN_GPIO     GPIOB
+#define LED_EN_PIN      4
+#define LedEnable()     PinSet(LED_EN_GPIO, LED_EN_PIN)
+#define LedDisable()    PinClear(LED_EN_GPIO, LED_EN_PIN)
+
 //Beeper_t Beeper;
 Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
@@ -40,11 +53,17 @@ int main(void) {
     Uart.Printf("\r%S AHB=%u", VERSION_STRING, Clk.AHBFreqHz);
 
     App.InitThread();
+    App.ID = App.GetDipSwitch();    // Get ID
 
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
+
+    // Led
     Led.Init();
-    Led.StartSequence(lsqStart);
+    PinSetupOut(LED_EN_GPIO, LED_EN_PIN, omPushPull);   // LED_EN pin setup
+    LedDisable();
+//    Led.StartSequence(lsqStart);
+
     Vibro.Init();
 
     if(Radio.Init() != OK) Vibro.StartSequence(vsqError);
@@ -58,6 +77,8 @@ __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
         chThdSleepMilliseconds(999);
+        App.ID = App.GetDipSwitch();
+        Uart.Printf("\rID=%X", App.ID);
 //        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
 
 #if 0 // ==== Radio ====
@@ -84,6 +105,27 @@ void App_t::ITask() {
 #endif
 
     } // while true
+}
+
+uint8_t App_t::GetDipSwitch() {
+    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN1, pudPullUp);
+    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN2, pudPullUp);
+    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN3, pudPullUp);
+    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN4, pudPullUp);
+    uint8_t Rslt;
+    Rslt = static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN1));
+    Rslt <<= 1;
+    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN2));
+    Rslt <<= 1;
+    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN3));
+    Rslt <<= 1;
+    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN4));
+    Rslt ^= 0xF;
+    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN1);
+    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN2);
+    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN3);
+    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN4);
+    return Rslt;
 }
 
 #if 0 // ===================== Load/save settings ==============================
