@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (after 2015-mar-04 BZR unknown)-product   date = 12.04.2015 14:21:07
+Cmp-Mod V01 Created by Cvpcb (after 2015-mar-04 BZR unknown)-product   date = 11.05.2015 23:19:01
 
 BeginCmp
 TimeStamp = /552951EF;
@@ -169,21 +169,21 @@ IdModule  = Capacitors:CAP_0603;
 EndCmp
 
 BeginCmp
-TimeStamp = /551B27A0;
+TimeStamp = /555258F4;
 Reference = C20;
-ValeurCmp = 10u;
-IdModule  = Capacitors:CAP_0805;
+ValeurCmp = 0.1u;
+IdModule  = Capacitors:CAP_0603;
 EndCmp
 
 BeginCmp
-TimeStamp = /551B3125;
+TimeStamp = /55525073;
 Reference = C21;
-ValeurCmp = 10u;
-IdModule  = Capacitors:CAP_0805;
+ValeurCmp = 0.1u;
+IdModule  = Capacitors:CAP_0603;
 EndCmp
 
 BeginCmp
-TimeStamp = /551B45F5;
+TimeStamp = /555292B9;
 Reference = C22;
 ValeurCmp = 10u;
 IdModule  = Capacitors:CAP_0805;
@@ -192,7 +192,7 @@ EndCmp
 BeginCmp
 TimeStamp = /5519A976;
 Reference = C23;
-ValeurCmp = TBD;
+ValeurCmp = DoNotMount;
 IdModule  = Capacitors:CAP_0402;
 EndCmp
 
@@ -206,7 +206,7 @@ EndCmp
 BeginCmp
 TimeStamp = /552947E8;
 Reference = C25;
-ValeurCmp = TBD;
+ValeurCmp = 1.5pF;
 IdModule  = Capacitors:CAP_0402;
 EndCmp
 
@@ -239,9 +239,9 @@ IdModule  = SOT:SOT23-5;
 EndCmp
 
 BeginCmp
-TimeStamp = /551AB5BE;
+TimeStamp = /5551FBE6;
 Reference = DD1;
-ValeurCmp = STM32L151CXTX;
+ValeurCmp = STM32L151CxTx;
 IdModule  = LQFP:LQFP48;
 EndCmp
 
@@ -302,7 +302,7 @@ IdModule  = Inductors:IND_0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /551B2F4A;
+TimeStamp = /5553B700;
 Reference = L3;
 ValeurCmp = TB201209 G152;
 IdModule  = Inductors:IND_0805;
@@ -311,7 +311,7 @@ EndCmp
 BeginCmp
 TimeStamp = /5519A991;
 Reference = L4;
-ValeurCmp = TBD;
+ValeurCmp = 33nH;
 IdModule  = Inductors:IND_0402;
 EndCmp
 
@@ -330,16 +330,16 @@ IdModule  = LEDs:5050;
 EndCmp
 
 BeginCmp
-TimeStamp = /551B3A95;
+TimeStamp = /55515503;
 Reference = Q2;
-ValeurCmp = IRLML9303;
+ValeurCmp = MMBT2222;
 IdModule  = SOT:SOT23-3;
 EndCmp
 
 BeginCmp
-TimeStamp = /551B61F2;
+TimeStamp = /55513396;
 Reference = Q3;
-ValeurCmp = IRLML9303;
+ValeurCmp = MMBT2222;
 IdModule  = SOT:SOT23-3;
 EndCmp
 
@@ -386,13 +386,6 @@ IdModule  = Resistors:RES_0603;
 EndCmp
 
 BeginCmp
-TimeStamp = /551FE657;
-Reference = R7;
-ValeurCmp = 20k;
-IdModule  = Resistors:RES_0603;
-EndCmp
-
-BeginCmp
 TimeStamp = /5519A96F;
 Reference = R8;
 ValeurCmp = 56k;
@@ -417,6 +410,20 @@ BeginCmp
 TimeStamp = /5527E5D5;
 Reference = R11;
 ValeurCmp = 4k7;
+IdModule  = Resistors:RES_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /5551550A;
+Reference = R12;
+ValeurCmp = 1k;
+IdModule  = Resistors:RES_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /55513A21;
+Reference = R13;
+ValeurCmp = 1k;
 IdModule  = Resistors:RES_0603;
 EndCmp
 

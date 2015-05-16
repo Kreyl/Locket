@@ -41,7 +41,7 @@ void TmrGeneralCallback(void *p) {
 
 int main(void) {
     // ==== Init Vcore & clock system ====
-    SetupVCore(vcore1V5);
+    SetupVCore(vcore1V2);
     Clk.UpdateFreqValues();
 
     // ==== Init OS ====
