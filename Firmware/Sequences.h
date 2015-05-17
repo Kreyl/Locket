@@ -208,15 +208,15 @@ const LedRGBChunk_t lsqStart[] = {
 
 const LedRGBChunk_t lsqFailure[] = {
         {csSetup, 0, clRed},
-        {csWait, 153},
+        {csWait, 99},
         {csSetup, 0, clBlack},
-        {csWait, 153},
+        {csWait, 99},
         {csSetup, 0, clRed},
-        {csWait, 153},
+        {csWait, 99},
         {csSetup, 0, clBlack},
-        {csWait, 153},
+        {csWait, 99},
         {csSetup, 0, clRed},
-        {csWait, 153},
+        {csWait, 99},
         {csSetup, 0, clBlack},
         {csEnd},
 };

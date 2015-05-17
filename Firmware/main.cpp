@@ -29,19 +29,21 @@ App_t App;
 #define LedDisable()    PinClear(LED_EN_GPIO, LED_EN_PIN)
 
 //Beeper_t Beeper;
-//Vibro_t Vibro(GPIOB, 8, TIM4, 3);
+Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
-// Universal VirtualTimer callback
-void TmrGeneralCallback(void *p) {
+#if 1 // ============================ Timers ===================================
+void TmrSecondCallback(void *p) {
     chSysLockFromIsr();
-    App.SignalEvtI((eventmask_t)p);
+    App.SignalEvtI(EVTMSK_EVERY_SECOND);
+    chVTSetI(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
     chSysUnlockFromIsr();
 }
+#endif
 
 int main(void) {
     // ==== Init Vcore & clock system ====
-    SetupVCore(vcore1V5);
+    SetupVCore(vcore1V2);
     Clk.UpdateFreqValues();
 
     // ==== Init OS ====
@@ -51,28 +53,30 @@ int main(void) {
     // ==== Init Hard & Soft ====
     App.InitThread();
     App.ID = App.EE.Read32(EE_DEVICE_ID_ADDR);  // Read device ID
+    chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
 
     Uart.Init(115200);
     Uart.Printf("\r%S  ID=%d", VERSION_STRING, App.ID);
-
 
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
 
     // Led
-//    Led.Init();
-//    PinSetupOut(LED_EN_GPIO, LED_EN_PIN, omPushPull);   // LED_EN pin setup
+    Led.Init();
+    PinSetupOut(LED_EN_GPIO, LED_EN_PIN, omPushPull);   // LED_EN pin setup
 //    LedDisable();
-//    Led.StartSequence(lsqStart);
+    Led.StartSequence(lsqStart);
 
 //    Vibro.Init();
 
-//    if(Radio.Init() != OK) Led.StartSequence(lsqFailure);
-//    else Led.StartSequence(lsqStart);
+    if(Radio.Init() != OK) Led.StartSequence(lsqFailure);
+    else Led.StartSequence(lsqStart);
 
     // Main cycle
     App.ITask();
 }
+
+
 
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
@@ -84,16 +88,28 @@ void App_t::ITask() {
             OnUartCmd(&Uart);
             Uart.SignalCmdProcessed();
         }
-#if 0 // ==== Radio ====
+
+        // ==== Every second ====
+        if(EvtMsk & EVTMSK_EVERY_SECOND) {
+            // Get mode
+            uint8_t b = GetDipSwitch();
+            b &= 0b00000111;    // Consider only lower bits
+            Mode_t NewMode = static_cast<Mode_t>(b);
+            if(Mode != NewMode) {
+                if(Mode == mError) Led.StartSequence(lsqFailure);
+                else {
+                    Led.StartSequence(lsqStart);
+                    Mode = NewMode;
+                }
+                chThdSleepMilliseconds(540);
+            }
+        }
+
+#if 1 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {
-//            Uart.Printf("\rRadioRx");
-            RadioIsOn = true;
-            Interface.ShowRadio();
+            Uart.Printf("\rRadioRx");
             chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
-            IProcessLedLogic();
-            // Radio RX disables Deadtime if it is on
-            DeadTimeIsNow = false;
-            chVTReset(&ITmrDeadTime);
+            if(Mode == mRxLight or Mode == mRxVibroLight)
         }
         if(EvtMsk & EVTMSK_RADIO_ON_TIMEOUT) {
 //            Uart.Printf("\rRadioTimeout");

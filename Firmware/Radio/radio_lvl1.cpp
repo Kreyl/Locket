@@ -33,43 +33,46 @@ static void rLvl1Thread(void *arg) {
 
 #define TX
 #define LED_RX
-//extern LedRGB_t Led;
 
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
     while(true) {
-#ifdef TX
-        CC.SetChannel(ID2RCHNL(App.ID));
-        Pkt.ID = App.ID;
-        Pkt.TestWord = TEST_WORD;
-        // Transmit
-        DBG1_SET();
-        CC.TransmitSync(&Pkt);
-        DBG1_CLR();
-        //chThdSleepMilliseconds(99);
-#elif defined LED_RX
-        Color_t Clr;
-        int8_t Rssi;
-//        if(Enabled) {
-            uint8_t RxRslt = CC.ReceiveSync(306, &Pkt, &Rssi);
-            if(RxRslt == OK) {
-                Uart.Printf("%d\r", Rssi);
-                Clr = clWhite;
-                if     (Rssi < -100) Clr = clRed;
-                else if(Rssi < -90) Clr = clYellow;
-                else if(Rssi < -80) Clr = clGreen;
-                else if(Rssi < -70) Clr = clCyan;
-                else if(Rssi < -60) Clr = clBlue;
-                else if(Rssi < -50) Clr = clMagenta;
+        if(App.Mode == mError) chThdSleepMilliseconds(450);
+        // ==== RX ====
+        else if(App.Mode == mRxLight or App.Mode == mRxVibro or App.Mode == mRxVibroLight) {
+            int8_t Rssi;
+            // Iterate channels
+            for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
+                if(i == App.ID) continue;   // Do not listen self
+                CC.SetChannel(ID2RCHNL(i));
+                uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+                if(RxRslt == OK) {
+                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
+                    if(Pkt.TestWord == TEST_WORD) App.SignalEvt(EVTMSK_RADIO_RX);
+                    break;  // No need to listen anymore
+                }
+            } // for
+            CC.EnterPwrDown();
+            chThdSleepMilliseconds(RX_SLEEP_T_MS);
+        } // if rx
+
+        // ==== TX ====
+        else {
+            CC.SetChannel(ID2RCHNL(App.ID));
+            Pkt.TestWord = TEST_WORD;
+            switch(App.Mode) {
+                case mTxLowPwr: CC.SetTxPower(CC_PwrMinus10dBm); break;
+                case mTxMidPwr: CC.SetTxPower(CC_Pwr0dBm);       break;
+                case mTxHiPwr:  CC.SetTxPower(CC_PwrPlus5dBm);   break;
+                case mTxMaxPwr: CC.SetTxPower(CC_PwrPlus12dBm);  break;
+                default: break;
             }
-            else {
-                Clr = clBlack;
-    //            Uart.Printf("Halt\r");
-            }
-            Led.SetColor(Clr);
-//        }
-        chThdSleepMilliseconds(99);
-#endif
+            // Transmit
+            DBG1_SET();
+            CC.TransmitSync(&Pkt);
+            DBG1_CLR();
+            chThdSleepMilliseconds(TX_PERIOD_MS);
+        } // if tx
     } // while true
 }
 #endif // task
