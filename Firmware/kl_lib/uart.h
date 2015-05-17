@@ -17,7 +17,7 @@
 #include "cmd.h"
 
 // Set to true if RX needed
-#define UART_RX_ENABLED     FALSE
+#define UART_RX_ENABLED     TRUE
 
 // UART
 #define UART_TXBUF_SIZE     207
@@ -66,6 +66,7 @@ private:
 #if UART_RX_ENABLED
     int32_t SzOld, RIndx;
     uint8_t IRxBuf[UART_RXBUF_SZ];
+    Thread *IPThd;
 #endif
     void ISendViaDMA();
 public:
@@ -85,7 +86,8 @@ public:
     void IPrintf(const char *format, va_list args);
 #if UART_RX_ENABLED
     UartCmd_t Cmd;
-    ProcessDataResult_t ProcessRx();
+    void SignalCmdProcessed();
+    void IRxTask();
     // Command and reply
     void Ack(int32_t Result) { Printf("Ack %d\r\n", Result); }
 #endif
@@ -100,6 +102,7 @@ public:
 #if UART_RX_ENABLED
         SzOld=0;
         RIndx=0;
+        IPThd = nullptr;
 #endif
     }
 };

@@ -6,7 +6,8 @@
  */
 
 #include <string.h>
-#include <uart.h>
+#include "uart.h"
+#include "main.h" // App_t
 
 Uart_t Uart;
 
@@ -71,34 +72,51 @@ static inline void FPutCharNow(char c) {
 }
 
 void Uart_t::PrintfNow(const char *S, ...) {
-//    while(!(UART->SR & USART_SR_TXE));
-//    UART->DR = 'A';
-    while(!(UART->SR & USART_SR_TXE));
-    UART->DR = 'g';
-    while(!(UART->SR & USART_SR_TXE));
-    UART->DR = 'a';
-
-//    va_list args;
-//    va_start(args, S);
-//    kl_vsprintf(FPutCharNow, 99999, S, args);
-//    va_end(args);
+    va_list args;
+    va_start(args, S);
+    kl_vsprintf(FPutCharNow, 99999, S, args);
+    va_end(args);
 }
 #endif
 
 #if UART_RX_ENABLED
-ProcessDataResult_t Uart_t::ProcessRx() {
-    int32_t Sz = UART_RXBUF_SZ - UART_DMA_RX->channel->CNDTR;   // Number of bytes copied to buffer since restart
-    if(Sz != SzOld) {
-        int32_t ByteCnt = Sz - SzOld;
-        if(ByteCnt < 0) ByteCnt += UART_RXBUF_SZ;   // Handle buffer circulation
-        SzOld = Sz;
-        for(int32_t i=0; i<ByteCnt; i++) {          // Iterate received bytes
-            char c = IRxBuf[RIndx++];
-            if(RIndx >= UART_RXBUF_SZ) RIndx = 0;
-            if(Cmd.PutChar(c) == pdrNewCmd) return pdrNewCmd;
-        } // for
-    } // if sz
-    return pdrProceed;
+__attribute__((__noreturn__))
+void Uart_t::IRxTask() {
+    IPThd = chThdSelf();
+    while(true) {
+        chThdSleepMilliseconds(UART_RX_POLLING_MS);
+        // Get number of bytes to process
+        int32_t Sz = UART_RXBUF_SZ - UART_DMA_RX->channel->CNDTR;   // Number of bytes copied to buffer since restart
+        if(Sz != SzOld) {
+            int32_t ByteCnt = Sz - SzOld;
+            if(ByteCnt < 0) ByteCnt += UART_RXBUF_SZ;   // Handle buffer circulation
+            SzOld = Sz;
+            // Iterate received bytes
+            for(int32_t i=0; i<ByteCnt; i++) {
+                char c = IRxBuf[RIndx++];
+                if(RIndx >= UART_RXBUF_SZ) RIndx = 0;
+                if(Cmd.PutChar(c) == pdrNewCmd) {
+                    chSysLock();
+                    App.SignalEvtI(EVTMSK_UART_NEW_CMD);
+                    chSchGoSleepS(THD_STATE_SUSPENDED); // Wait until cmd processed
+                    chSysUnlock();  // Will be here when application signals that cmd processed
+                }
+            } // for
+        } // if sz
+    } // while true
+}
+
+void Uart_t::SignalCmdProcessed() {
+    chSysLock();
+    if(IPThd->p_state == THD_STATE_SUSPENDED) chSchReadyI(IPThd);
+    chSysUnlock();
+}
+
+static WORKING_AREA(waUartRxThread, 128);
+__attribute__((__noreturn__))
+static void UartRxThread(void *arg) {
+    chRegSetThreadName("UartRx");
+    Uart.IRxTask();
 }
 #endif
 
@@ -117,9 +135,9 @@ void Uart_t::Init(uint32_t ABaudrate) {
     else               UART->BRR = Clk.APB1FreqHz / ABaudrate;
     UART->CR2 = 0;
     // ==== DMA ====
-//    dmaStreamAllocate     (UART_DMA_TX, IRQ_PRIO_HIGH, CmdUartTxIrq, NULL);
-//    dmaStreamSetPeripheral(UART_DMA_TX, &UART->DR);
-//    dmaStreamSetMode      (UART_DMA_TX, UART_DMA_TX_MODE);
+    dmaStreamAllocate     (UART_DMA_TX, IRQ_PRIO_HIGH, CmdUartTxIrq, NULL);
+    dmaStreamSetPeripheral(UART_DMA_TX, &UART->DR);
+    dmaStreamSetMode      (UART_DMA_TX, UART_DMA_TX_MODE);
 
 #if UART_RX_ENABLED
     UART->CR1 = USART_CR1_TE | USART_CR1_RE;        // TX & RX enable
@@ -133,9 +151,11 @@ void Uart_t::Init(uint32_t ABaudrate) {
     dmaStreamSetTransactionSize(UART_DMA_RX, UART_RXBUF_SZ);
     dmaStreamSetMode      (UART_DMA_RX, UART_DMA_RX_MODE);
     dmaStreamEnable       (UART_DMA_RX);
+    // Thread
+    chThdCreateStatic(waUartRxThread, sizeof(waUartRxThread), LOWPRIO, (tfunc_t)UartRxThread, NULL);
 #else
     UART->CR1 = USART_CR1_TE;     // Transmitter enabled
-//    UART->CR3 = USART_CR3_DMAT;   // Enable DMA at transmitter
+    UART->CR3 = USART_CR3_DMAT;   // Enable DMA at transmitter
 #endif
     UART->CR1 |= USART_CR1_UE;    // Enable USART
 }

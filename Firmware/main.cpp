@@ -49,10 +49,10 @@ int main(void) {
     chSysInit();
 
     // ==== Init Hard & Soft ====
+    App.InitThread();
     Uart.Init(115200);
     Uart.Printf("\r%S AHB=%u", VERSION_STRING, Clk.AHBFreqHz);
 
-    App.InitThread();
     App.ID = App.GetDipSwitch();    // Get ID
 
 //    Beeper.Init();
@@ -76,13 +76,13 @@ int main(void) {
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
-        chThdSleepMilliseconds(999);
-        Uart.PrintfNow("AA");
-//        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-//        // ==== Uart cmd ====
-//        if(EvtMsk & EVTMSK_UART_RX_POLL) {
-//            while(Uart.ProcessRx() == pdrNewCmd) OnUartCmd(&Uart);
-//        }
+//        chThdSleepMilliseconds(999);
+        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        // ==== Uart cmd ====
+        if(EvtMsk & EVTMSK_UART_NEW_CMD) {
+            OnUartCmd(&Uart);
+            Uart.SignalCmdProcessed();
+        }
 #if 0 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {
 //            Uart.Printf("\rRadioRx");
@@ -110,11 +110,15 @@ void App_t::ITask() {
 }
 
 void App_t::OnUartCmd(Uart_t *PUart) {
-//    UartCmd_t *PCmd = &PUart->Cmd;
-//    __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations
-//    Uart.Printf("\r%S\r", PCmd->Name);
-//    // Handle command
-//    if(PCmd->NameIs("Ping")) PUart->Ack(OK);
+    UartCmd_t *PCmd = &PUart->Cmd;
+    __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations
+    Uart.Printf("\r%S\r", PCmd->Name);
+    // Handle command
+    if(PCmd->NameIs("Ping")) PUart->Ack(OK);
+
+
+
+    else PUart->Ack(CMD_UNKNOWN);
 }
 
 uint8_t App_t::GetDipSwitch() {
