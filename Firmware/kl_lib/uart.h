@@ -89,7 +89,8 @@ public:
     void SignalCmdProcessed();
     void IRxTask();
     // Command and reply
-    void Ack(int32_t Result) { Printf("Ack %d\r\n", Result); }
+    void Reply(const char* CmdCode, int32_t Data) { Printf("%S,%d\r\n", CmdCode, Data); }
+    void Ack(int32_t Result) { Printf("\r\nAck %d\r\n", Result); }
 #endif
     Uart_t() {
         for(uint32_t i=0; i<UART_TXBUF_SIZE; i++) TXBuf[i] = 0;

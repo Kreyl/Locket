@@ -19,14 +19,22 @@
 
 // ==== Constants and default values ====
 #define ID_MIN                  1
-#define ID_MAX                  15
+#define ID_MAX                  10
 #define ID_DEFAULT              ID_MIN
+
+#if 1 // ==== Eeprom ====
+// Addresses
+#define EE_DEVICE_ID_ADDR       0
+#endif
+
 
 class App_t {
 private:
     Thread *PThread;
+    uint8_t ISetID(int32_t NewID);
 public:
-    uint32_t ID;
+    int32_t ID;
+    Eeprom_t EE;
     uint8_t GetDipSwitch();
     // Eternal methods
     void InitThread() { PThread = chThdSelf(); }

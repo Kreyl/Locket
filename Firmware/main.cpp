@@ -50,10 +50,11 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     App.InitThread();
-    Uart.Init(115200);
-    Uart.Printf("\r%S AHB=%u", VERSION_STRING, Clk.AHBFreqHz);
+    App.ID = App.EE.Read32(EE_DEVICE_ID_ADDR);  // Read device ID
 
-    App.ID = App.GetDipSwitch();    // Get ID
+    Uart.Init(115200);
+    Uart.Printf("\r%S  ID=%d", VERSION_STRING, App.ID);
+
 
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
@@ -116,7 +117,14 @@ void App_t::OnUartCmd(Uart_t *PUart) {
     // Handle command
     if(PCmd->NameIs("Ping")) PUart->Ack(OK);
 
+    else if(PCmd->NameIs("GetID")) Uart.Reply("ID", ID);
 
+    else if(PCmd->NameIs("SetID")) {
+        if(PCmd->GetNextToken() != OK) { PUart->Ack(CMD_ERROR); return; }
+        if(PCmd->TryConvertTokenToNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
+        uint8_t r = ISetID(dw32);
+        PUart->Ack(r);
+    }
 
     else PUart->Ack(CMD_UNKNOWN);
 }
@@ -140,6 +148,20 @@ uint8_t App_t::GetDipSwitch() {
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN3);
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN4);
     return Rslt;
+}
+
+uint8_t App_t::ISetID(int32_t NewID) {
+    if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
+    uint8_t rslt = EE.Write32(EE_DEVICE_ID_ADDR, NewID);
+    if(rslt == OK) {
+        ID = NewID;
+        Uart.Printf("\rNew ID: %u", ID);
+        return OK;
+    }
+    else {
+        Uart.Printf("\rEE error: %u", rslt);
+        return FAILURE;
+    }
 }
 
 #if 0 // ===================== Load/save settings ==============================
