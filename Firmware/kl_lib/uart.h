@@ -5,8 +5,8 @@
  *      Author: kreyl
  */
 
-#ifndef CMD_UART_H_
-#define CMD_UART_H_
+#ifndef UART_H_
+#define UART_H_
 
 #include "stm32l1xx.h"
 #include "ch.h"
@@ -20,7 +20,7 @@
 #define UART_RX_ENABLED     FALSE
 
 // UART
-#define UART_TXBUF_SIZE     1500
+#define UART_TXBUF_SIZE     207
 
 
 #define UART                USART1
@@ -28,6 +28,7 @@
 #define UART_TX_PIN         9
 #define UART_AF             AF7 // for all uarts
 #define UART_RCC_ENABLE()   rccEnableUSART1(FALSE)
+#define UART_RCC_DISABLE()  rccDisableUSART1(FALSE)
 
 #define UART_DMA_TX         STM32_DMA1_STREAM4
 #define UART_DMA_TX_MODE    DMA_PRIORITY_LOW | \
@@ -38,46 +39,46 @@
                             STM32_DMA_CR_TCIE         /* Enable Transmission Complete IRQ */
 
 #if UART_RX_ENABLED // ==== RX ====
-#define UART_RXBUF_SZ       72 // unprocessed bytes
+#define UART_RXBUF_SZ       99 // unprocessed bytes
 #define UART_CMD_BUF_SZ     54 // payload bytes
 #define UART_RX_PIN         10
 #define UART_RX_REG         UART->DR
 
 #define UART_RX_POLLING_MS  99
 #define UART_DMA_RX         STM32_DMA1_STREAM5
-#define UART_DMA_RX_MODE    DMA_PRIORITY_LOW | \
+#define UART_DMA_RX_MODE    DMA_PRIORITY_MEDIUM | \
                             STM32_DMA_CR_MSIZE_BYTE | \
                             STM32_DMA_CR_PSIZE_BYTE | \
                             STM32_DMA_CR_MINC |       /* Memory pointer increase */ \
                             STM32_DMA_CR_DIR_P2M |    /* Direction is peripheral to memory */ \
                             STM32_DMA_CR_CIRC         /* Circular buffer enable */
 // Cmd related
-typedef Cmd_t<512> UartCmd_t;
+typedef Cmd_t<99> UartCmd_t;
 #endif
 
-class CmdUart_t {
+class Uart_t {
 private:
     char TXBuf[UART_TXBUF_SIZE];
     char *PRead, *PWrite;
     bool IDmaIsIdle;
     uint32_t IFullSlotsCount, ITransSize;
-    void ISendViaDMA();
+    uint32_t IBaudrate;
 #if UART_RX_ENABLED
-    int32_t SzOld=0, RIndx=0;
+    int32_t SzOld, RIndx;
     uint8_t IRxBuf[UART_RXBUF_SZ];
-    void CompleteCmd();
 #endif
+    void ISendViaDMA();
 public:
     void Printf(const char *S, ...);
     void PrintfI(const char *S, ...);
     void FlushTx() { while(!IDmaIsIdle); }  // wait DMA
-    void PrintNow(const char *S) {
-        while(*S != 0) {
-            while(!(UART->SR & USART_SR_TXE));
-            UART->DR = *S++;
-        }
-    }
+    void PrintfNow(const char *S, ...);
     void Init(uint32_t ABaudrate);
+    void DeInit() {
+        UART->CR1 &= ~USART_CR1_UE; // UART Disable
+        UART_RCC_DISABLE();
+    }
+    void OnAHBFreqChange();
     // Inner use
     void IRQDmaTxHandler();
     void IPutChar(char c);
@@ -86,10 +87,23 @@ public:
     UartCmd_t Cmd;
     ProcessDataResult_t ProcessRx();
     // Command and reply
-    void Ack(int32_t Result) { Printf("#Ack %d\r\n", Result); }
+    void Ack(int32_t Result) { Printf("Ack %d\r\n", Result); }
 #endif
+    Uart_t() {
+        for(uint32_t i=0; i<UART_TXBUF_SIZE; i++) TXBuf[i] = 0;
+        PWrite = TXBuf;
+        PRead = TXBuf;
+        IDmaIsIdle = true;
+        IFullSlotsCount = 0;
+        ITransSize = 0;
+        IBaudrate = 115200;
+#if UART_RX_ENABLED
+        SzOld=0;
+        RIndx=0;
+#endif
+    }
 };
 
-extern CmdUart_t Uart;
+extern Uart_t Uart;
 
-#endif /* CMD_UART_H_ */
+#endif /* UART_H_ */

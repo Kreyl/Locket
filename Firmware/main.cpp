@@ -29,7 +29,7 @@ App_t App;
 #define LedDisable()    PinClear(LED_EN_GPIO, LED_EN_PIN)
 
 //Beeper_t Beeper;
-Vibro_t Vibro(GPIOB, 8, TIM4, 3);
+//Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 // Universal VirtualTimer callback
@@ -41,7 +41,7 @@ void TmrGeneralCallback(void *p) {
 
 int main(void) {
     // ==== Init Vcore & clock system ====
-    SetupVCore(vcore1V2);
+    SetupVCore(vcore1V5);
     Clk.UpdateFreqValues();
 
     // ==== Init OS ====
@@ -59,15 +59,15 @@ int main(void) {
 //    Beeper.StartSequence(bsqBeepBeep);
 
     // Led
-    Led.Init();
-    PinSetupOut(LED_EN_GPIO, LED_EN_PIN, omPushPull);   // LED_EN pin setup
-    LedDisable();
+//    Led.Init();
+//    PinSetupOut(LED_EN_GPIO, LED_EN_PIN, omPushPull);   // LED_EN pin setup
+//    LedDisable();
 //    Led.StartSequence(lsqStart);
 
-    Vibro.Init();
+//    Vibro.Init();
 
-    if(Radio.Init() != OK) Vibro.StartSequence(vsqError);
-    else Vibro.StartSequence(vsqBrrBrr);
+//    if(Radio.Init() != OK) Led.StartSequence(lsqFailure);
+//    else Led.StartSequence(lsqStart);
 
     // Main cycle
     App.ITask();
@@ -77,10 +77,12 @@ __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
         chThdSleepMilliseconds(999);
-        App.ID = App.GetDipSwitch();
-        Uart.Printf("\rID=%X", App.ID);
+        Uart.PrintfNow("AA");
 //        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-
+//        // ==== Uart cmd ====
+//        if(EvtMsk & EVTMSK_UART_RX_POLL) {
+//            while(Uart.ProcessRx() == pdrNewCmd) OnUartCmd(&Uart);
+//        }
 #if 0 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {
 //            Uart.Printf("\rRadioRx");
@@ -107,13 +109,21 @@ void App_t::ITask() {
     } // while true
 }
 
+void App_t::OnUartCmd(Uart_t *PUart) {
+//    UartCmd_t *PCmd = &PUart->Cmd;
+//    __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations
+//    Uart.Printf("\r%S\r", PCmd->Name);
+//    // Handle command
+//    if(PCmd->NameIs("Ping")) PUart->Ack(OK);
+}
+
 uint8_t App_t::GetDipSwitch() {
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN1, pudPullUp);
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN2, pudPullUp);
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN3, pudPullUp);
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN4, pudPullUp);
     uint8_t Rslt;
-    Rslt = static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN1));
+    Rslt  = static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN1));
     Rslt <<= 1;
     Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN2));
     Rslt <<= 1;

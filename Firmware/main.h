@@ -15,7 +15,7 @@
 #include "evt_mask.h"
 #include "uart.h"
 
-#define VERSION_STRING  "SalemTX v1.0"
+#define VERSION_STRING  "Klaus v1.0"
 
 // ==== Constants and default values ====
 #define ID_MIN                  1
@@ -36,6 +36,7 @@ public:
         chSysUnlock();
     }
     void SignalEvtI(eventmask_t Evt) { chEvtSignalI(PThread, Evt); }
+    void OnUartCmd(Uart_t *PUart);
     // Inner use
     void ITask();
     App_t(): PThread(nullptr), ID(ID_DEFAULT) {}

@@ -24,7 +24,7 @@ private:
 public:
     char *Name, *Token;
     ProcessDataResult_t PutChar(char c) {
-        // Reset cmd if was completed and after that new char arrived
+        // Reset cmd if it was completed, and after that new char arrived
         if(Completed) {
             Completed = false;
             Cnt = 0;

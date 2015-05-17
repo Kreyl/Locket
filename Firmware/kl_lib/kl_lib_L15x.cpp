@@ -74,10 +74,7 @@ void Timer_t::SetUpdateFrequency(uint32_t FreqHz) {
 
 #if CH_DBG_ENABLED // ========================= DEBUG ==========================
 void chDbgPanic(const char *msg1) {
-    Uart.PrintNow("\r");
-    Uart.PrintNow(msg1);
-    Uart.PrintNow(" @");
-    Uart.PrintNow(chThdSelf()->p_name);
+    Uart.PrintfNow("\r%S @ %S\r", msg1, chThdSelf()->p_name);
 }
 #endif
 
