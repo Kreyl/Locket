@@ -16,3 +16,5 @@ RFSimulation/debug_log.scr
 Hardware/_autosave-Locket.kicad_pcb
 Firmware/.settings/org.eclipse.cdt.managedbuilder.core.prefs
 Firmware/.settings/language.settings.xml
+Hardware/3d/Locket.wrl
+Hardware/3d/locket.wrl.sldprt
