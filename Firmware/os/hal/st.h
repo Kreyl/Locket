@@ -15,118 +15,21 @@
 */
 
 /**
- * @file    hal.h
- * @brief   HAL subsystem header.
+ * @file    st.h
+ * @brief   ST Driver macros and structures.
+ * @details This header is designed to be include-able without having to
+ *          include other files from the HAL.
  *
- * @addtogroup HAL
+ * @addtogroup ST
  * @{
  */
 
-#ifndef _HAL_H_
-#define _HAL_H_
-
-#include "osal.h"
-#include "halconf.h"
-
-#include "hal_lld.h"
-
-#include "stm32f0xx.h"  // @KL
-
-/* Abstract interfaces.*/
-//#include "hal_streams.h"
-//#include "hal_channels.h"
-//#include "hal_files.h"
-//#include "hal_ioblock.h"
-//#include "hal_mmcsd.h"
-
-/* Shared headers.*/
-//#include "hal_queues.h"
-
-/* Normal drivers.*/
-//#include "pal.h"
-//#include "adc.h"
-//#include "can.h"
-//#include "dac.h"
-//#include "ext.h"
-//#include "gpt.h"
-//#include "i2c.h"
-//#include "i2s.h"
-//#include "icu.h"
-//#include "mac.h"
-//#include "mii.h"
-//#include "pwm.h"
-//#include "rtc.h"
-//#include "serial.h"
-//#include "sdc.h"
-//#include "spi.h"
-//#include "uart.h"
-//#include "usb.h"
-
-/*
- *  The ST driver is a special case, it is only included if the OSAL is
- *  configured to require it.
- */
-#if OSAL_ST_MODE != OSAL_ST_MODE_NONE
-#include "st.h"
-#endif
-
-/* Complex drivers.*/
-//#include "mmc_spi.h"
-//#include "serial_usb.h"
-
-/* Community drivers.*/
-#if defined(HAL_USE_COMMUNITY) || defined(__DOXYGEN__)
-#if (HAL_USE_COMMUNITY == TRUE) || defined(__DOXYGEN__)
-#include "hal_community.h"
-#endif
-#endif
+#ifndef _ST_H_
+#define _ST_H_
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
-
-/**
- * @brief   ChibiOS/HAL identification macro.
- */
-#define _CHIBIOS_HAL_
-
-/**
- * @brief   Stable release flag.
- */
-#define CH_HAL_STABLE           0
-
-/**
- * @name    ChibiOS/HAL version identification
- * @{
- */
-/**
- * @brief   HAL version string.
- */
-#define HAL_VERSION             "3.0.0p5"
-
-/**
- * @brief   HAL version major number.
- */
-#define CH_HAL_MAJOR            3
-
-/**
- * @brief   HAL version minor number.
- */
-#define CH_HAL_MINOR            0
-
-/**
- * @brief   HAL version patch number.
- */
-#define CH_HAL_PATCH            0
-/** @} */
-
-/**
- * @name    Return codes
- * @{
- */
-#define HAL_SUCCESS             false
-#define HAL_FAILED              true
-/** @} */
 
 /*===========================================================================*/
 /* Driver pre-compile time settings.                                         */
@@ -140,9 +43,38 @@
 /* Driver data structures and types.                                         */
 /*===========================================================================*/
 
+#include "st_lld.h"
+
 /*===========================================================================*/
 /* Driver macros.                                                            */
 /*===========================================================================*/
+
+/**
+ * @name    Macro Functions
+ * @{
+ */
+/**
+ * @brief   Returns the time counter value.
+ * @note    This functionality is only available in free running mode, the
+ *          behaviour in periodic mode is undefined.
+ *
+ * @return              The counter value.
+ *
+ * @api
+ */
+#define stGetCounter() st_lld_get_counter()
+
+/**
+ * @brief   Determines if the alarm is active.
+ *
+ * @return              The alarm status.
+ * @retval false        if the alarm is not active.
+ * @retval true         is the alarm is active
+ *
+ * @api
+ */
+#define stIsAlarmActive() st_lld_is_alarm_active()
+/** @} */
 
 /*===========================================================================*/
 /* External declarations.                                                    */
@@ -151,11 +83,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void halInit(void);
+  void stInit(void);
+  void stStartAlarm(systime_t abstime);
+  void stStopAlarm(void);
+  void stSetAlarm(systime_t abstime);
+  systime_t stGetAlarm(void);
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _HAL_H_ */
+#endif /* _ST_H_ */
 
 /** @} */

@@ -15,33 +15,20 @@
 #include "radio_lvl1.h"
 
 App_t App;
-// Dip Switch
-#define DIPSWITCH_GPIO  GPIOA
-#define DIPSWITCH_PIN1  8
-#define DIPSWITCH_PIN2  11
-#define DIPSWITCH_PIN3  12
-#define DIPSWITCH_PIN4  15
-
-// LED Enable
-#define LED_EN_GPIO     GPIOB
-#define LED_EN_PIN      4
-#define LedEnable()     PinSet(LED_EN_GPIO, LED_EN_PIN)
-#define LedDisable()    PinClear(LED_EN_GPIO, LED_EN_PIN)
 
 //Beeper_t Beeper;
-Vibro_t Vibro(GPIOB, 8, TIM4, 3);
+Vibro_t Vibro(GPIOB, 8, TIM_VIBRO, 1);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 // Universal VirtualTimer callback
 void TmrGeneralCallback(void *p) {
-    chSysLockFromIsr();
-    App.SignalEvtI((eventmask_t)p);
-    chSysUnlockFromIsr();
+    chSysLockFromISR();
+    App.SignalEvtI((eventmask_t)p); // TODO: static_cast or what there
+    chSysUnlockFromISR();
 }
 
 int main(void) {
     // ==== Init Vcore & clock system ====
-    SetupVCore(vcore1V2);
     Clk.UpdateFreqValues();
 
     // ==== Init OS ====
@@ -60,8 +47,6 @@ int main(void) {
 
     // Led
     Led.Init();
-    PinSetupOut(LED_EN_GPIO, LED_EN_PIN, omPushPull);   // LED_EN pin setup
-    LedDisable();
 //    Led.StartSequence(lsqStart);
 
     Vibro.Init();

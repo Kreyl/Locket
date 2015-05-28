@@ -15,117 +15,63 @@
 */
 
 /**
- * @file    hal.h
- * @brief   HAL subsystem header.
+ * @file    STM32F0xx/stm32_isr.h
+ * @brief   ISR remapper driver header.
  *
- * @addtogroup HAL
+ * @addtogroup STM32F0xx_ISR
  * @{
  */
 
-#ifndef _HAL_H_
-#define _HAL_H_
-
-#include "osal.h"
-#include "halconf.h"
-
-#include "hal_lld.h"
-
-#include "stm32f0xx.h"  // @KL
-
-/* Abstract interfaces.*/
-//#include "hal_streams.h"
-//#include "hal_channels.h"
-//#include "hal_files.h"
-//#include "hal_ioblock.h"
-//#include "hal_mmcsd.h"
-
-/* Shared headers.*/
-//#include "hal_queues.h"
-
-/* Normal drivers.*/
-//#include "pal.h"
-//#include "adc.h"
-//#include "can.h"
-//#include "dac.h"
-//#include "ext.h"
-//#include "gpt.h"
-//#include "i2c.h"
-//#include "i2s.h"
-//#include "icu.h"
-//#include "mac.h"
-//#include "mii.h"
-//#include "pwm.h"
-//#include "rtc.h"
-//#include "serial.h"
-//#include "sdc.h"
-//#include "spi.h"
-//#include "uart.h"
-//#include "usb.h"
-
-/*
- *  The ST driver is a special case, it is only included if the OSAL is
- *  configured to require it.
- */
-#if OSAL_ST_MODE != OSAL_ST_MODE_NONE
-#include "st.h"
-#endif
-
-/* Complex drivers.*/
-//#include "mmc_spi.h"
-//#include "serial_usb.h"
-
-/* Community drivers.*/
-#if defined(HAL_USE_COMMUNITY) || defined(__DOXYGEN__)
-#if (HAL_USE_COMMUNITY == TRUE) || defined(__DOXYGEN__)
-#include "hal_community.h"
-#endif
-#endif
+#ifndef _STM32_ISR_H_
+#define _STM32_ISR_H_
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
 
 /**
- * @brief   ChibiOS/HAL identification macro.
- */
-#define _CHIBIOS_HAL_
-
-/**
- * @brief   Stable release flag.
- */
-#define CH_HAL_STABLE           0
-
-/**
- * @name    ChibiOS/HAL version identification
+ * @name    ISR names and numbers remapping
  * @{
  */
-/**
- * @brief   HAL version string.
- */
-#define HAL_VERSION             "3.0.0p5"
 
-/**
- * @brief   HAL version major number.
+/*
+ * I2C units.
  */
-#define CH_HAL_MAJOR            3
+#define STM32_I2C1_GLOBAL_HANDLER   Vector9C
+#define STM32_I2C1_GLOBAL_NUMBER    23
 
-/**
- * @brief   HAL version minor number.
- */
-#define CH_HAL_MINOR            0
+#define STM32_I2C2_GLOBAL_HANDLER   VectorA0
+#define STM32_I2C2_GLOBAL_NUMBER    24
 
-/**
- * @brief   HAL version patch number.
+/*
+ * TIM units.
  */
-#define CH_HAL_PATCH            0
-/** @} */
+#define STM32_TIM1_UP_HANDLER       Vector74
+#define STM32_TIM1_CC_HANDLER       Vector78
+#define STM32_TIM2_HANDLER          Vector7C
+#define STM32_TIM3_HANDLER          Vector80
 
-/**
- * @name    Return codes
- * @{
+#define STM32_TIM1_UP_NUMBER        13
+#define STM32_TIM1_CC_NUMBER        14
+#define STM32_TIM2_NUMBER           15
+#define STM32_TIM3_NUMBER           16
+
+/*
+ * USART units.
  */
-#define HAL_SUCCESS             false
-#define HAL_FAILED              true
+#define STM32_USART1_HANDLER        VectorAC
+#define STM32_USART2_HANDLER        VectorB0
+
+#define STM32_USART1_NUMBER         27
+#define STM32_USART2_NUMBER         28
+
+/*
+ * USB units.
+ */
+#define STM32_USB1_LP_HANDLER       VectorBC
+#define STM32_USB1_LP_NUMBER        31
+#define STM32_USB1_HP_HANDLER       VectorBC
+#define STM32_USB1_HP_NUMBER        31
 /** @} */
 
 /*===========================================================================*/
@@ -148,14 +94,6 @@
 /* External declarations.                                                    */
 /*===========================================================================*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-  void halInit(void);
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _HAL_H_ */
+#endif /* _STM32_ISR_H_ */
 
 /** @} */

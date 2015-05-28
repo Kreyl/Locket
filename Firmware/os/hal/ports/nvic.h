@@ -15,117 +15,36 @@
 */
 
 /**
- * @file    hal.h
- * @brief   HAL subsystem header.
+ * @file    common/ARMCMx/nvic.h
+ * @brief   Cortex-Mx NVIC support macros and structures.
  *
- * @addtogroup HAL
+ * @addtogroup COMMON_ARMCMx_NVIC
  * @{
  */
 
-#ifndef _HAL_H_
-#define _HAL_H_
-
-#include "osal.h"
-#include "halconf.h"
-
-#include "hal_lld.h"
-
-#include "stm32f0xx.h"  // @KL
-
-/* Abstract interfaces.*/
-//#include "hal_streams.h"
-//#include "hal_channels.h"
-//#include "hal_files.h"
-//#include "hal_ioblock.h"
-//#include "hal_mmcsd.h"
-
-/* Shared headers.*/
-//#include "hal_queues.h"
-
-/* Normal drivers.*/
-//#include "pal.h"
-//#include "adc.h"
-//#include "can.h"
-//#include "dac.h"
-//#include "ext.h"
-//#include "gpt.h"
-//#include "i2c.h"
-//#include "i2s.h"
-//#include "icu.h"
-//#include "mac.h"
-//#include "mii.h"
-//#include "pwm.h"
-//#include "rtc.h"
-//#include "serial.h"
-//#include "sdc.h"
-//#include "spi.h"
-//#include "uart.h"
-//#include "usb.h"
-
-/*
- *  The ST driver is a special case, it is only included if the OSAL is
- *  configured to require it.
- */
-#if OSAL_ST_MODE != OSAL_ST_MODE_NONE
-#include "st.h"
-#endif
-
-/* Complex drivers.*/
-//#include "mmc_spi.h"
-//#include "serial_usb.h"
-
-/* Community drivers.*/
-#if defined(HAL_USE_COMMUNITY) || defined(__DOXYGEN__)
-#if (HAL_USE_COMMUNITY == TRUE) || defined(__DOXYGEN__)
-#include "hal_community.h"
-#endif
-#endif
+#ifndef _NVIC_H_
+#define _NVIC_H_
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
 
 /**
- * @brief   ChibiOS/HAL identification macro.
- */
-#define _CHIBIOS_HAL_
-
-/**
- * @brief   Stable release flag.
- */
-#define CH_HAL_STABLE           0
-
-/**
- * @name    ChibiOS/HAL version identification
+ * @name System vectors numbers
  * @{
  */
-/**
- * @brief   HAL version string.
- */
-#define HAL_VERSION             "3.0.0p5"
-
-/**
- * @brief   HAL version major number.
- */
-#define CH_HAL_MAJOR            3
-
-/**
- * @brief   HAL version minor number.
- */
-#define CH_HAL_MINOR            0
-
-/**
- * @brief   HAL version patch number.
- */
-#define CH_HAL_PATCH            0
-/** @} */
-
-/**
- * @name    Return codes
- * @{
- */
-#define HAL_SUCCESS             false
-#define HAL_FAILED              true
+#define HANDLER_MEM_MANAGE      0       /**< MEM MANAGE vector id.          */
+#define HANDLER_BUS_FAULT       1       /**< BUS FAULT vector id.           */
+#define HANDLER_USAGE_FAULT     2       /**< USAGE FAULT vector id.         */
+#define HANDLER_RESERVED_3      3
+#define HANDLER_RESERVED_4      4
+#define HANDLER_RESERVED_5      5
+#define HANDLER_RESERVED_6      6
+#define HANDLER_SVCALL          7       /**< SVCALL vector id.              */
+#define HANDLER_DEBUG_MONITOR   8       /**< DEBUG MONITOR vector id.       */
+#define HANDLER_RESERVED_9      9
+#define HANDLER_PENDSV          10      /**< PENDSV vector id.              */
+#define HANDLER_SYSTICK         11      /**< SYS TCK vector id.             */
 /** @} */
 
 /*===========================================================================*/
@@ -144,6 +63,11 @@
 /* Driver macros.                                                            */
 /*===========================================================================*/
 
+/**
+ * @brief   Priority level to priority mask conversion macro.
+ */
+#define NVIC_PRIORITY_MASK(prio) ((prio) << (8 - __NVIC_PRIO_BITS))
+
 /*===========================================================================*/
 /* External declarations.                                                    */
 /*===========================================================================*/
@@ -151,11 +75,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void halInit(void);
+  void nvicEnableVector(uint32_t n, uint32_t prio);
+  void nvicDisableVector(uint32_t n);
+  void nvicSetSystemHandlerPriority(uint32_t handler, uint32_t prio);
+  void nvicClearPending(uint32_t n);
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _HAL_H_ */
+#endif /* _NVIC_H_ */
 
 /** @} */
