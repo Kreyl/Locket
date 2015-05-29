@@ -81,6 +81,7 @@
 									<listOptionValue builtIn="false" value="../os/rt"/>
 									<listOptionValue builtIn="false" value="../os/rt/include"/>
 									<listOptionValue builtIn="false" value="../os/ext"/>
+									<listOptionValue builtIn="false" value="../os/hal/ports"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.input.1368711610" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.input"/>
 							</tool>

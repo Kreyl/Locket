@@ -23,7 +23,7 @@ LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 // Universal VirtualTimer callback
 void TmrGeneralCallback(void *p) {
     chSysLockFromISR();
-    App.SignalEvtI((eventmask_t)p); // TODO: static_cast or what there
+    App.SignalEvtI(static_cast<eventmask_t>(p));
     chSysUnlockFromISR();
 }
 

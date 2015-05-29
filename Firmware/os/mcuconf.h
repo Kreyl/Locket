@@ -121,7 +121,7 @@
  * ST driver system settings.
  */
 #define STM32_ST_IRQ_PRIORITY               2
-#define STM32_ST_USE_TIMER                  3
+#define STM32_ST_USE_TIMER                  14
 
 /*
  * UART driver system settings.
