@@ -5,7 +5,7 @@
  *      Author: kreyl
  */
 
-#include "kl_lib_L15x.h"
+#include <kl_lib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <uart.h>

@@ -26,13 +26,13 @@
 */
 
 /**
- * @file    GCC/ARMCMx/STM32L1xx/cmparams.h
- * @brief   ARM Cortex-M3 parameters for the STM32L1xx.
+ * @file    GCC/ARMCMx/STM32F0xx/cmparams.h
+ * @brief   ARM Cortex-M0 parameters for the STM32F0xx.
  *
- * @defgroup ARMCMx_STM32L1xx STM32L1xx Specific Parameters
+ * @defgroup ARMCMx_STM32F0xx STM32F0xx Specific Parameters
  * @ingroup ARMCMx_SPECIFIC
- * @details This file contains the Cortex-M3 specific parameters for the
- *          STM32L1xx platform.
+ * @details This file contains the Cortex-M0 specific parameters for the
+ *          STM32F0xx platform.
  * @{
  */
 
@@ -42,7 +42,7 @@
 /**
  * @brief   Cortex core model.
  */
-#define CORTEX_MODEL            CORTEX_M3
+#define CORTEX_MODEL            CORTEX_M0
 
 /**
  * @brief   Systick unit presence.
@@ -52,7 +52,7 @@
 /**
  * @brief   Memory Protection unit presence.
  */
-#define CORTEX_HAS_MPU          TRUE
+#define CORTEX_HAS_MPU          FALSE
 
 /**
  * @brief   Floating Point unit presence.
@@ -62,7 +62,7 @@
 /**
  * @brief   Number of bits in priority masks.
  */
-#define CORTEX_PRIORITY_BITS    4
+#define CORTEX_PRIORITY_BITS    2
 
 #endif /* _CMPARAMS_H_ */
 

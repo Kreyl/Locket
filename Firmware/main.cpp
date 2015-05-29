@@ -22,14 +22,8 @@ App_t App;
 #define DIPSWITCH_PIN3  12
 #define DIPSWITCH_PIN4  15
 
-// LED Enable
-#define LED_EN_GPIO     GPIOB
-#define LED_EN_PIN      4
-#define LedEnable()     PinSet(LED_EN_GPIO, LED_EN_PIN)
-#define LedDisable()    PinClear(LED_EN_GPIO, LED_EN_PIN)
-
 //Beeper_t Beeper;
-Vibro_t Vibro(GPIOB, 8, TIM4, 3);
+//Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 #if 1 // ============================ Timers ===================================
@@ -43,7 +37,7 @@ void TmrSecondCallback(void *p) {
 
 int main(void) {
     // ==== Init Vcore & clock system ====
-    SetupVCore(vcore1V2);
+//    SetupVCore(vcore1V2);
     Clk.UpdateFreqValues();
 
     // ==== Init OS ====
@@ -52,7 +46,7 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     App.InitThread();
-    App.ID = App.EE.Read32(EE_DEVICE_ID_ADDR);  // Read device ID
+//    App.ID = App.EE.Read32(EE_DEVICE_ID_ADDR);  // Read device ID
     chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
 
     Uart.Init(115200);
@@ -63,8 +57,6 @@ int main(void) {
 
     // Led
     Led.Init();
-    PinSetupOut(LED_EN_GPIO, LED_EN_PIN, omPushPull);   // LED_EN pin setup
-//    LedDisable();
     Led.StartSequence(lsqStart);
 
 //    Vibro.Init();
@@ -105,7 +97,7 @@ void App_t::ITask() {
             }
         }
 
-#if 1 // ==== Radio ====
+#if 0 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {
             Uart.Printf("\rRadioRx");
             chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
@@ -167,17 +159,18 @@ uint8_t App_t::GetDipSwitch() {
 }
 
 uint8_t App_t::ISetID(int32_t NewID) {
-    if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
-    uint8_t rslt = EE.Write32(EE_DEVICE_ID_ADDR, NewID);
-    if(rslt == OK) {
-        ID = NewID;
-        Uart.Printf("\rNew ID: %u", ID);
-        return OK;
-    }
-    else {
-        Uart.Printf("\rEE error: %u", rslt);
-        return FAILURE;
-    }
+//    if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
+//    uint8_t rslt = EE.Write32(EE_DEVICE_ID_ADDR, NewID);
+//    if(rslt == OK) {
+//        ID = NewID;
+//        Uart.Printf("\rNew ID: %u", ID);
+//        return OK;
+//    }
+//    else {
+//        Uart.Printf("\rEE error: %u", rslt);
+//        return FAILURE;
+//    }
+    return FAILURE;
 }
 
 #if 0 // ===================== Load/save settings ==============================

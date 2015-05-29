@@ -8,9 +8,9 @@
 #ifndef RADIO_LVL1_H_
 #define RADIO_LVL1_H_
 
+#include <kl_lib.h>
 #include "ch.h"
 #include "rlvl1_defins.h"
-#include "kl_lib_L15x.h"
 #include "cc1101.h"
 
 class rLevel1_t {

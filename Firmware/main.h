@@ -8,10 +8,9 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include "kl_lib_L15x.h"
+#include "kl_lib.h"
 #include "ch.h"
 #include "hal.h"
-#include "clocking_L1xx.h"
 #include "evt_mask.h"
 #include "uart.h"
 
@@ -43,7 +42,6 @@ private:
     uint8_t ISetID(int32_t NewID);
 public:
     int32_t ID;
-    Eeprom_t EE;
     uint8_t GetDipSwitch();
     Mode_t Mode;
     VirtualTimer TmrSecond;

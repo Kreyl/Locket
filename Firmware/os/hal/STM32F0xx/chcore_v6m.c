@@ -26,10 +26,10 @@
 */
 
 /**
- * @file    GCC/ARMCMx/chcore_v7m.c
- * @brief   ARMv7-M architecture port code.
+ * @file    GCC/ARMCMx/chcore_v6m.c
+ * @brief   ARMv6-M architecture port code.
  *
- * @addtogroup ARMCMx_V7M_CORE
+ * @addtogroup ARMCMx_V6M_CORE
  * @{
  */
 
@@ -55,107 +55,59 @@ CH_IRQ_HANDLER(SysTickVector) {
   CH_IRQ_EPILOGUE();
 }
 
-#if !CORTEX_SIMPLIFIED_PRIORITY || defined(__DOXYGEN__)
+#if !CORTEX_ALTERNATE_SWITCH || defined(__DOXYGEN__)
 /**
- * @brief   SVC vector.
- * @details The SVC vector is used for exception mode re-entering after a
+ * @brief   NMI vector.
+ * @details The NMI vector is used for exception mode re-entering after a
  *          context switch.
- * @note    The PendSV vector is only used in advanced kernel mode.
  */
-void SVCallVector(void) {
-  struct extctx *ctxp;
-
-  /* Current PSP value.*/
-  asm volatile ("mrs     %0, PSP" : "=r" (ctxp) : : "memory");
+void NMIVector(void) {
+  register struct extctx *ctxp;
 
   /* Discarding the current exception context and positioning the stack to
      point to the real one.*/
+  asm volatile ("mrs     %0, PSP" : "=r" (ctxp) : : "memory");
   ctxp++;
-
-#if CORTEX_USE_FPU
-  /* Restoring the special register SCB_FPCCR.*/
-  SCB_FPCCR = (uint32_t)ctxp->fpccr;
-  SCB_FPCAR = SCB_FPCAR + sizeof (struct extctx);
-#endif
   asm volatile ("msr     PSP, %0" : : "r" (ctxp) : "memory");
   port_unlock_from_isr();
 }
-#endif /* !CORTEX_SIMPLIFIED_PRIORITY */
+#endif /* !CORTEX_ALTERNATE_SWITCH */
 
-#if CORTEX_SIMPLIFIED_PRIORITY || defined(__DOXYGEN__)
+#if CORTEX_ALTERNATE_SWITCH || defined(__DOXYGEN__)
 /**
  * @brief   PendSV vector.
  * @details The PendSV vector is used for exception mode re-entering after a
  *          context switch.
- * @note    The PendSV vector is only used in compact kernel mode.
  */
 void PendSVVector(void) {
-  struct extctx *ctxp;
-
-  /* Current PSP value.*/
-  asm volatile ("mrs     %0, PSP" : "=r" (ctxp) : : "memory");
+  register struct extctx *ctxp;
 
   /* Discarding the current exception context and positioning the stack to
      point to the real one.*/
+  asm volatile ("mrs     %0, PSP" : "=r" (ctxp) : : "memory");
   ctxp++;
-
-#if CORTEX_USE_FPU
-  /* Restoring the special register SCB_FPCCR.*/
-  SCB_FPCCR = (uint32_t)ctxp->fpccr;
-  SCB_FPCAR = SCB_FPCAR + sizeof (struct extctx);
-#endif
   asm volatile ("msr     PSP, %0" : : "r" (ctxp) : "memory");
 }
-#endif /* CORTEX_SIMPLIFIED_PRIORITY */
+#endif /* CORTEX_ALTERNATE_SWITCH */
 
 /*===========================================================================*/
 /* Port exported functions.                                                  */
 /*===========================================================================*/
 
 /**
- * @brief   Port-related initialization code.
+ * @brief   IRQ epilogue code.
+ *
+ * @param[in] lr        value of the @p LR register on ISR entry
  */
-void _port_init(void) {
+void _port_irq_epilogue(regarm_t lr) {
 
-  /* Initialization of the vector table and priority related settings.*/
-  SCB_VTOR = CORTEX_VTOR_INIT;
-  SCB_AIRCR = AIRCR_VECTKEY | AIRCR_PRIGROUP(CORTEX_PRIGROUP_INIT);
+  if (lr != (regarm_t)0xFFFFFFF1) {
+    register struct extctx *ctxp;
 
-  /* Initialization of the system vectors used by the port.*/
-  nvicSetSystemHandlerPriority(HANDLER_SVCALL,
-    CORTEX_PRIORITY_MASK(CORTEX_PRIORITY_SVCALL));
-  nvicSetSystemHandlerPriority(HANDLER_PENDSV,
-    CORTEX_PRIORITY_MASK(CORTEX_PRIORITY_PENDSV));
-  nvicSetSystemHandlerPriority(HANDLER_SYSTICK,
-    CORTEX_PRIORITY_MASK(CORTEX_PRIORITY_SYSTICK));
-}
-
-#if !CH_OPTIMIZE_SPEED
-void _port_lock(void) {
-  register uint32_t tmp asm ("r3") = CORTEX_BASEPRI_KERNEL;
-  asm volatile ("msr     BASEPRI, %0" : : "r" (tmp) : "memory");
-}
-
-void _port_unlock(void) {
-  register uint32_t tmp asm ("r3") = CORTEX_BASEPRI_DISABLED;
-  asm volatile ("msr     BASEPRI, %0" : : "r" (tmp) : "memory");
-}
-#endif
-
-/**
- * @brief   Exception exit redirection to _port_switch_from_isr().
- */
-void _port_irq_epilogue(void) {
-
-  port_lock_from_isr();
-  if ((SCB_ICSR & ICSR_RETTOBASE) != 0) {
-    struct extctx *ctxp;
-
-    /* Current PSP value.*/
-    asm volatile ("mrs     %0, PSP" : "=r" (ctxp) : : "memory");
-
+    port_lock_from_isr();
     /* Adding an artificial exception return context, there is no need to
        populate it fully.*/
+    asm volatile ("mrs     %0, PSP" : "=r" (ctxp) : : "memory");
     ctxp--;
     asm volatile ("msr     PSP, %0" : : "r" (ctxp) : "memory");
     ctxp->xpsr = (regarm_t)0x01000000;
@@ -165,10 +117,6 @@ void _port_irq_epilogue(void) {
     if (chSchIsPreemptionRequired()) {
       /* Preemption is required we need to enforce a context switch.*/
       ctxp->pc = (void *)_port_switch_from_isr;
-#if CORTEX_USE_FPU
-      /* Triggering a lazy FPU state save.*/
-      asm volatile ("vmrs    APSR_nzcv, FPSCR" : : : "memory");
-#endif
     }
     else {
       /* Preemption not required, we just need to exit the exception
@@ -176,30 +124,16 @@ void _port_irq_epilogue(void) {
       ctxp->pc = (void *)_port_exit_from_isr;
     }
 
-#if CORTEX_USE_FPU
-    {
-      uint32_t fpccr;
-
-      /* Saving the special register SCB_FPCCR into the reserved offset of
-         the Cortex-M4 exception frame.*/
-      (ctxp + 1)->fpccr = (regarm_t)(fpccr = SCB_FPCCR);
-
-      /* Now the FPCCR is modified in order to not restore the FPU status
-         from the artificial return context.*/
-      SCB_FPCCR = fpccr | FPCCR_LSPACT;
-    }
-#endif
-
     /* Note, returning without unlocking is intentional, this is done in
        order to keep the rest of the context switch atomic.*/
-    return;
   }
-  port_unlock_from_isr();
 }
 
 /**
  * @brief   Post-IRQ switch code.
- * @details Exception handlers return here for context switching.
+ * @details The switch is performed in thread context then an NMI exception
+ *          is enforced in order to return to the exact point before the
+ *          preemption.
  */
 #if !defined(__DOXYGEN__)
 __attribute__((naked))
@@ -210,14 +144,16 @@ void _port_switch_from_isr(void) {
   chSchDoReschedule();
   dbg_check_unlock();
   asm volatile ("_port_exit_from_isr:" : : : "memory");
-#if !CORTEX_SIMPLIFIED_PRIORITY || defined(__DOXYGEN__)
-  asm volatile ("svc     #0");
-#else /* CORTEX_SIMPLIFIED_PRIORITY */
+#if CORTEX_ALTERNATE_SWITCH
   SCB_ICSR = ICSR_PENDSVSET;
   port_unlock();
+#else
+  SCB_ICSR = ICSR_NMIPENDSET;
+#endif
+  /* The following loop should never be executed, the exception will kick in
+     immediately.*/
   while (TRUE)
     ;
-#endif /* CORTEX_SIMPLIFIED_PRIORITY */
 }
 
 /**
@@ -234,21 +170,24 @@ void _port_switch_from_isr(void) {
 __attribute__((naked))
 #endif
 void _port_switch(Thread *ntp, Thread *otp) {
+  register struct intctx *r13 asm ("r13");
 
-  asm volatile ("push    {r4, r5, r6, r7, r8, r9, r10, r11, lr}"
-                : : : "memory");
-#if CORTEX_USE_FPU
-  asm volatile ("vpush   {s16-s31}" : : : "memory");
-#endif
+  asm volatile ("push    {r4, r5, r6, r7, lr}                   \n\t"
+                "mov     r4, r8                                 \n\t"
+                "mov     r5, r9                                 \n\t"
+                "mov     r6, r10                                \n\t"
+                "mov     r7, r11                                \n\t"
+                "push    {r4, r5, r6, r7}" : : : "memory");
 
-  asm volatile ("str     sp, [%1, #12]                          \n\t"
-                "ldr     sp, [%0, #12]" : : "r" (ntp), "r" (otp));
+  otp->p_ctx.r13 = r13;
+  r13 = ntp->p_ctx.r13;
 
-#if CORTEX_USE_FPU
-  asm volatile ("vpop    {s16-s31}" : : : "memory");
-#endif
-  asm volatile ("pop     {r4, r5, r6, r7, r8, r9, r10, r11, pc}"
-                : : : "memory");
+  asm volatile ("pop     {r4, r5, r6, r7}                       \n\t"
+                "mov     r8, r4                                 \n\t"
+                "mov     r9, r5                                 \n\t"
+                "mov     r10, r6                                \n\t"
+                "mov     r11, r7                                \n\t"
+                "pop     {r4, r5, r6, r7, pc}" : : "r" (r13) : "memory");
 }
 
 /**

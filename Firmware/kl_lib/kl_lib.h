@@ -8,12 +8,18 @@
 #ifndef KL_LIB_F100_H_
 #define KL_LIB_F100_H_
 
-#include "stm32l1xx.h"
 #include "ch.h"
 #include "hal.h"
-#include "clocking_L1xx.h"
 #include "core_cmInstr.h"
 #include <cstdlib>
+
+#if defined STM32L1XX_MD
+#include "clocking_L1xx.h"
+#include "stm32l1xx.h"
+#elif defined STM32F030
+#include "clocking_f030.h"
+#include "stm32f0xx.h"
+#endif
 
 #if 1 // ============================ General ==================================
 #define PACKED __attribute__ ((__packed__))
@@ -253,9 +259,15 @@ enum PinAF_t {
 };
 
 // Set/clear
+#if defined STM32L1XX_MD
 static inline void PinSet    (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BSRRL = (uint16_t)(1<<APinNumber); }
 static inline void PinClear  (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BSRRH = (uint16_t)(1<<APinNumber); }
+#elif defined STM32F030
+static inline void PinSet    (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BSRR = (uint32_t)(1<<APinNumber); }
+static inline void PinClear  (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BRR  = (uint32_t)(1<<APinNumber); }
+#endif
 static inline void PinToggle (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->ODR  ^= (uint16_t)(1<<APinNumber); }
+
 // Check state
 static inline bool PinIsSet(GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { return (PGpioPort->IDR & (uint32_t)(1<<APinNumber)); }
 // Setup
@@ -287,7 +299,6 @@ static inline void PinSetupOut(
     // Setup speed
     PGpioPort->OSPEEDR &= ~(0b11 << Offset); // clear previous bits
     PGpioPort->OSPEEDR |= (uint32_t)ASpeed << Offset;
-
 }
 static inline void PinSetupIn(
         GPIO_TypeDef *PGpioPort,
@@ -342,7 +353,6 @@ static inline void PinSetupAlterFunc(
 #endif
 
 #if 1 // ===================== Output pin manipulations ========================
-// Example:
 class PinOutputPushPull_t {
 public:
     GPIO_TypeDef *PGpio;
@@ -419,9 +429,15 @@ public:
         SetTriggerType(ATriggerType);
         EXTI->PR    =  IrqMsk;      // Clean irq flag
         // Get IRQ channel
+#if defined STM32L1XX_MD
         if      ((APinNumber >= 0)  and (APinNumber <= 4))  IIrqChnl = EXTI0_IRQn + APinNumber;
         else if ((APinNumber >= 5)  and (APinNumber <= 9))  IIrqChnl = EXTI9_5_IRQn;
         else if ((APinNumber >= 10) and (APinNumber <= 15)) IIrqChnl = EXTI15_10_IRQn;
+#elif defined STM32F030
+        if      ((APinNumber >= 0)  and (APinNumber <= 1))  IIrqChnl = EXTI0_1_IRQn;
+        else if ((APinNumber >= 2)  and (APinNumber <= 3))  IIrqChnl = EXTI2_3_IRQn;
+        else if ((APinNumber >= 4)  and (APinNumber <= 15)) IIrqChnl = EXTI4_15_IRQn;
+#endif
     }
     void EnableIrq(const uint32_t Priority) { nvicEnableVector(IIrqChnl, CORTEX_PRIORITY_MASK(Priority)); }
     void DisableIrq() { nvicDisableVector(IIrqChnl); }
@@ -525,7 +541,7 @@ public:
 };
 #endif
 
-#if 1 // ============================== I2C ====================================
+#if 0 // ============================== I2C ====================================
 #define I2C_DMATX_MODE  DMA_PRIORITY_LOW | \
                         STM32_DMA_CR_MSIZE_BYTE | \
                         STM32_DMA_CR_PSIZE_BYTE | \
@@ -581,7 +597,7 @@ public:
 };
 #endif
 
-#if 1 // ====================== FLASH & EEPROM =================================
+#if 0 // ====================== FLASH & EEPROM =================================
 #define FLASH_LIB_KL
 #define EEPROM_BASE_ADDR    ((uint32_t)0x08080000)
 // ==== Flash keys ====

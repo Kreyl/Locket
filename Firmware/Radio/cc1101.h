@@ -14,7 +14,7 @@
  */
 
 #include <inttypes.h>
-#include "kl_lib_L15x.h"
+#include <kl_lib.h>
 #include "cc1101defins.h"
 #include "cc1101_rf_settings.h"
 #include "cc_gpio.h"

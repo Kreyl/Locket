@@ -8,9 +8,9 @@
 #ifndef KL_LIB_VIBRO_H_
 #define KL_LIB_VIBRO_H_
 
+#include <kl_lib.h>
 #include "ChunkTypes.h"
 #include "hal.h"
-#include "kl_lib_L15x.h"
 
 #define VIBRO_TOP_VALUE     22
 #define VIBRO_FREQ_HZ       3600

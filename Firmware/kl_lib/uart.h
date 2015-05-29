@@ -8,11 +8,11 @@
 #ifndef UART_H_
 #define UART_H_
 
+#include <kl_lib.h>
 #include "stm32l1xx.h"
 #include "ch.h"
 #include "hal.h"
 #include "kl_sprintf.h"
-#include "kl_lib_L15x.h"
 #include <cstring>
 #include "cmd.h"
 

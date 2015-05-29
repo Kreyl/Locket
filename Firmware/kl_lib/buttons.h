@@ -12,7 +12,7 @@
 #ifdef STM32F2XX
 #include "kl_lib_f2xx.h"
 #elif defined STM32L1XX_MD || defined STM32L1XX_HD
-#include "kl_lib_L15x.h"
+#include <kl_lib.h>
 #endif
 #include "kl_buf.h"
 
