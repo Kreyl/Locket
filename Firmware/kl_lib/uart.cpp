@@ -66,9 +66,15 @@ void Uart_t::ISendViaDMA() {
 
 #if 1 // ==== Print Now ====
 static inline void FPutCharNow(char c) {
+#if defined STM32L1XX_MD
     while(!(UART->SR & USART_SR_TXE));
-    UART->DR = c;
+    UART_TX_REG = c;
     while(!(UART->SR & USART_SR_TXE));
+#elif defined STM32F030
+    while(!(UART->ISR & USART_ISR_TXE));
+    UART_TX_REG = c;
+    while(!(UART->ISR & USART_ISR_TXE));
+#endif
 }
 
 void Uart_t::PrintfNow(const char *S, ...) {
@@ -131,12 +137,11 @@ void Uart_t::Init(uint32_t ABaudrate) {
     IBaudrate = ABaudrate;
     // ==== USART configuration ====
     UART_RCC_ENABLE();
-    if(UART == USART1) UART->BRR = Clk.APB2FreqHz / ABaudrate;
-    else               UART->BRR = Clk.APB1FreqHz / ABaudrate;
+    OnAHBFreqChange();  // Setup baudrate
     UART->CR2 = 0;
     // ==== DMA ====
     dmaStreamAllocate     (UART_DMA_TX, IRQ_PRIO_HIGH, CmdUartTxIrq, NULL);
-    dmaStreamSetPeripheral(UART_DMA_TX, &UART->DR);
+    dmaStreamSetPeripheral(UART_DMA_TX, &UART_TX_REG);
     dmaStreamSetMode      (UART_DMA_TX, UART_DMA_TX_MODE);
 
 #if UART_RX_ENABLED
@@ -146,7 +151,7 @@ void Uart_t::Init(uint32_t ABaudrate) {
     PinSetupAlterFunc(UART_GPIO, UART_RX_PIN,  omOpenDrain, pudPullUp, UART_AF);
 
     dmaStreamAllocate     (UART_DMA_RX, IRQ_PRIO_LOW, nullptr, NULL);
-    dmaStreamSetPeripheral(UART_DMA_RX, &UART->DR);
+    dmaStreamSetPeripheral(UART_DMA_RX, &UART_RX_REG);
     dmaStreamSetMemory0   (UART_DMA_RX, IRxBuf);
     dmaStreamSetTransactionSize(UART_DMA_RX, UART_RXBUF_SZ);
     dmaStreamSetMode      (UART_DMA_RX, UART_DMA_RX_MODE);
@@ -161,8 +166,12 @@ void Uart_t::Init(uint32_t ABaudrate) {
 }
 
 void Uart_t::OnAHBFreqChange() {
+#if defined STM32L1XX_MD
     if(UART == USART1) UART->BRR = Clk.APB2FreqHz / IBaudrate;
     else               UART->BRR = Clk.APB1FreqHz / IBaudrate;
+#elif defined STM32F030
+    UART->BRR = Clk.APBFreqHz / IBaudrate;
+#endif
 }
 
 // ==== TX DMA IRQ ====

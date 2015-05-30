@@ -57,7 +57,6 @@ int main(void) {
 
     // Led
     Led.Init();
-    Led.StartSequence(lsqStart);
 
 //    Vibro.Init();
 

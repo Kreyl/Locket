@@ -52,7 +52,6 @@ void Clk_t::UpdateFreqValues() {
     switch(tmp) {
         case csHSI:   SysClkHz = HSI_VALUE; break;
         case csHSE:   SysClkHz = CRYSTAL_FREQ_HZ; break;
-        case csHSI48: SysClkHz = HSI48_VALUE; break;
         case csPLL: // PLL used as system clock source
             // Get different PLL dividers
             PreDiv = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1;
@@ -61,10 +60,8 @@ void Clk_t::UpdateFreqValues() {
             // Which src is used as pll input?
             PllSrc = RCC->CFGR & RCC_CFGR_PLLSRC;
             switch(PllSrc) {
-                case RCC_CFGR_PLLSRC_HSI_DIV2: SysClkHz = HSI_VALUE / 2; break;
-                case RCC_CFGR_PLLSRC_HSI_PREDIV: SysClkHz = HSI_VALUE / PreDiv; break;
-                case RCC_CFGR_PLLSRC_HSE_PREDIV: SysClkHz = CRYSTAL_FREQ_HZ / PreDiv; break;
-                case RCC_CFGR_PLLSRC_HSI48_PREDIV: SysClkHz = HSI48_VALUE / PreDiv; break;
+                case RCC_CFGR_PLLSRC_HSI_Div2: SysClkHz = HSI_VALUE / 2; break;
+                case RCC_CFGR_PLLSRC_PREDIV1: SysClkHz = CRYSTAL_FREQ_HZ / PreDiv; break;
                 default: break;
             }
             SysClkHz *= PllMul;
@@ -114,15 +111,7 @@ uint8_t Clk_t::SwitchTo(ClkSrc_t AClkSrc) {
             RCC->CFGR |=  RCC_CFGR_SW_PLL;      // } Select PLL as system clock src
             while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL); // Wait until ready
             break;
-
-        case csHSI48:
-            if(EnableHSI48() != 0) return 4;
-            RCC->CFGR &= ~RCC_CFGR_SW;          // }
-            RCC->CFGR |=  RCC_CFGR_SW_HSI48;    // } Select HSI48 as system clock src
-            while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL); // Wait until ready
-            break;
     } // switch
-
     return 0;
 }
 

@@ -12,6 +12,7 @@
 
 #if 1 // ============================= Timer ===================================
 void Timer_t::Init() {
+#if defined STM32L1XX_MD
     if(ANY_OF_3(ITmr, TIM9, TIM10, TIM11)) PClk = &Clk.APB2FreqHz;
     else PClk = &Clk.APB1FreqHz;
     if     (ITmr == TIM2)  { rccEnableTIM2(FALSE); }
@@ -22,13 +23,43 @@ void Timer_t::Init() {
     else if(ITmr == TIM9)  { rccEnableAPB2(RCC_APB2ENR_TIM9EN,  FALSE); }
     else if(ITmr == TIM10) { rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE); }
     else if(ITmr == TIM11) { rccEnableAPB2(RCC_APB2ENR_TIM11EN, FALSE); }
+#elif defined STM32F030
+    if     (ITmr == TIM1)  { rccEnableTIM1(FALSE); }
+    else if(ITmr == TIM2)  { rccEnableTIM2(FALSE); }
+    else if(ITmr == TIM3)  { rccEnableTIM3(FALSE); }
+    else if(ITmr == TIM6)  { rccEnableAPB1(RCC_APB1ENR_TIM6EN,  FALSE); }
+    else if(ITmr == TIM14) { RCC->APB1ENR |= RCC_APB1ENR_TIM14EN; }
+    else if(ITmr == TIM15) { RCC->APB2ENR |= RCC_APB2ENR_TIM15EN; }
+    else if(ITmr == TIM16) { RCC->APB2ENR |= RCC_APB2ENR_TIM16EN; }
+    else if(ITmr == TIM17) { RCC->APB2ENR |= RCC_APB2ENR_TIM17EN; }
+    // Clock src
+    PClk = &Clk.APBFreqHz;
+#endif
 }
 
 void Timer_t::InitPwm(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATopValue, Inverted_t Inverted, PinOutMode_t OutputType) {
     // GPIO
+#if defined STM32L1XX_MD
     if              (ITmr == TIM2)              PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
     else if(ANY_OF_2(ITmr, TIM3, TIM4))         PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
     else if(ANY_OF_3(ITmr, TIM9, TIM10, TIM11)) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF3);
+#elif defined STM32F030
+    if     (ITmr == TIM1)  PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
+    else if(ITmr == TIM3)  PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
+    else if(ITmr == TIM14) {
+        if(GPIO == GPIOA) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF4);
+        else PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF0);
+    }
+    else if(ITmr == TIM15) {
+        if(GPIO == GPIOA) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF0);
+        else PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
+    }
+    else if(ITmr == TIM16 or ITmr == TIM17) {
+        if(GPIO == GPIOA) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF5);
+        else PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
+    }
+#endif
+
     ITmr->ARR = ATopValue;
     // Output
     uint16_t tmp = (Inverted == invInverted)? 0b111 : 0b110; // PWM mode 1 or 2
@@ -78,7 +109,7 @@ void chDbgPanic(const char *msg1) {
 }
 #endif
 
-#if 1 // ============================= I2C =====================================
+#if I2C_KL // ============================= I2C =====================================
 void i2cDmaIrqHandler(void *p, uint32_t flags) {
     chSysLockFromIsr();
     //Uart.Printf("===T===");

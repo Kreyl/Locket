@@ -124,7 +124,7 @@ public:
 #if 1 // ============================== LedRGB =================================
 #define LED_RGB
 #define LED_RGB_TOP_VALUE   255 // Intencity 0...255
-#define LED_RGB_INVERTED    invInverted
+#define LED_RGB_INVERTED    invNotInverted
 
 class LedRGB_t : public BaseSequencer_t<LedRGBChunk_t> {
 private:

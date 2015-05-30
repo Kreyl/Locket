@@ -542,6 +542,7 @@ public:
 #endif
 
 #if 0 // ============================== I2C ====================================
+#define I2C_KL  TRUE
 #define I2C_DMATX_MODE  DMA_PRIORITY_LOW | \
                         STM32_DMA_CR_MSIZE_BYTE | \
                         STM32_DMA_CR_PSIZE_BYTE | \

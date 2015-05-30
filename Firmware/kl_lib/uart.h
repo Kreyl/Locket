@@ -9,9 +9,6 @@
 #define UART_H_
 
 #include <kl_lib.h>
-#include "stm32l1xx.h"
-#include "ch.h"
-#include "hal.h"
 #include "kl_sprintf.h"
 #include <cstring>
 #include "cmd.h"
@@ -26,11 +23,11 @@
 #define UART                USART1
 #define UART_GPIO           GPIOA
 #define UART_TX_PIN         9
-#define UART_AF             AF7 // for all uarts
+#define UART_AF             AF1 // for USART1 @ GPIOA
 #define UART_RCC_ENABLE()   rccEnableUSART1(FALSE)
 #define UART_RCC_DISABLE()  rccDisableUSART1(FALSE)
 
-#define UART_DMA_TX         STM32_DMA1_STREAM4
+#define UART_DMA_TX         STM32_DMA1_STREAM2
 #define UART_DMA_TX_MODE    DMA_PRIORITY_LOW | \
                             STM32_DMA_CR_MSIZE_BYTE | \
                             STM32_DMA_CR_PSIZE_BYTE | \
@@ -42,16 +39,24 @@
 #define UART_RXBUF_SZ       99 // unprocessed bytes
 #define UART_CMD_BUF_SZ     54 // payload bytes
 #define UART_RX_PIN         10
-#define UART_RX_REG         UART->DR
 
 #define UART_RX_POLLING_MS  99
-#define UART_DMA_RX         STM32_DMA1_STREAM5
+#define UART_DMA_RX         STM32_DMA1_STREAM3
 #define UART_DMA_RX_MODE    DMA_PRIORITY_MEDIUM | \
                             STM32_DMA_CR_MSIZE_BYTE | \
                             STM32_DMA_CR_PSIZE_BYTE | \
                             STM32_DMA_CR_MINC |       /* Memory pointer increase */ \
                             STM32_DMA_CR_DIR_P2M |    /* Direction is peripheral to memory */ \
                             STM32_DMA_CR_CIRC         /* Circular buffer enable */
+
+#if defined STM32L1XX_MD
+#define UART_TX_REG         UART->DR
+#define UART_RX_REG         UART->DR
+#elif defined STM32F030
+#define UART_TX_REG         UART->TDR
+#define UART_RX_REG         UART->RDR
+#endif
+
 // Cmd related
 typedef Cmd_t<99> UartCmd_t;
 #endif

@@ -29,7 +29,7 @@
 
 #define CRYSTAL_FREQ_HZ     8000000     // Freq of external crystal, change accordingly
 
-enum ClkSrc_t {csHSI=0b00, csHSE=0b01, csPLL=0b10, csHSI48=0b11};
+enum ClkSrc_t {csHSI=0b00, csHSE=0b01, csPLL=0b10};
 enum PllMul_t {
     pllMul2=0,
     pllMul3=1,
@@ -48,7 +48,7 @@ enum PllMul_t {
     pllMul16=14
 };
 
-enum PllSrc_t {plsHSIdiv2=0b00, plsHSI=0b01, plsHSE=0b10, plsHSI48=0b11};
+enum PllSrc_t {plsHSIdiv2=0b00, plsHSI=0b01, plsHSE=0b10};
 
 enum AHBDiv_t {
     ahbDiv1=0b0000,
