@@ -56,7 +56,7 @@ public:
     void OnUartCmd(Uart_t *PUart);
     // Inner use
     void ITask();
-    App_t(): PThread(nullptr), ID(ID_DEFAULT), Mode(mRxVibro) {}
+    App_t(): PThread(nullptr), ID(ID_DEFAULT), Mode(mError) {}
 };
 
 extern App_t App;

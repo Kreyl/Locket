@@ -287,9 +287,9 @@ const BeepChunk_t bsqBeepBeep[] = {
 #endif
 
 #if 1 // ============================== Vibro ==================================
-#define VIBRO_VOLUME    22  // 1 to 22
+#define VIBRO_VOLUME    27  // 1 to 22
 
-#define VIBRO_SHORT_MS  63
+#define VIBRO_SHORT_MS  153
 const BaseChunk_t vsqBrr[] = {
         {csSetup, VIBRO_VOLUME},
         {csWait, VIBRO_SHORT_MS},

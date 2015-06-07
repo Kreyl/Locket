@@ -22,6 +22,7 @@
 #endif
 
 rLevel1_t Radio;
+extern LedRGB_t Led;
 
 #if 1 // ================================ Task =================================
 static WORKING_AREA(warLvl1Thread, 256);
@@ -31,13 +32,35 @@ static void rLvl1Thread(void *arg) {
     Radio.ITask();
 }
 
-#define TX
-#define LED_RX
-
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
-    while(true) {chThdSleepMilliseconds(450); }
-    /*
+    while(true) {
+        // Demo
+//        if(App.Mode == 0b0001) { // RX
+//            int8_t Rssi;
+//            Color_t Clr;
+//            uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+//            if(RxRslt == OK) {
+//                Uart.Printf("\rRssi=%d", Rssi);
+//                Clr = clWhite;
+//                if     (Rssi < -100) Clr = clRed;
+//                else if(Rssi < -90) Clr = clYellow;
+//                else if(Rssi < -80) Clr = clGreen;
+//                else if(Rssi < -70) Clr = clCyan;
+//                else if(Rssi < -60) Clr = clBlue;
+//                else if(Rssi < -50) Clr = clMagenta;
+//            }
+//            else Clr = clBlack;
+////            Led.SetColor(Clr);
+//            chThdSleepMilliseconds(99);
+//        }
+//        else {  // TX
+            DBG1_SET();
+            CC.TransmitSync(&Pkt);
+            DBG1_CLR();
+            chThdSleepMilliseconds(99);
+//        }
+/*
         if(App.Mode == mError) chThdSleepMilliseconds(450);
         // ==== RX ====
         else if(App.Mode == mRxLight or App.Mode == mRxVibro or App.Mode == mRxVibroLight) {
@@ -74,8 +97,8 @@ void rLevel1_t::ITask() {
             DBG1_CLR();
             chThdSleepMilliseconds(TX_PERIOD_MS);
         } // if tx
+        */
     } // while true
-    */
 }
 #endif // task
 
@@ -88,6 +111,7 @@ uint8_t rLevel1_t::Init() {
 #endif
         CC.SetTxPower(CC_Pwr0dBm);
         CC.SetPktSize(RPKT_LEN);
+        CC.SetChannel(0);
         // Thread
         chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
 //        Uart.Printf("\rCC init OK");

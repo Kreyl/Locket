@@ -243,7 +243,7 @@ void cc1101_t::IGdo0IrqHandler() {
 }
 
 extern "C" {
-CH_IRQ_HANDLER(GDO0_IRQ_HANLER) {
+CH_IRQ_HANDLER(GDO0_IRQ_HANDLER) {
     CH_IRQ_PROLOGUE();
     CC.IGdo0IrqHandler();
     CH_IRQ_EPILOGUE();

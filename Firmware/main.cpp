@@ -23,14 +23,14 @@ App_t App;
 #define DIPSWITCH_PIN4  15
 
 //Beeper_t Beeper;
-//Vibro_t Vibro(GPIOB, 8, TIM4, 3);
+Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 #if 1 // ============================ Timers ===================================
 void TmrSecondCallback(void *p) {
     chSysLockFromIsr();
     App.SignalEvtI(EVTMSK_EVERY_SECOND);
-    chVTSetI(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    chVTSetI(&App.TmrSecond, MS2ST(3000), TmrSecondCallback, nullptr);
     chSysUnlockFromIsr();
 }
 #endif
@@ -58,7 +58,8 @@ int main(void) {
     // Led
     Led.Init();
 
-//    Vibro.Init();
+    Vibro.Init();
+    Vibro.StartSequence(vsqBrr);
 
     if(Radio.Init() != OK) Led.StartSequence(lsqFailure);
     else Led.StartSequence(lsqStart);
@@ -82,18 +83,17 @@ void App_t::ITask() {
 
         // ==== Every second ====
         if(EvtMsk & EVTMSK_EVERY_SECOND) {
-            // Get mode
+//            // Get mode
 //            uint8_t b = GetDipSwitch();
 //            b &= 0b00000111;    // Consider only lower bits
 //            Mode_t NewMode = static_cast<Mode_t>(b);
 //            if(Mode != NewMode) {
-//                if(Mode == mError) Led.StartSequence(lsqFailure);
-//                else {
-//                    Led.StartSequence(lsqStart);
-//                    Mode = NewMode;
-//                }
-//                chThdSleepMilliseconds(540);
+                Led.StartSequence(lsqStart);
+
+//                Mode = NewMode;
+//                Uart.Printf("\rMode=%X", Mode);
 //            }
+//            if(Mode < mRxVibro or Mode > mTxMaxPwr) Led.StartSequence(lsqFailure);
         }
 
 #if 0 // ==== Radio ====
@@ -149,7 +149,7 @@ uint8_t App_t::GetDipSwitch() {
     Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN3));
     Rslt <<= 1;
     Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN4));
-    Rslt ^= 0xF;
+    Rslt ^= 0xF;    // Invert switches
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN1);
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN2);
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN3);

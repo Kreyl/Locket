@@ -17,7 +17,7 @@
 
 class Vibro_t : public BaseSequencer_t<BaseChunk_t> {
 private:
-    PinOutputPWM_t<VIBRO_TOP_VALUE, invInverted, omPushPull> IPin;
+    PinOutputPWM_t<VIBRO_TOP_VALUE, invNotInverted, omPushPull> IPin;
     void ISwitchOff() { IPin.Set(0); }
     SequencerLoopTask_t ISetup() {
         IPin.Set(IPCurrentChunk->Volume);
