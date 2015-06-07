@@ -36,7 +36,8 @@ static void rLvl1Thread(void *arg) {
 
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
-    while(true) {
+    while(true) {chThdSleepMilliseconds(450); }
+    /*
         if(App.Mode == mError) chThdSleepMilliseconds(450);
         // ==== RX ====
         else if(App.Mode == mRxLight or App.Mode == mRxVibro or App.Mode == mRxVibroLight) {
@@ -74,6 +75,7 @@ void rLevel1_t::ITask() {
             chThdSleepMilliseconds(TX_PERIOD_MS);
         } // if tx
     } // while true
+    */
 }
 #endif // task
 
@@ -81,19 +83,16 @@ void rLevel1_t::ITask() {
 uint8_t rLevel1_t::Init() {
     // Init radioIC
     if(CC.Init() == OK) {
-//        CC.SetTxPower(CC_Pwr0dBm);
-//        CC.SetPktSize(RPKT_LEN);
-        // Thread
-//        chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
 #ifdef DBG_PINS
         PinSetupOut(DBG_GPIO1, DBG_PIN1, omPushPull);
 #endif
+        CC.SetTxPower(CC_Pwr0dBm);
+        CC.SetPktSize(RPKT_LEN);
+        // Thread
+        chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
 //        Uart.Printf("\rCC init OK");
         return OK;
     }
-    else {
-        Uart.Printf("\rCC init error");
-        return FAILURE;
-    }
+    else return FAILURE;
 }
 #endif

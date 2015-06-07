@@ -56,7 +56,7 @@ struct EventListener {
                                                     by the thread to the Event
                                                     Source.                 */
   flagsmask_t           el_flags;       /**< @brief Flags added to the listener
-                                                    by the event source.*/
+                                                    by the event source.    */
 };
 
 /**
@@ -115,7 +115,7 @@ typedef void (*evhandler_t)(eventid_t);
  *                      identifier is used as index for the event callback
  *                      function.
  *                      The value must range between zero and the size, in bit,
- *                      of the @p eventid_t type minus one.
+ *                      of the @p eventmask_t type minus one.
  *
  * @api
  */
@@ -127,7 +127,7 @@ typedef void (*evhandler_t)(eventid_t);
  * @note    This function can be invoked before the kernel is initialized
  *          because it just prepares a @p EventSource structure.
  *
- * @param[in] esp       pointer to the @p EventSource structure
+ * @param[out] esp      pointer to the @p EventSource structure
  *
  * @init
  */

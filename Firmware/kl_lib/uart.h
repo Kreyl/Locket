@@ -23,11 +23,11 @@
 #define UART                USART1
 #define UART_GPIO           GPIOA
 #define UART_TX_PIN         9
-#define UART_AF             AF1 // for USART1 @ GPIOA
+
 #define UART_RCC_ENABLE()   rccEnableUSART1(FALSE)
 #define UART_RCC_DISABLE()  rccDisableUSART1(FALSE)
 
-#define UART_DMA_TX         STM32_DMA1_STREAM2
+
 #define UART_DMA_TX_MODE    DMA_PRIORITY_LOW | \
                             STM32_DMA_CR_MSIZE_BYTE | \
                             STM32_DMA_CR_PSIZE_BYTE | \
@@ -41,7 +41,6 @@
 #define UART_RX_PIN         10
 
 #define UART_RX_POLLING_MS  99
-#define UART_DMA_RX         STM32_DMA1_STREAM3
 #define UART_DMA_RX_MODE    DMA_PRIORITY_MEDIUM | \
                             STM32_DMA_CR_MSIZE_BYTE | \
                             STM32_DMA_CR_PSIZE_BYTE | \
@@ -50,11 +49,17 @@
                             STM32_DMA_CR_CIRC         /* Circular buffer enable */
 
 #if defined STM32L1XX_MD
+#define UART_AF             AF7 // for USART1 @ GPIOA
 #define UART_TX_REG         UART->DR
 #define UART_RX_REG         UART->DR
+#define UART_DMA_TX         STM32_DMA1_STREAM4
+#define UART_DMA_RX         STM32_DMA1_STREAM5
 #elif defined STM32F030
+#define UART_AF             AF1 // for USART1 @ GPIOA
 #define UART_TX_REG         UART->TDR
 #define UART_RX_REG         UART->RDR
+#define UART_DMA_TX         STM32_DMA1_STREAM2
+#define UART_DMA_RX         STM32_DMA1_STREAM3
 #endif
 
 // Cmd related

@@ -76,7 +76,7 @@
  *          different threads.
  *
  * @param[in] esp       pointer to the  @p EventSource structure
- * @param[in] elp       pointer to the @p EventListener structure
+ * @param[out] elp      pointer to the @p EventListener structure
  * @param[in] mask      the mask of event flags to be ORed to the thread when
  *                      the event source is broadcasted
  *
@@ -204,7 +204,7 @@ void chEvtBroadcastFlagsI(EventSource *esp, flagsmask_t flags) {
  * @return              The flags added to the listener by the associated
  *                      event source.
  *
- * @iclass
+ * @api
  */
 flagsmask_t chEvtGetAndClearFlags(EventListener *elp) {
   flagsmask_t flags;
@@ -358,7 +358,7 @@ eventmask_t chEvtWaitOne(eventmask_t mask) {
     chSchGoSleepS(THD_STATE_WTOREVT);
     m = ctp->p_epending & mask;
   }
-  m &= -m;
+  m ^= m & (m - 1);
   ctp->p_epending &= ~m;
 
   chSysUnlock();
@@ -461,7 +461,7 @@ eventmask_t chEvtWaitOneTimeout(eventmask_t mask, systime_t time) {
     }
     m = ctp->p_epending & mask;
   }
-  m &= -m;
+  m ^= m & (m - 1);
   ctp->p_epending &= ~m;
 
   chSysUnlock();

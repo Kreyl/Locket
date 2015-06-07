@@ -26,12 +26,12 @@
 */
 
 /**
- * @file    GCC/ARMCMx/STM32F0xx/vectors.c
- * @brief   Interrupt vectors for the STM32F0xx family.
+ * @file    GCC/ARMCMx/STM32L1xx/vectors.c
+ * @brief   Interrupt vectors for the STM32 family.
  *
- * @defgroup ARMCMx_STM32F0xx_VECTORS STM32F0xx Interrupt Vectors
+ * @defgroup ARMCMx_STM32L1xx_VECTORS STM32L1xx Interrupt Vectors
  * @ingroup ARMCMx_SPECIFIC
- * @details Interrupt vectors for the STM32F0xx family.
+ * @details Interrupt vectors for the STM32L1xx family.
  * @{
  */
 
@@ -62,7 +62,7 @@ typedef struct {
   irq_vector_t  vector34;
   irq_vector_t  pendsv_vector;
   irq_vector_t  systick_vector;
-  irq_vector_t  vectors[32];
+  irq_vector_t  vectors[45];
 } vectors_t;
 
 #if !defined(__DOXYGEN__)
@@ -114,10 +114,23 @@ extern void VectorB0(void);
 extern void VectorB4(void);
 extern void VectorB8(void);
 extern void VectorBC(void);
-#endif
+extern void VectorC0(void);
+extern void VectorC4(void);
+extern void VectorC8(void);
+extern void VectorCC(void);
+extern void VectorD0(void);
+extern void VectorD4(void);
+extern void VectorD8(void);
+extern void VectorDC(void);
+extern void VectorE0(void);
+extern void VectorE4(void);
+extern void VectorE8(void);
+extern void VectorEC(void);
+extern void VectorF0(void);
+#endif /* !defined(__DOXYGEN__) */
 
 /**
- * @brief   STM32 vectors table.
+ * @brief   STM32L1xx vectors table.
  */
 #if !defined(__DOXYGEN__)
 __attribute__ ((section("vectors")))
@@ -135,7 +148,11 @@ vectors_t _vectors = {
     Vector80,           Vector84,           Vector88,           Vector8C,
     Vector90,           Vector94,           Vector98,           Vector9C,
     VectorA0,           VectorA4,           VectorA8,           VectorAC,
-    VectorB0,           VectorB4,           VectorB8,           VectorBC
+    VectorB0,           VectorB4,           VectorB8,           VectorBC,
+    VectorC0,           VectorC4,           VectorC8,           VectorCC,
+    VectorD0,           VectorD4,           VectorD8,           VectorDC,
+    VectorE0,           VectorE4,           VectorE8,           VectorEC,
+    VectorF0
   }
 };
 
@@ -201,5 +218,18 @@ void VectorB0(void) __attribute__((weak, alias("_unhandled_exception")));
 void VectorB4(void) __attribute__((weak, alias("_unhandled_exception")));
 void VectorB8(void) __attribute__((weak, alias("_unhandled_exception")));
 void VectorBC(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorC0(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorC4(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorC8(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorCC(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorD0(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorD4(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorD8(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorDC(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorE0(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorE4(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorE8(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorEC(void) __attribute__((weak, alias("_unhandled_exception")));
+void VectorF0(void) __attribute__((weak, alias("_unhandled_exception")));
 
 /** @} */

@@ -12,12 +12,11 @@
 #include "hal.h"
 #include "core_cmInstr.h"
 #include <cstdlib>
+#include "clocking.h"
 
 #if defined STM32L1XX_MD
-#include "clocking_L1xx.h"
 #include "stm32l1xx.h"
 #elif defined STM32F030
-#include "clocking_f030.h"
 #include "stm32f0xx.h"
 #endif
 

@@ -15,10 +15,10 @@
 */
 
 /**
- * @file    STM32F0xx/stm32_isr.h
+ * @file    STM32L1xx/stm32_isr.h
  * @brief   ISR remapper driver header.
  *
- * @addtogroup STM32F0xx_ISR
+ * @addtogroup STM32L1xx_ISR
  * @{
  */
 
@@ -33,37 +33,38 @@
  * @name    ISR names and numbers remapping
  * @{
  */
-
-/*
- * I2C units.
- */
-#define STM32_I2C1_GLOBAL_HANDLER   Vector9C
-#define STM32_I2C1_GLOBAL_NUMBER    23
-
-#define STM32_I2C2_GLOBAL_HANDLER   VectorA0
-#define STM32_I2C2_GLOBAL_NUMBER    24
-
 /*
  * TIM units.
  */
-#define STM32_TIM1_UP_HANDLER       Vector74
-#define STM32_TIM1_CC_HANDLER       Vector78
-#define STM32_TIM2_HANDLER          Vector7C
-#define STM32_TIM3_HANDLER          Vector80
+#define STM32_TIM2_HANDLER          TIM2_IRQHandler
+#define STM32_TIM3_HANDLER          TIM3_IRQHandler
+#define STM32_TIM4_HANDLER          TIM4_IRQHandler
+#define STM32_TIM9_HANDLER          TIM9_IRQHandler
 
-#define STM32_TIM1_UP_NUMBER        13
-#define STM32_TIM1_CC_NUMBER        14
-#define STM32_TIM2_NUMBER           15
-#define STM32_TIM3_NUMBER           16
+#define STM32_TIM2_NUMBER           TIM2_IRQn
+#define STM32_TIM3_NUMBER           TIM3_IRQn
+#define STM32_TIM4_NUMBER           TIM4_IRQn
+#define STM32_TIM9_NUMBER           TIM9_IRQn
 
 /*
  * USART units.
  */
-#define STM32_USART1_HANDLER        VectorAC
-#define STM32_USART2_HANDLER        VectorB0
+#define STM32_USART1_HANDLER        USART1_IRQHandler
+#define STM32_USART2_HANDLER        USART2_IRQHandler
+#define STM32_USART3_HANDLER        USART3_IRQHandler
 
-#define STM32_USART1_NUMBER         27
-#define STM32_USART2_NUMBER         28
+#define STM32_USART1_NUMBER         USART1_IRQn
+#define STM32_USART2_NUMBER         USART2_IRQn
+#define STM32_USART3_NUMBER         USART3_IRQn
+
+/*
+ * USB units.
+ */
+#define STM32_USB1_HP_HANDLER       Vector8C
+#define STM32_USB1_LP_HANDLER       Vector90
+
+#define STM32_USB1_HP_NUMBER        USB_HP_IRQn
+#define STM32_USB1_LP_NUMBER        USB_LP_IRQn
 /** @} */
 
 /*===========================================================================*/

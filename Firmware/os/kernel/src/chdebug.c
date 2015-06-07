@@ -193,7 +193,7 @@ void dbg_check_leave_isr(void) {
 void chDbgCheckClassI(void) {
 
   if ((dbg_isr_cnt < 0) || (dbg_lock_cnt <= 0))
-    chDbgPanic("SV#10: misplaced I-class function"); // @KL added description
+    chDbgPanic("SV#10");
 }
 
 /**
@@ -255,7 +255,9 @@ void dbg_trace(Thread *otp) {
 /* Panic related code and variables.                                         */
 /*===========================================================================*/
 
-#if CH_DBG_ENABLED || defined(__DOXYGEN__)
+// @KL
+//#if CH_DBG_ENABLED || defined(__DOXYGEN__)
+#if 0
 /**
  * @brief   Pointer to the panic message.
  * @details This pointer is meant to be accessed through the debugger, it is
@@ -268,12 +270,11 @@ const char *dbg_panic_msg;
  *
  * @param[in] msg       the pointer to the panic message string
  */
-// @KL: replaced at kl_lib
-//void chDbgPanic(const char *msg) {
-//
-//  dbg_panic_msg = msg;
-//  chSysHalt();
-//}
+void chDbgPanic(const char *msg) {
+
+  dbg_panic_msg = msg;
+  chSysHalt();
+}
 #endif /* CH_DBG_ENABLED */
 
 /** @} */
