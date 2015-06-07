@@ -36,30 +36,30 @@ __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
     while(true) {
         // Demo
-//        if(App.Mode == 0b0001) { // RX
-//            int8_t Rssi;
-//            Color_t Clr;
-//            uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-//            if(RxRslt == OK) {
-//                Uart.Printf("\rRssi=%d", Rssi);
-//                Clr = clWhite;
-//                if     (Rssi < -100) Clr = clRed;
-//                else if(Rssi < -90) Clr = clYellow;
-//                else if(Rssi < -80) Clr = clGreen;
-//                else if(Rssi < -70) Clr = clCyan;
-//                else if(Rssi < -60) Clr = clBlue;
-//                else if(Rssi < -50) Clr = clMagenta;
-//            }
-//            else Clr = clBlack;
-////            Led.SetColor(Clr);
-//            chThdSleepMilliseconds(99);
-//        }
-//        else {  // TX
+        if(App.Mode == 0b0001) { // RX
+            int8_t Rssi;
+            Color_t Clr;
+            uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+            if(RxRslt == OK) {
+                Uart.Printf("\rRssi=%d", Rssi);
+                Clr = clWhite;
+                if     (Rssi < -100) Clr = clRed;
+                else if(Rssi < -90) Clr = clYellow;
+                else if(Rssi < -80) Clr = clGreen;
+                else if(Rssi < -70) Clr = clCyan;
+                else if(Rssi < -60) Clr = clBlue;
+                else if(Rssi < -50) Clr = clMagenta;
+            }
+            else Clr = clBlack;
+            Led.SetColor(Clr);
+            chThdSleepMilliseconds(99);
+        }
+        else {  // TX
             DBG1_SET();
             CC.TransmitSync(&Pkt);
             DBG1_CLR();
-            chThdSleepMilliseconds(99);
-//        }
+//            chThdSleepMilliseconds(99);
+        }
 /*
         if(App.Mode == mError) chThdSleepMilliseconds(450);
         // ==== RX ====

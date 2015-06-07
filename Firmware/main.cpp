@@ -83,16 +83,15 @@ void App_t::ITask() {
 
         // ==== Every second ====
         if(EvtMsk & EVTMSK_EVERY_SECOND) {
-//            // Get mode
-//            uint8_t b = GetDipSwitch();
-//            b &= 0b00000111;    // Consider only lower bits
-//            Mode_t NewMode = static_cast<Mode_t>(b);
-//            if(Mode != NewMode) {
+            // Get mode
+            uint8_t b = GetDipSwitch();
+            b &= 0b00000111;    // Consider only lower bits
+            Mode_t NewMode = static_cast<Mode_t>(b);
+            if(Mode != NewMode) {
                 Led.StartSequence(lsqStart);
-
-//                Mode = NewMode;
-//                Uart.Printf("\rMode=%X", Mode);
-//            }
+                Mode = NewMode;
+                Uart.Printf("\rMode=%X", Mode);
+            }
 //            if(Mode < mRxVibro or Mode > mTxMaxPwr) Led.StartSequence(lsqFailure);
         }
 
