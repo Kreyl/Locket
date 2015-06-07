@@ -81,10 +81,10 @@ void rLevel1_t::ITask() {
 uint8_t rLevel1_t::Init() {
     // Init radioIC
     if(CC.Init() == OK) {
-        CC.SetTxPower(CC_Pwr0dBm);
-        CC.SetPktSize(RPKT_LEN);
+//        CC.SetTxPower(CC_Pwr0dBm);
+//        CC.SetPktSize(RPKT_LEN);
         // Thread
-        chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
+//        chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
 #ifdef DBG_PINS
         PinSetupOut(DBG_GPIO1, DBG_PIN1, omPushPull);
 #endif

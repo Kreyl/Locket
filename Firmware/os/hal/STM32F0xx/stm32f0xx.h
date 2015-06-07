@@ -598,7 +598,10 @@ typedef struct
   uint16_t  RESERVED1;    /*!< Reserved, 0x06                                                            */
   __IO uint16_t SR;       /*!< SPI Status register,                                 Address offset: 0x08 */
   uint16_t  RESERVED2;    /*!< Reserved, 0x0A                                                            */
+  // @KL
   __IO uint16_t DR;       /*!< SPI data register,                                   Address offset: 0x0C */
+//  __IO uint8_t DRH;
+//  __IO uint8_t DRL;
   uint16_t  RESERVED3;    /*!< Reserved, 0x0E                                                            */
   __IO uint16_t CRCPR;    /*!< SPI CRC polynomial register (not used in I2S mode),  Address offset: 0x10 */
   uint16_t  RESERVED4;    /*!< Reserved, 0x12                                                            */

@@ -50,7 +50,7 @@ int main(void) {
     chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
 
     Uart.Init(115200);
-    Uart.Printf("\r%S  ID=%d", VERSION_STRING, App.ID);
+    Uart.Printf("\r%S  ID=%d   AHB freq=%u", VERSION_STRING, App.ID, Clk.AHBFreqHz);
 
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
@@ -83,17 +83,17 @@ void App_t::ITask() {
         // ==== Every second ====
         if(EvtMsk & EVTMSK_EVERY_SECOND) {
             // Get mode
-            uint8_t b = GetDipSwitch();
-            b &= 0b00000111;    // Consider only lower bits
-            Mode_t NewMode = static_cast<Mode_t>(b);
-            if(Mode != NewMode) {
-                if(Mode == mError) Led.StartSequence(lsqFailure);
-                else {
-                    Led.StartSequence(lsqStart);
-                    Mode = NewMode;
-                }
-                chThdSleepMilliseconds(540);
-            }
+//            uint8_t b = GetDipSwitch();
+//            b &= 0b00000111;    // Consider only lower bits
+//            Mode_t NewMode = static_cast<Mode_t>(b);
+//            if(Mode != NewMode) {
+//                if(Mode == mError) Led.StartSequence(lsqFailure);
+//                else {
+//                    Led.StartSequence(lsqStart);
+//                    Mode = NewMode;
+//                }
+//                chThdSleepMilliseconds(540);
+//            }
         }
 
 #if 0 // ==== Radio ====

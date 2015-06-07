@@ -526,7 +526,11 @@ public:
         if(CPOL == cpolIdleHigh) PSpi->CR1 |= SPI_CR1_CPOL;     // CPOL
         if(CPHA == cphaSecondEdge) PSpi->CR1 |= SPI_CR1_CPHA;   // CPHA
         PSpi->CR1 |= ((uint16_t)Baudrate) << 3;                 // Baudrate
+#if defined STM32L1XX_MD
         PSpi->CR2 = 0;
+#elif defined STM32F030
+        PSpi->CR2 = (uint16_t)0b1111 << 8;  // 16 bit data size only
+#endif
         PSpi->I2SCFGR &= ~((uint16_t)SPI_I2SCFGR_I2SMOD);       // Disable I2S
     }
     void Enable () { PSpi->CR1 |=  SPI_CR1_SPE; }
@@ -536,6 +540,11 @@ public:
     uint8_t ReadWriteByte(uint8_t AByte) {
         PSpi->DR = AByte;
         while(!(PSpi->SR & SPI_SR_RXNE));  // Wait for SPI transmission to complete
+        return PSpi->DR;
+    }
+    uint16_t ReadWriteWord(uint16_t Word) {
+        PSpi->DR = Word;
+        while(!(PSpi->SR & SPI_SR_RXNE));
         return PSpi->DR;
     }
 };

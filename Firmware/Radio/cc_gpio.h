@@ -18,18 +18,23 @@
 #define CC_CS       4
 
 #if CC_GDO0 == 0
-#define GDO0_IRQ_HANLER     EXTI0_IRQHandler
+#define GDO0_IRQ_HANDLER     EXTI0_IRQHandler
 #elif CC_GDO0 == 1
-#define GDO0_IRQ_HANLER     EXTI1_IRQHandler
+#define GDO0_IRQ_HANDLER     EXTI1_IRQHandler
 #elif CC_GDO0 == 2
-#define GDO0_IRQ_HANLER     EXTI2_IRQHandler
+#define GDO0_IRQ_HANDLER     EXTI2_IRQHandler
 #elif CC_GDO0 == 3
-#define GDO0_IRQ_HANLER     EXTI3_IRQHandler
+#define GDO0_IRQ_HANDLER     EXTI3_IRQHandler
 #elif CC_GDO0 == 4
-#define GDO0_IRQ_HANLER     EXTI4_IRQHandler
+#define GDO0_IRQ_HANDLER     EXTI4_IRQHandler
 #endif
 
 // SPI
 #define CC_SPI      SPI1
+#if defined STM32L1XX_MD
+#define CC_SPI_AF   AF5
+#elif defined STM32F030
+#define CC_SPI_AF   AF0
+#endif
 
 #endif /* CC_GPIO_H_ */
