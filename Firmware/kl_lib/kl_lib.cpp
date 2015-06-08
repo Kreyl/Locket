@@ -102,7 +102,6 @@ void Timer_t::SetUpdateFrequency(uint32_t FreqHz) {
 
 #endif
 
-
 #if CH_DBG_ENABLED // ========================= DEBUG ==========================
 void chDbgPanic(const char *msg1) {
     Uart.PrintfNow("\r%S @ %S\r", msg1, chThdSelf()->p_name);
@@ -354,7 +353,6 @@ uint8_t i2c_t::WaitBTF() {
 }
 #endif
 
-#include <uart.h>
 #ifdef FLASH_LIB_KL // ==================== FLASH & EEPROM =====================
 // Here not-fast write is used. I.e. interface will erase the word if it is not the same.
 uint8_t Eeprom_t::Write32(uint32_t Addr, uint32_t W) {

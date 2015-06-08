@@ -191,18 +191,13 @@ const LedChunk_t lsqBlinkGreenX2[] = {
 
 #if 1 // ============================ LED RGB ==================================
 // ==== Door ====
-#define clDoorOpen      ((Color_t){0,   255, 0})
-#define clDoorClosed    ((Color_t){18,  0,   0})
-#define clWrongKey      ((Color_t){255, 0,   0})
-#define clSecretKey     ((Color_t){0,   0,   255})
+#define clIndication    ((Color_t){0, 255, 0})
 
 const LedRGBChunk_t lsqStart[] = {
-//        {csSetup, 360, clRed},
-//        {csSetup, 360, clBlack},
-        {csSetup, 360, clGreen},
-        {csSetup, 360, clBlack},
-//        {csSetup, 360, clBlue},
-//        {csSetup, 360, clBlack},
+        {csSetup, 90, clRed},
+        {csSetup, 90, clGreen},
+        {csSetup, 90, clBlue},
+        {csSetup, 90, clBlack},
         {csEnd}
 };
 
@@ -219,6 +214,15 @@ const LedRGBChunk_t lsqFailure[] = {
         {csWait, 99},
         {csSetup, 0, clBlack},
         {csEnd},
+};
+
+const LedRGBChunk_t lsqIndicationOn[] = {
+        {csSetup, 720, clIndication},
+        {csEnd}
+};
+const LedRGBChunk_t lsqIndicationOff[] = {
+        {csSetup, 720, clBlack},
+        {csEnd}
 };
 
 /*
@@ -313,6 +317,15 @@ const BaseChunk_t vsqError[] = {
         {csSetup, 0},
         {csEnd}
 };
+
+const BaseChunk_t vsqIndicationOn[] = {
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 1800},
+        {csGoto, 0}
+};
+
 #endif
 
 #endif /* SEQUENCES_H_ */

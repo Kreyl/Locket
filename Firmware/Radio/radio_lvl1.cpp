@@ -22,7 +22,6 @@
 #endif
 
 rLevel1_t Radio;
-extern LedRGB_t Led;
 
 #if 1 // ================================ Task =================================
 static WORKING_AREA(warLvl1Thread, 256);
@@ -35,7 +34,7 @@ static void rLvl1Thread(void *arg) {
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
     while(true) {
-        // Demo
+#if 0        // Demo
         if(App.Mode == 0b0001) { // RX
             int8_t Rssi;
             Color_t Clr;
@@ -60,10 +59,9 @@ void rLevel1_t::ITask() {
             DBG1_CLR();
 //            chThdSleepMilliseconds(99);
         }
-/*
-        if(App.Mode == mError) chThdSleepMilliseconds(450);
+#else
         // ==== RX ====
-        else if(App.Mode == mRxLight or App.Mode == mRxVibro or App.Mode == mRxVibroLight) {
+        if(App.Mode >= mRxVibro and App.Mode <= mRxVibroLight) {
             int8_t Rssi;
             // Iterate channels
             for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
@@ -71,7 +69,7 @@ void rLevel1_t::ITask() {
                 CC.SetChannel(ID2RCHNL(i));
                 uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
                 if(RxRslt == OK) {
-                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
+//                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
                     if(Pkt.TestWord == TEST_WORD) App.SignalEvt(EVTMSK_RADIO_RX);
                     break;  // No need to listen anymore
                 }
@@ -81,14 +79,14 @@ void rLevel1_t::ITask() {
         } // if rx
 
         // ==== TX ====
-        else {
+        else if(App.Mode >= mTxLowPwr and App.Mode <= mTxMaxPwr) {
             CC.SetChannel(ID2RCHNL(App.ID));
             Pkt.TestWord = TEST_WORD;
             switch(App.Mode) {
                 case mTxLowPwr: CC.SetTxPower(CC_PwrMinus10dBm); break;
                 case mTxMidPwr: CC.SetTxPower(CC_Pwr0dBm);       break;
                 case mTxHiPwr:  CC.SetTxPower(CC_PwrPlus5dBm);   break;
-                case mTxMaxPwr: CC.SetTxPower(CC_PwrPlus12dBm);  break;
+                case mTxMaxPwr: CC.SetTxPower(CC_PwrPlus10dBm);  break;
                 default: break;
             }
             // Transmit
@@ -97,7 +95,10 @@ void rLevel1_t::ITask() {
             DBG1_CLR();
             chThdSleepMilliseconds(TX_PERIOD_MS);
         } // if tx
-        */
+
+        // Errorneous mode
+        else chThdSleepMilliseconds(450);
+#endif
     } // while true
 }
 #endif // task
@@ -114,7 +115,6 @@ uint8_t rLevel1_t::Init() {
         CC.SetChannel(0);
         // Thread
         chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
-//        Uart.Printf("\rCC init OK");
         return OK;
     }
     else return FAILURE;

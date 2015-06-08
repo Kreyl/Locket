@@ -147,6 +147,14 @@ void __attribute__ ((weak)) _init(void)  {}
 #if 1 // ====================== Virtual Timer ==================================
 // Universal VirtualTimer callback
 extern void TmrGeneralCallback(void *p);
+/*
+// Universal VirtualTimer callback
+void TmrGeneralCallback(void *p) {
+    chSysLockFromIsr();
+    App.SignalEvtI((eventmask_t)p);
+    chSysUnlockFromIsr();
+}
+ */
 
 static inline void chVTRestart(VirtualTimer *vtp, systime_t time, vtfunc_t vtfunc, void *par) {
     chSysLock()
@@ -606,7 +614,7 @@ public:
 };
 #endif
 
-#if 0 // ====================== FLASH & EEPROM =================================
+#if 1 // ====================== FLASH & EEPROM =================================
 #define FLASH_LIB_KL
 #define EEPROM_BASE_ADDR    ((uint32_t)0x08080000)
 // ==== Flash keys ====

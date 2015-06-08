@@ -26,25 +26,32 @@
 
 #if 1 // ==== Eeprom ====
 // Addresses
-#define EE_DEVICE_ID_ADDR       0
+#define EE_ADDR_DEVICE_ID       0
 #endif
 
 enum Mode_t {
-    mError = 0b000,
-    mRxVibro = 0b001, mRxLight = 0b010, mRxVibroLight = 0b011,
-    mTxLowPwr = 0b100, mTxMidPwr = 0b101, mTxHiPwr = 0b110, mTxMaxPwr = 0b111
+    mError = 0b0000,
+    mRxVibro  = 0b0001, mRxLight  = 0b0010, mRxVibroLight = 0b0011,
+    mTxLowPwr = 0b0100, mTxMidPwr = 0b0101, mTxHiPwr = 0b0110, mTxMaxPwr = 0b0111,
+    mRxTxVibroLow = 0b1000, mRxTxVibroMid = 0b1001, mRxTxVibroHi = 0b1010, mRxTxVibroMax = 0b1011,
+    mRxTxLightLow = 0b1100, mRxTxLightMid = 0b1101, mRxTxLightHi = 0b1110, mRxTxLightMax = 0b1111
 };
+
+enum IndicationState_t {isOn, isOff};
 
 class App_t {
 private:
     Thread *PThread;
+    Eeprom_t EE;
     VirtualTimer ITmrRadioTimeout;
+    IndicationState_t Indication;
     uint8_t ISetID(int32_t NewID);
 public:
     int32_t ID;
     uint8_t GetDipSwitch();
     Mode_t Mode;
     VirtualTimer TmrSecond;
+    void ReadIDfromEE();
     // Eternal methods
     void InitThread() { PThread = chThdSelf(); }
     void SignalEvt(eventmask_t Evt) {
@@ -56,7 +63,7 @@ public:
     void OnUartCmd(Uart_t *PUart);
     // Inner use
     void ITask();
-    App_t(): PThread(nullptr), ID(ID_DEFAULT), Mode(mError) {}
+    App_t(): PThread(nullptr), Indication(isOff), ID(ID_DEFAULT), Mode(mError) {}
 };
 
 extern App_t App;

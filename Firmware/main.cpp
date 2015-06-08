@@ -30,7 +30,13 @@ LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 void TmrSecondCallback(void *p) {
     chSysLockFromIsr();
     App.SignalEvtI(EVTMSK_EVERY_SECOND);
-    chVTSetI(&App.TmrSecond, MS2ST(3000), TmrSecondCallback, nullptr);
+    chVTSetI(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    chSysUnlockFromIsr();
+}
+// Universal VirtualTimer callback
+void TmrGeneralCallback(void *p) {
+    chSysLockFromIsr();
+    App.SignalEvtI((eventmask_t)p);
     chSysUnlockFromIsr();
 }
 #endif
@@ -46,7 +52,7 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     App.InitThread();
-//    App.ID = App.EE.Read32(EE_DEVICE_ID_ADDR);  // Read device ID
+    App.ReadIDfromEE();
     chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
 
     Uart.Init(115200);
@@ -55,7 +61,6 @@ int main(void) {
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
 
-    // Led
     Led.Init();
 
     Vibro.Init();
@@ -63,17 +68,15 @@ int main(void) {
 
     if(Radio.Init() != OK) Led.StartSequence(lsqFailure);
     else Led.StartSequence(lsqStart);
+    chThdSleepMilliseconds(2700);
 
     // Main cycle
     App.ITask();
 }
 
-
-
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
-//        chThdSleepMilliseconds(999);
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
         // ==== Uart cmd ====
         if(EvtMsk & EVTMSK_UART_NEW_CMD) {
@@ -85,27 +88,35 @@ void App_t::ITask() {
         if(EvtMsk & EVTMSK_EVERY_SECOND) {
             // Get mode
             uint8_t b = GetDipSwitch();
-            b &= 0b00000111;    // Consider only lower bits
             Mode_t NewMode = static_cast<Mode_t>(b);
             if(Mode != NewMode) {
                 Led.StartSequence(lsqStart);
                 Mode = NewMode;
+                Led.Stop();
+                Vibro.Stop();
+                Indication = isOff;
                 Uart.Printf("\rMode=%X", Mode);
             }
-//            if(Mode < mRxVibro or Mode > mTxMaxPwr) Led.StartSequence(lsqFailure);
+            if(Mode == mError) Led.StartSequence(lsqFailure);
         }
 
-#if 0 // ==== Radio ====
+#if 1 // ==== Radio ====
         if(EvtMsk & EVTMSK_RADIO_RX) {
-            Uart.Printf("\rRadioRx");
+//            Uart.Printf("\rRadioRx");
             chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
-            if(Mode == mRxLight or Mode == mRxVibroLight)
+            if(Indication == isOff) {
+                Indication = isOn;
+                if(Mode == mRxLight or Mode == mRxVibroLight) Led.StartSequence(lsqIndicationOn);
+                if(Mode == mRxVibro or Mode == mRxVibroLight) Vibro.StartSequence(vsqIndicationOn);
+            }
         }
         if(EvtMsk & EVTMSK_RADIO_ON_TIMEOUT) {
 //            Uart.Printf("\rRadioTimeout");
-            RadioIsOn = false;
-            Interface.ShowRadio();
-            IProcessLedLogic();
+            if(Indication == isOn) {
+                Indication = isOff;
+                Led.StartSequence(lsqIndicationOff);
+                Vibro.Stop();
+            }
         }
 #endif
 
@@ -156,18 +167,23 @@ uint8_t App_t::GetDipSwitch() {
     return Rslt;
 }
 
+void App_t::ReadIDfromEE() {
+    ID = EE.Read32(EE_ADDR_DEVICE_ID);  // Read device ID
+    if(ID < ID_MIN or ID > ID_MAX) ID = ID_DEFAULT;
+}
+
 uint8_t App_t::ISetID(int32_t NewID) {
-//    if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
-//    uint8_t rslt = EE.Write32(EE_DEVICE_ID_ADDR, NewID);
-//    if(rslt == OK) {
-//        ID = NewID;
-//        Uart.Printf("\rNew ID: %u", ID);
-//        return OK;
-//    }
-//    else {
-//        Uart.Printf("\rEE error: %u", rslt);
-//        return FAILURE;
-//    }
+    if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
+    uint8_t rslt = EE.Write32(EE_ADDR_DEVICE_ID, NewID);
+    if(rslt == OK) {
+        ID = NewID;
+        Uart.Printf("\rNew ID: %u", ID);
+        return OK;
+    }
+    else {
+        Uart.Printf("\rEE error: %u", rslt);
+        return FAILURE;
+    }
     return FAILURE;
 }
 
