@@ -137,6 +137,29 @@ public:
         }
         return Rslt;
     }
+
+    uint8_t Get(T *p) {
+        if(this->IFullSlotsCount == 0) return FAILURE;
+        *p = *this->PRead;
+        if(++this->PRead > (this->IBuf + Sz - 1)) this->PRead = this->IBuf;     // Circulate buffer
+        this->IFullSlotsCount--;
+        return OK;
+    }
+
+    uint8_t Put(T Value) {
+        *this->PWrite = Value;
+        if(++this->PWrite > (this->IBuf + Sz - 1)) this->PWrite = this->IBuf;   // Circulate buffer
+        if(this->IFullSlotsCount >= Sz) return OVERFLOW;
+        else {
+            this->IFullSlotsCount++;
+            return OK;
+        }
+    }
+
+    uint8_t PutIfNotOverflow(T *p) {
+        if(this->IFullSlotsCount >= Sz) return OVERFLOW;
+        else return Put(p);
+    }
 };
 
 // =============================== Chunk buf ===================================

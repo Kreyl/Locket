@@ -51,7 +51,7 @@ static inline void Lvl250ToLvl1000(uint16_t *PLvl) {
 
 #if 1 // =========================== Pkt_t =====================================
 struct rPkt_t {
-    uint32_t TestWord;
+    uint32_t DWord;
 } __attribute__ ((__packed__));
 #define RPKT_LEN    sizeof(rPkt_t)
 #endif
@@ -63,9 +63,13 @@ struct rPkt_t {
 
 #if 1 // ======================= Channels & cycles =============================
 #define RCHNL_MIN       5
-#define RCHNL_MAX
-
 #define ID2RCHNL(ID)    (RCHNL_MIN + ID)
+
+#define RCHNL_RXTX      4
+#define CYCLE_CNT       4
+#define SLOT_CNT        108
+
+#define ID_BUF_SZ       27
 
 #endif
 
@@ -73,6 +77,9 @@ struct rPkt_t {
 #define TX_PERIOD_MS    45
 #define RX_T_MS         63
 #define RX_SLEEP_T_MS   270
+
+#define SLOT_DURATION_MS        3
+#define MIN_SLEEP_DURATION_MS   18
 
 #endif
 

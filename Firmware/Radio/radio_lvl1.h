@@ -12,12 +12,17 @@
 #include "ch.h"
 #include "rlvl1_defins.h"
 #include "cc1101.h"
+#include "kl_buf.h"
 
 class rLevel1_t {
 private:
     rPkt_t Pkt;
+    void TryToReceive(uint32_t RxDuration);
+    void TryToSleep(uint32_t SleepDuration);
+    void SetTxPwr();
 public:
     uint8_t Init();
+    CircBufNumber_t<uint32_t, ID_BUF_SZ> IdBuf;
     // Inner use
     void ITask();
 };

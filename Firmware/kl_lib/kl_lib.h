@@ -14,6 +14,9 @@
 #include <cstdlib>
 #include "clocking.h"
 
+// Lib version
+#define KL_LIB_VERSION      20150610_0148
+
 #if defined STM32L1XX_MD
 #include "stm32l1xx.h"
 #elif defined STM32F030
@@ -47,6 +50,7 @@
 #define CMD_UNKNOWN     9
 #define EMPTY_STRING    10
 #define NOT_A_NUMBER    11
+#define OVERFLOW        12
 
 // Binary semaphores
 #define NOT_TAKEN       false

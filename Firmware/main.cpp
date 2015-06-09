@@ -27,6 +27,7 @@ Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 #if 1 // ============================ Timers ===================================
+// Once-a-second timer
 void TmrSecondCallback(void *p) {
     chSysLockFromIsr();
     App.SignalEvtI(EVTMSK_EVERY_SECOND);
@@ -53,6 +54,7 @@ int main(void) {
     // ==== Init Hard & Soft ====
     App.InitThread();
     App.ReadIDfromEE();
+    // Start once-a-second timer
     chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
 
     Uart.Init(115200);
@@ -186,54 +188,3 @@ uint8_t App_t::ISetID(int32_t NewID) {
     }
     return FAILURE;
 }
-
-#if 0 // ===================== Load/save settings ==============================
-void App_t::LoadSettings() {
-    if(EE_PTR->ID < ID_MIN or EE_PTR->ID > ID_MAX) Settings.ID = ID_DEFAULT;
-    else Settings.ID = EE_PTR->ID;
-
-    if(EE_PTR->DurationActive_s < DURATION_ACTIVE_MIN_S or
-       EE_PTR->DurationActive_s > DURATION_ACTIVE_MAX_S
-       ) {
-        Settings.DurationActive_s = DURATION_ACTIVE_DEFAULT;
-    }
-    else Settings.DurationActive_s = EE_PTR->DurationActive_s;
-
-    Settings.DeadtimeEnabled = EE_PTR->DeadtimeEnabled;
-
-    SettingsHasChanged = false;
-}
-
-void App_t::SaveSettings() {
-    chSysLock();
-    if(chVTIsArmedI(&ITmrSaving)) chVTResetI(&ITmrSaving);  // Reset timer
-    chVTSetEvtI(&ITmrSaving, S2ST(4), EVTMSK_SAVE);
-    chSysUnlock();
-}
-
-void App_t::ISaveSettingsReally() {
-    Flash_t::UnlockEE();
-    chSysLock();
-    uint8_t r = OK;
-    uint32_t *Src = (uint32_t*)&Settings;
-    uint32_t *Dst = (uint32_t*)EE_PTR;
-    for(uint32_t i=0; i<SETTINGS_SZ32; i++) {
-        r = Flash_t::WaitForLastOperation();
-        if(r != OK) break;
-        *Dst++ = *Src++;
-    }
-    Flash_t::LockEE();
-    chSysUnlock();
-    if(r == OK) {
-        Uart.Printf("\rSettings saved");
-        SettingsHasChanged = false;
-        Interface.ShowID();
-        Interface.ShowDurationActive();
-        Interface.ShowDeadtimeSettings();
-    }
-    else {
-        Uart.Printf("\rSettings saving failure");
-        Interface.Error("Save failure");
-    }
-}
-#endif
