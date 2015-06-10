@@ -74,23 +74,18 @@ void rLevel1_t::ITask() {
                 uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
                 if(RxRslt == OK) {
 //                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
-                    if(Pkt.DWord == TEST_WORD) App.SignalEvt(EVTMSK_RADIO_RX);
-                    break;  // No need to listen anymore
+                    IdBuf.Put(Pkt.DWord);
+                    break;
                 }
             } // for
-            CC.EnterPwrDown();
-            chThdSleepMilliseconds(RX_SLEEP_T_MS);
+            TryToSleep(RX_SLEEP_T_MS);
         } // if rx
 
         // ==== TX ====
         else if(App.Mode >= mTxLowPwr and App.Mode <= mTxMaxPwr) {
             CC.SetChannel(ID2RCHNL(App.ID));
-            Pkt.DWord = TEST_WORD;
-            SetTxPwr();
-            DBG1_SET();
-            CC.TransmitSync(&Pkt);
-            DBG1_CLR();
-            chThdSleepMilliseconds(TX_PERIOD_MS);
+            Transmit();
+            TryToSleep(TX_PERIOD_MS);
         } // if tx
 
         // ==== RxTx: see each other ====
@@ -104,22 +99,18 @@ void rLevel1_t::ITask() {
                 // If TX slot is not zero: receive at zero cycle or sleep otherwise
                 uint32_t Delay = TxSlot * SLOT_DURATION_MS;
                 if(Delay != 0) {
-                    if(CycleN == 0) TryToReceive(Delay);
+                    if(CycleN == 0) Receive(Delay);
                     else TryToSleep(Delay);
                 }
-                // Transmit
-                Pkt.DWord = App.ID;
-                SetTxPwr();
-                DBG1_SET();
-                CC.TransmitSync(&Pkt);
-                DBG1_CLR();
+                Transmit();
                 // If TX slot is not last, receive at zero cycle or sleep otherwise
                 Delay = (SLOT_CNT - TxSlot - 1) * SLOT_DURATION_MS;
                 if(Delay != 0) {
-                    if(CycleN == 0) TryToReceive(Delay);
+                    if(CycleN == 0) Receive(Delay);
                     else TryToSleep(Delay);
                 }
             } // for CycleN
+            Uart.Printf("\rRcvd: %u", IdBuf.GetFullCount());
         } // If RxTx
 
         // Errorneous mode
@@ -129,7 +120,7 @@ void rLevel1_t::ITask() {
 }
 #endif // task
 
-void rLevel1_t::TryToReceive(uint32_t RxDuration) {
+void rLevel1_t::Receive(uint32_t RxDuration) {
     int8_t Rssi;
     uint32_t TimeEnd = chTimeNow() + RxDuration;
 //    Uart.Printf("\r***End: %u", TimeEnd);
@@ -149,14 +140,12 @@ void rLevel1_t::TryToReceive(uint32_t RxDuration) {
 }
 
 void rLevel1_t::TryToSleep(uint32_t SleepDuration) {
-    if(SleepDuration < MIN_SLEEP_DURATION_MS) return;
-    else {
-        CC.EnterPwrDown();
-        chThdSleepMilliseconds(SleepDuration);
-    }
+    if(SleepDuration >= MIN_SLEEP_DURATION_MS) CC.EnterPwrDown();
+    chThdSleepMilliseconds(SleepDuration);
 }
 
-void rLevel1_t::SetTxPwr() {
+void rLevel1_t::Transmit() {
+    // Set TX power
     switch(App.Mode) {
         case mTxLowPwr:
         case mRxTxVibroLow:
@@ -180,6 +169,10 @@ void rLevel1_t::SetTxPwr() {
             break;
         default: break;
     }
+    Pkt.DWord = App.ID;
+    DBG1_SET();
+    CC.TransmitSync(&Pkt);
+    DBG1_CLR();
 }
 
 #if 1 // ============================

@@ -17,9 +17,9 @@
 class rLevel1_t {
 private:
     rPkt_t Pkt;
-    void TryToReceive(uint32_t RxDuration);
+    void Transmit();
+    void Receive(uint32_t RxDuration);
     void TryToSleep(uint32_t SleepDuration);
-    void SetTxPwr();
 public:
     uint8_t Init();
     CircBufNumber_t<uint32_t, ID_BUF_SZ> IdBuf;

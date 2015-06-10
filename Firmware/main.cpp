@@ -40,7 +40,16 @@ void TmrGeneralCallback(void *p) {
     App.SignalEvtI((eventmask_t)p);
     chSysUnlockFromIsr();
 }
+// Check radio buffer
+void TmrCheckCallback(void *p) {
+    chSysLockFromIsr();
+    App.SignalEvtI(EVTMSK_RX_BUF_CHECK);
+    chVTSetI(&App.TmrCheck, MS2ST(RXBUF_CHECK_PERIOD_MS), TmrCheckCallback, nullptr);
+    chSysUnlockFromIsr();
+}
 #endif
+
+
 
 int main(void) {
     // ==== Init Vcore & clock system ====
@@ -54,11 +63,13 @@ int main(void) {
     // ==== Init Hard & Soft ====
     App.InitThread();
     App.ReadIDfromEE();
-    // Start once-a-second timer
+
+    // Timers
     chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    chVTSet(&App.TmrCheck, MS2ST(RXBUF_CHECK_PERIOD_MS), TmrCheckCallback, nullptr);
 
     Uart.Init(115200);
-    Uart.Printf("\r%S  ID=%d   AHB freq=%u", VERSION_STRING, App.ID, Clk.AHBFreqHz);
+    Uart.Printf("\r%S_%S  ID=%d   AHB freq=%u", APP_NAME, APP_VERSION, App.ID, Clk.AHBFreqHz);
 
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
@@ -80,13 +91,14 @@ __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-        // ==== Uart cmd ====
+#if 1   // ==== Uart cmd ====
         if(EvtMsk & EVTMSK_UART_NEW_CMD) {
             OnUartCmd(&Uart);
             Uart.SignalCmdProcessed();
         }
+#endif
 
-        // ==== Every second ====
+#if 1   // ==== Every second ====
         if(EvtMsk & EVTMSK_EVERY_SECOND) {
             // Get mode
             uint8_t b = GetDipSwitch();
@@ -96,36 +108,63 @@ void App_t::ITask() {
                 Mode = NewMode;
                 Led.Stop();
                 Vibro.Stop();
-                Indication = isOff;
+                LightWasOn = false;
                 Uart.Printf("\rMode=%X", Mode);
             }
             if(Mode == mError) Led.StartSequence(lsqFailure);
         }
+#endif
 
-#if 1 // ==== Radio ====
-        if(EvtMsk & EVTMSK_RADIO_RX) {
-//            Uart.Printf("\rRadioRx");
-            chVTRestart(&ITmrRadioTimeout, S2ST(RADIO_NOPKT_TIMEOUT_S), EVTMSK_RADIO_ON_TIMEOUT);
-            if(Indication == isOff) {
-                Indication = isOn;
-                if(Mode == mRxLight or Mode == mRxVibroLight) Led.StartSequence(lsqIndicationOn);
-                if(Mode == mRxVibro or Mode == mRxVibroLight) Vibro.StartSequence(vsqIndicationOn);
+#if 1   // ==== Rx buf check ====
+        if(EvtMsk & EVTMSK_RX_BUF_CHECK) {
+            RxTable.Clear();
+            uint32_t RID=0;
+            while(Radio.IdBuf.Get(&RID) == OK) RxTable.AddID(RID);
+            Uart.Printf("\rCnt = %u", RxTable.Cnt);
+            // Select indication
+            const BaseChunk_t *VibroSequence = nullptr;
+            bool LightMustBeOn = false;
+            if(RxTable.Cnt != 0) {
+                switch(App.Mode) {
+                    case mRxLight:
+                    case mRxTxLightLow:
+                    case mRxTxLightMid:
+                    case mRxTxLightHi:
+                    case mRxTxLightMax:
+                        LightMustBeOn = true;
+                        break;
+                    case mRxVibro:
+                        VibroSequence = vsqSingle;
+                        break;
+                    case mRxVibroLight:
+                        LightMustBeOn = true;
+                        VibroSequence = vsqSingle;
+                        break;
+                    case mRxTxVibroLow:
+                    case mRxTxVibroMid:
+                    case mRxTxVibroHi:
+                    case mRxTxVibroMax:
+                        if     (RxTable.Cnt == 1) VibroSequence = vsqSingle;
+                        else if(RxTable.Cnt == 2) VibroSequence = vsqPair;
+                        else                      VibroSequence = vsqMany;  // RxTable.Cnt  > 2
+                        break;
+                    default: break;
+                } // switch
+            } // if != 0
+            // Vibro
+            if(VibroSequence == nullptr) Vibro.Stop();
+            else if(Vibro.GetCurrentSequence() != VibroSequence) Vibro.StartSequence(VibroSequence);
+            // Light
+            if(LightMustBeOn and !LightWasOn) {
+                LightWasOn = true;
+                Led.StartSequence(lsqIndicationOn);
             }
-        }
-        if(EvtMsk & EVTMSK_RADIO_ON_TIMEOUT) {
-//            Uart.Printf("\rRadioTimeout");
-            if(Indication == isOn) {
-                Indication = isOff;
+            else if(!LightMustBeOn and LightWasOn) {
+                LightWasOn = false;
                 Led.StartSequence(lsqIndicationOff);
-                Vibro.Stop();
             }
-        }
+        } // if evtmsk
 #endif
-
-#if 0 // ==== Saving settings ====
-        if(EvtMsk & EVTMSK_SAVE) { ISaveSettingsReally(); }
-#endif
-
     } // while true
 }
 

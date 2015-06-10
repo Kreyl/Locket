@@ -268,7 +268,7 @@ const LedSmoothChunk_t lsqEnterIdle[] = {
 
 #endif
 
-#if 1 // ============================= Beeper ==================================
+#if 0 // ============================= Beeper ==================================
 #define BEEP_VOLUME     2
 
 // Type, duration_ms, freq, volume
@@ -293,7 +293,8 @@ const BeepChunk_t bsqBeepBeep[] = {
 #if 1 // ============================== Vibro ==================================
 #define VIBRO_VOLUME    27  // 1 to 22
 
-#define VIBRO_SHORT_MS  153
+#define VIBRO_SHORT_MS          153
+
 const BaseChunk_t vsqBrr[] = {
         {csSetup, VIBRO_VOLUME},
         {csWait, VIBRO_SHORT_MS},
@@ -318,14 +319,39 @@ const BaseChunk_t vsqError[] = {
         {csEnd}
 };
 
-const BaseChunk_t vsqIndicationOn[] = {
+const BaseChunk_t vsqSingle[] = {
         {csSetup, VIBRO_VOLUME},
         {csWait, VIBRO_SHORT_MS},
         {csSetup, 0},
         {csWait, 1800},
         {csGoto, 0}
 };
-
+const BaseChunk_t vsqPair[] = {
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 99},
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 1350},
+        {csGoto, 0}
+};
+const BaseChunk_t vsqMany[] = {
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 99},
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 99},
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 1008},
+        {csGoto, 0}
+};
 #endif
 
 #endif /* SEQUENCES_H_ */

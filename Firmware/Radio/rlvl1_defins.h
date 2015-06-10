@@ -56,11 +56,6 @@ struct rPkt_t {
 #define RPKT_LEN    sizeof(rPkt_t)
 #endif
 
-#if 1 // ========================== const Pkt_t ================================
-#define TEST_WORD   0xCa115ea1  // Call Seal
-
-#endif
-
 #if 1 // ======================= Channels & cycles =============================
 #define RCHNL_MIN       5
 #define ID2RCHNL(ID)    (RCHNL_MIN + ID)

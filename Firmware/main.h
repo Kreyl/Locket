@@ -14,15 +14,15 @@
 #include "evt_mask.h"
 #include "uart.h"
 
-#define VERSION_STRING  "Klaus v1.0"
+#define APP_NAME        "Klaus"
+#define APP_VERSION     _TIMENOW_
 
 // ==== Constants and default values ====
 #define ID_MIN                  1
 #define ID_MAX                  10
 #define ID_DEFAULT              ID_MIN
-// Radio timing
-#define RADIO_NOPKT_TIMEOUT_S   4
-
+// Timings
+#define RXBUF_CHECK_PERIOD_MS   3600
 
 #if 1 // ==== Eeprom ====
 // Addresses
@@ -37,20 +37,36 @@ enum Mode_t {
     mRxTxLightLow = 0b1100, mRxTxLightMid = 0b1101, mRxTxLightHi = 0b1110, mRxTxLightMax = 0b1111
 };
 
-enum IndicationState_t {isOn, isOff};
+#if 1 // ==== RX table ====
+#define RX_TABLE_SZ     54
+class RxTable_t {
+private:
+    uint32_t IBuf[RX_TABLE_SZ];
+public:
+    uint32_t Cnt;
+    void AddID(uint32_t ID) {
+        for(uint32_t i=0; i<Cnt; i++) {
+            if(IBuf[i] == ID) return;   // do not add what exists
+        }
+        IBuf[Cnt] = ID;
+        Cnt++;
+    }
+    void Clear() { Cnt = 0; }
+};
+#endif
 
 class App_t {
 private:
     Thread *PThread;
     Eeprom_t EE;
-    VirtualTimer ITmrRadioTimeout;
-    IndicationState_t Indication;
     uint8_t ISetID(int32_t NewID);
+    RxTable_t RxTable;
+    bool LightWasOn = false;
 public:
     int32_t ID;
-    uint8_t GetDipSwitch();
     Mode_t Mode;
-    VirtualTimer TmrSecond;
+    VirtualTimer TmrSecond, TmrCheck;
+    uint8_t GetDipSwitch();
     void ReadIDfromEE();
     // Eternal methods
     void InitThread() { PThread = chThdSelf(); }
@@ -63,7 +79,7 @@ public:
     void OnUartCmd(Uart_t *PUart);
     // Inner use
     void ITask();
-    App_t(): PThread(nullptr), Indication(isOff), ID(ID_DEFAULT), Mode(mError) {}
+    App_t(): PThread(nullptr), ID(ID_DEFAULT), Mode(mError) {}
 };
 
 extern App_t App;

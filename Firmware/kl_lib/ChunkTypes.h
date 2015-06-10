@@ -85,6 +85,8 @@ public:
         chSysLock();
         if(chVTIsArmedI(&ITmr)) chVTResetI(&ITmr);
         ISwitchOff();
+        IPStartChunk = nullptr;
+        IPCurrentChunk = nullptr;
         chSysUnlock();
     }
     const TChunk* GetCurrentSequence() { return IPStartChunk; }

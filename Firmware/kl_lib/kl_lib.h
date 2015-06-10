@@ -15,7 +15,7 @@
 #include "clocking.h"
 
 // Lib version
-#define KL_LIB_VERSION      20150610_0148
+#define KL_LIB_VERSION      20150611_1130
 
 #if defined STM32L1XX_MD
 #include "stm32l1xx.h"
@@ -30,11 +30,10 @@
 #endif
 
 #ifndef TRUE
-#define TRUE 1
+#define TRUE    1
 #endif
-
 #ifndef FALSE
-#define FALSE 0
+#define FALSE   0
 #endif
 
 // Return values
