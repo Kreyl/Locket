@@ -20,7 +20,7 @@ class Cmd_t {
 private:
     char IString[BufSz];
     uint32_t Cnt;
-    bool Completed = false;
+    bool Completed;
 public:
     char *Name, *Token;
     ProcessDataResult_t PutChar(char c) {
@@ -53,6 +53,13 @@ public:
         return (*p == '\0')? OK : NOT_A_NUMBER;
     }
     bool NameIs(const char *SCmd) { return (strcasecmp(Name, SCmd) == 0); }
+    Cmd_t() {
+        Cnt = 0;
+        Completed = false;
+        Name = nullptr;
+        Token = nullptr;
+//        for(uint32_t i=0; i<BufSz; i++) IString[i] = 0;
+    }
 };
 
 #endif /* CMD_H_ */

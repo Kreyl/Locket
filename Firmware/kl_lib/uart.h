@@ -17,7 +17,7 @@
 #define UART_RX_ENABLED     TRUE
 
 // UART
-#define UART_TXBUF_SIZE     207
+#define UART_TXBUF_SZ       207
 
 
 #define UART                USART1
@@ -68,7 +68,7 @@ typedef Cmd_t<99> UartCmd_t;
 
 class Uart_t {
 private:
-    char TXBuf[UART_TXBUF_SIZE];
+    char TXBuf[UART_TXBUF_SZ];
     char *PRead, *PWrite;
     bool IDmaIsIdle;
     uint32_t IFullSlotsCount, ITransSize;
@@ -103,7 +103,7 @@ public:
     void Ack(int32_t Result) { Printf("\r\nAck %d\r\n", Result); }
 #endif
     Uart_t() {
-        for(uint32_t i=0; i<UART_TXBUF_SIZE; i++) TXBuf[i] = 0;
+//        for(uint32_t i=0; i<UART_TXBUF_SZ; i++) TXBuf[i] = 0;
         PWrite = TXBuf;
         PRead = TXBuf;
         IDmaIsIdle = true;
@@ -111,6 +111,7 @@ public:
         ITransSize = 0;
         IBaudrate = 115200;
 #if UART_RX_ENABLED
+//        for(uint32_t i=0; i<UART_RXBUF_SZ; i++) IRxBuf[i] = 0;
         SzOld=0;
         RIndx=0;
         IPThd = nullptr;

@@ -42,18 +42,18 @@ void Uart_t::PrintfI(const char *format, ...) {
 
 void Uart_t::IPutChar(char c) {
     *PWrite++ = c;
-    if(PWrite >= &TXBuf[UART_TXBUF_SIZE]) PWrite = TXBuf;   // Circulate buffer
+    if(PWrite >= &TXBuf[UART_TXBUF_SZ]) PWrite = TXBuf;   // Circulate buffer
 }
 
 void Uart_t::IPrintf(const char *format, va_list args) {
-    int32_t MaxLength = UART_TXBUF_SIZE - IFullSlotsCount;
+    int32_t MaxLength = UART_TXBUF_SZ - IFullSlotsCount;
     IFullSlotsCount += kl_vsprintf(FPutChar, MaxLength, format, args);
     // Start transmission if Idle
     if(IDmaIsIdle) ISendViaDMA();
 }
 
 void Uart_t::ISendViaDMA() {
-    uint32_t PartSz = (TXBuf + UART_TXBUF_SIZE) - PRead; // Cnt from PRead to end of buf
+    uint32_t PartSz = (TXBuf + UART_TXBUF_SZ) - PRead; // Cnt from PRead to end of buf
     ITransSize = MIN(IFullSlotsCount, PartSz);
     if(ITransSize != 0) {
         IDmaIsIdle = false;
@@ -179,7 +179,7 @@ void Uart_t::IRQDmaTxHandler() {
     dmaStreamDisable(UART_DMA_TX);    // Registers may be changed only when stream is disabled
     IFullSlotsCount -= ITransSize;
     PRead += ITransSize;
-    if(PRead >= (TXBuf + UART_TXBUF_SIZE)) PRead = TXBuf; // Circulate pointer
+    if(PRead >= (TXBuf + UART_TXBUF_SZ)) PRead = TXBuf; // Circulate pointer
 
     if(IFullSlotsCount == 0) IDmaIsIdle = true; // Nothing left to send
     else ISendViaDMA();

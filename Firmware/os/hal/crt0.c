@@ -120,7 +120,7 @@ typedef funcp_t * funcpp_t;
  * @brief   Destructors invocation switch.
  */
 #if !defined(CRT0_CALL_DESTRUCTORS) || defined(__DOXYGEN__)
-#define CRT0_CALL_DESTRUCTORS       TRUE
+#define CRT0_CALL_DESTRUCTORS       FALSE
 #endif
 
 /** @} */

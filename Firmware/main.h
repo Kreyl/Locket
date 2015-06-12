@@ -37,31 +37,13 @@ enum Mode_t {
     mRxTxLightLow = 0b1100, mRxTxLightMid = 0b1101, mRxTxLightHi = 0b1110, mRxTxLightMax = 0b1111
 };
 
-#if 1 // ==== RX table ====
-#define RX_TABLE_SZ     54
-class RxTable_t {
-private:
-    uint32_t IBuf[RX_TABLE_SZ];
-public:
-    uint32_t Cnt;
-    void AddID(uint32_t ID) {
-        for(uint32_t i=0; i<Cnt; i++) {
-            if(IBuf[i] == ID) return;   // do not add what exists
-        }
-        IBuf[Cnt] = ID;
-        Cnt++;
-    }
-    void Clear() { Cnt = 0; }
-};
-#endif
-
 class App_t {
 private:
     Thread *PThread;
     Eeprom_t EE;
     uint8_t ISetID(int32_t NewID);
-    RxTable_t RxTable;
     bool LightWasOn = false;
+    bool FirstTimeModeChangeIndication = true;
 public:
     int32_t ID;
     Mode_t Mode;

@@ -18,7 +18,7 @@ struct Buf_t {
     uint32_t Length;
 };
 
-// =========================== Circular buffer =================================
+#if 1 // ========================= Circular buffer =============================
 template <typename T, uint32_t Sz>
 class CircBuf_t {
 protected:
@@ -52,9 +52,8 @@ public:
         }
         else PRead += ALength;
     }
-    // Friendship
-    //friend class BufChunkPut_t;
 };
+#endif
 
 /*
 template <typename T>
@@ -96,7 +95,7 @@ public:
 };
 */
 
-// Buffer for simple types, like uint8_t etc.
+#if 1 // =========== Buffer for simple types, like uint8_t etc. ================
 template <typename T, uint32_t Sz>
 class CircBufNumber_t : public CircBuf_t<T, Sz> {
 public:
@@ -161,6 +160,26 @@ public:
         else return Put(p);
     }
 };
+#endif
+
+#if 1 // ========================= Counting buffer =============================
+template <typename T, uint32_t Sz>
+class CountingBuf_t {
+private:
+    T IBuf[Sz];
+    uint32_t Cnt;
+public:
+    void Add(T Value) {
+        for(uint32_t i=0; i<Cnt; i++) {
+            if(IBuf[i] == Value) return;   // do not add what exists
+        }
+        IBuf[Cnt] = Value;
+        Cnt++;
+    }
+    uint32_t GetCount() { return Cnt; }
+    void Clear() { Cnt = 0; }
+};
+#endif
 
 // =============================== Chunk buf ===================================
 // Allows to add data chunk by chunk, and to get it all. And vice versa.

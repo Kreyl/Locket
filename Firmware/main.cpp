@@ -104,12 +104,14 @@ void App_t::ITask() {
             uint8_t b = GetDipSwitch();
             Mode_t NewMode = static_cast<Mode_t>(b);
             if(Mode != NewMode) {
-                Led.StartSequence(lsqStart);
                 Mode = NewMode;
                 Led.Stop();
                 Vibro.Stop();
                 LightWasOn = false;
-                Uart.Printf("\rMode=%X", Mode);
+                Uart.Printf("\rMode=%u", Mode);
+                // Do not indicate mode change after power on
+                if(FirstTimeModeChangeIndication) FirstTimeModeChangeIndication = false;
+                else Led.StartSequence(lsqStart);
             }
             if(Mode == mError) Led.StartSequence(lsqFailure);
         }
@@ -117,14 +119,16 @@ void App_t::ITask() {
 
 #if 1   // ==== Rx buf check ====
         if(EvtMsk & EVTMSK_RX_BUF_CHECK) {
-            RxTable.Clear();
-            uint32_t RID=0;
-            while(Radio.IdBuf.Get(&RID) == OK) RxTable.AddID(RID);
-            Uart.Printf("\rCnt = %u", RxTable.Cnt);
-            // Select indication
+            // Get number of distinct received IDs and clear table
+            chSysLock();
+            uint32_t Cnt = Radio.RxTable.GetCount();
+            Radio.RxTable.Clear();
+            chSysUnlock();
+            Uart.Printf("\rCnt = %u", Cnt);
+            // ==== Select indication depending on received cnt ====
             const BaseChunk_t *VibroSequence = nullptr;
             bool LightMustBeOn = false;
-            if(RxTable.Cnt != 0) {
+            if(Cnt != 0) {
                 switch(App.Mode) {
                     case mRxLight:
                     case mRxTxLightLow:
@@ -144,13 +148,14 @@ void App_t::ITask() {
                     case mRxTxVibroMid:
                     case mRxTxVibroHi:
                     case mRxTxVibroMax:
-                        if     (RxTable.Cnt == 1) VibroSequence = vsqSingle;
-                        else if(RxTable.Cnt == 2) VibroSequence = vsqPair;
-                        else                      VibroSequence = vsqMany;  // RxTable.Cnt  > 2
+                        if     (Cnt == 1) VibroSequence = vsqSingle;
+                        else if(Cnt == 2) VibroSequence = vsqPair;
+                        else              VibroSequence = vsqMany;  // RxTable.Cnt  > 2
                         break;
                     default: break;
                 } // switch
             } // if != 0
+            // ==== Indicate ====
             // Vibro
             if(VibroSequence == nullptr) Vibro.Stop();
             else if(Vibro.GetCurrentSequence() != VibroSequence) Vibro.StartSequence(VibroSequence);

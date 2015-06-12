@@ -74,7 +74,7 @@ void rLevel1_t::ITask() {
                 uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
                 if(RxRslt == OK) {
 //                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
-                    IdBuf.Put(Pkt.DWord);
+                    RxTable.Add(Pkt.DWord);
                     break;
                 }
             } // for
@@ -95,7 +95,6 @@ void rLevel1_t::ITask() {
             for(uint32_t CycleN=0; CycleN < CYCLE_CNT; CycleN++) {
                 // ==== New cycle begins ====
                 uint32_t TxSlot = rand() % SLOT_CNT;    // Choose slot to transmit
-        //        Uart.Printf("\rTxSlot: %u", TxSlot);
                 // If TX slot is not zero: receive at zero cycle or sleep otherwise
                 uint32_t Delay = TxSlot * SLOT_DURATION_MS;
                 if(Delay != 0) {
@@ -110,7 +109,7 @@ void rLevel1_t::ITask() {
                     else TryToSleep(Delay);
                 }
             } // for CycleN
-            Uart.Printf("\rRcvd: %u", IdBuf.GetFullCount());
+//            Uart.Printf("\rRcvd: %u", IdBuf.GetFullCount());
         } // If RxTx
 
         // Errorneous mode
@@ -123,20 +122,19 @@ void rLevel1_t::ITask() {
 void rLevel1_t::Receive(uint32_t RxDuration) {
     int8_t Rssi;
     uint32_t TimeEnd = chTimeNow() + RxDuration;
-//    Uart.Printf("\r***End: %u", TimeEnd);
     while(true) {
         DBG2_SET();
         uint8_t RxRslt = CC.ReceiveSync(RxDuration, &Pkt, &Rssi);
         DBG2_CLR();
         if(RxRslt == OK) {
-//            Uart.Printf("\rRID = %X", PktRx.UID);
-            IdBuf.Put(Pkt.DWord);
+//            Uart.Printf("\r***RID = %X", Pkt.DWord);
+            chSysLock();
+            RxTable.Add(Pkt.DWord);
+            chSysUnlock();
         }
-//        Uart.Printf("\rNow: %u", chTimeNow());
         if(chTimeNow() < TimeEnd) RxDuration = TimeEnd - chTimeNow();
         else break;
     }
-//    Uart.Printf("\rDif: %u", chTimeNow() - TimeEnd);
 }
 
 void rLevel1_t::TryToSleep(uint32_t SleepDuration) {

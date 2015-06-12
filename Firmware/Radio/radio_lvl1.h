@@ -22,9 +22,10 @@ private:
     void TryToSleep(uint32_t SleepDuration);
 public:
     uint8_t Init();
-    CircBufNumber_t<uint32_t, ID_BUF_SZ> IdBuf;
+    CountingBuf_t<uint32_t, RXTABLE_SZ> RxTable;
     // Inner use
     void ITask();
+    rLevel1_t(): Pkt({0}) {}
 };
 
 extern rLevel1_t Radio;

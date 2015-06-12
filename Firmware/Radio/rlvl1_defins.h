@@ -56,22 +56,23 @@ struct rPkt_t {
 #define RPKT_LEN    sizeof(rPkt_t)
 #endif
 
+// ==== Sizes ====
+#define RXTABLE_SZ      54
+
 #if 1 // ======================= Channels & cycles =============================
 #define RCHNL_MIN       5
 #define ID2RCHNL(ID)    (RCHNL_MIN + ID)
 
 #define RCHNL_RXTX      4
 #define CYCLE_CNT       4
-#define SLOT_CNT        108
-
-#define ID_BUF_SZ       27
+#define SLOT_CNT        72
 
 #endif
 
 #if 1 // =========================== Timings ===================================
-#define TX_PERIOD_MS    45
-#define RX_T_MS         63
-#define RX_SLEEP_T_MS   270
+#define TX_PERIOD_MS            45
+#define RX_T_MS                 63
+#define RX_SLEEP_T_MS           270
 
 #define SLOT_DURATION_MS        3
 #define MIN_SLEEP_DURATION_MS   18
