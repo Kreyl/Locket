@@ -25,7 +25,7 @@
 // Colors
 #define CLR_DEFAULT             clGreen
 const Color_t ClrTable[] = {
-        clRed, clGreen, clBlue, clYellow, clMagenta, clCyan, clWhite
+        clRed, clGreen, clBlue, clYellow, clCyan, clMagenta, clWhite
 };
 #define CLRTABLE_CNT    countof(ClrTable)
 
