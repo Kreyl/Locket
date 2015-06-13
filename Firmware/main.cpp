@@ -80,8 +80,6 @@ int main(void) {
     Vibro.StartSequence(vsqBrr);
 
     if(Radio.Init() != OK) Led.StartSequence(lsqFailure);
-    else Led.StartSequence(lsqStart);
-    chThdSleepMilliseconds(2700);
 
     // Main cycle
     App.ITask();
@@ -109,9 +107,8 @@ void App_t::ITask() {
                 Vibro.Stop();
                 LightWasOn = false;
                 Uart.Printf("\rMode=%u", Mode);
-                // Do not indicate mode change after power on
-                if(FirstTimeModeChangeIndication) FirstTimeModeChangeIndication = false;
-                else Led.StartSequence(lsqStart);
+                // Indicate Mode
+                Led.StartSequence(lsqModesTable[static_cast<uint32_t>(Mode)]);
             }
             if(Mode == mError) Led.StartSequence(lsqFailure);
         }

@@ -43,7 +43,6 @@ private:
     Eeprom_t EE;
     uint8_t ISetID(int32_t NewID);
     bool LightWasOn = false;
-    bool FirstTimeModeChangeIndication = true;
 public:
     int32_t ID;
     Mode_t Mode;

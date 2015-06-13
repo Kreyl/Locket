@@ -213,7 +213,7 @@ const LedRGBChunk_t lsqFailure[] = {
         {csSetup, 0, clRed},
         {csWait, 99},
         {csSetup, 0, clBlack},
-        {csEnd},
+        {csEnd}
 };
 
 const LedRGBChunk_t lsqIndicationOn[] = {
@@ -225,25 +225,140 @@ const LedRGBChunk_t lsqIndicationOff[] = {
         {csEnd}
 };
 
-/*
-const LedRGBChunk_t lsqDoorClose[] = {
-        {csSetup, 630, clDoorClosed},
+// ==== Modes ====
+#define IND_DUR_MS  90
+// RX
+const LedRGBChunk_t lsqRxVibro[] = {
+        {csSetup, IND_DUR_MS, clMagenta},
+        {csSetup, IND_DUR_MS, clBlack},
         {csEnd}
 };
-const LedRGBChunk_t lsqDoorWrongKey[] = {
-        {csSetup, 0, clWrongKey},
-        {csWait, 99},
-        {csSetup, 360, clDoorClosed},
+const LedRGBChunk_t lsqRxLight[] = {
+        {csSetup, IND_DUR_MS, clWhite},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqRxVibroLight[] = {
+        {csSetup, IND_DUR_MS, clMagenta},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, IND_DUR_MS, clWhite},
+        {csSetup, IND_DUR_MS, clBlack},
         {csEnd}
 };
 
-const LedRGBChunk_t lsqDoorSecretKey[] = {
-        {csSetup, 0, clSecretKey},
-        {csWait, 99},
-        {csSetup, 360, clDoorClosed},
+// TX
+#define TX_ON_DUR_MS    IND_DUR_MS
+const LedRGBChunk_t lsqTxLow[] = {
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
         {csEnd}
 };
-*/
+const LedRGBChunk_t lsqTxMid[] = {
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqTxHigh[] = {
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqTxMax[] = {
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, TX_ON_DUR_MS, clYellow},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+
+// TxRxVibro
+#define RXTX_ON_DUR_MS  90
+const LedRGBChunk_t lsqRxTxVibroLow[] = {
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqRxTxVibroMid[] = {
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqRxTxVibroHigh[] = {
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqRxTxVibroMax[] = {
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, clBlue},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+
+// TxRxLight
+#define TXRX_LIGHT_CL   clCyan
+const LedRGBChunk_t lsqRxTxLightLow[] = {
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqRxTxLightMid[] = {
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqRxTxLightHigh[] = {
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+const LedRGBChunk_t lsqRxTxLightMax[] = {
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
+        {csSetup, IND_DUR_MS, clBlack},
+        {csEnd}
+};
+
+// Table of colors
+const LedRGBChunk_t *lsqModesTable[] = {
+        lsqFailure,
+        lsqRxVibro, lsqRxLight, lsqRxVibroLight,
+        lsqTxLow, lsqTxMid, lsqTxHigh, lsqTxMax,
+        lsqRxTxVibroLow, lsqRxTxVibroMid, lsqRxTxVibroHigh, lsqRxTxVibroMax,
+        lsqRxTxLightLow, lsqRxTxLightMid, lsqRxTxLightHigh, lsqRxTxLightMax
+};
 #endif
 
 #if 0 // =========================== LED Smooth ================================
@@ -293,7 +408,7 @@ const BeepChunk_t bsqBeepBeep[] = {
 #if 1 // ============================== Vibro ==================================
 #define VIBRO_VOLUME    27  // 1 to 22
 
-#define VIBRO_SHORT_MS          153
+#define VIBRO_SHORT_MS          99
 
 const BaseChunk_t vsqBrr[] = {
         {csSetup, VIBRO_VOLUME},
