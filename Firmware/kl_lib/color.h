@@ -14,7 +14,12 @@
 #define ClrMix(C, B, L)     ((C * L + B * (255 - L)) / 255)
 
 struct Color_t {
-    uint8_t R, G, B;
+    union {
+        struct {
+            uint8_t R, G, B;
+        };
+        uint32_t DWord32;
+    };
     bool operator == (const Color_t &AColor) { return ((R == AColor.R) and (G == AColor.G) and (B == AColor.B)); }
     bool operator != (const Color_t &AColor) { return ((R != AColor.R) or  (G != AColor.G) or  (B != AColor.B)); }
     Color_t& operator = (const Color_t &Right) { R = Right.R; G = Right.G; B = Right.B; return *this; }
@@ -27,13 +32,13 @@ struct Color_t {
         else if(B > PColor->B) B--;
     }
     void Set(uint8_t Red, uint8_t Green, uint8_t Blue) { R = Red; G = Green; B = Blue; }
-    void Get(uint8_t *PR, uint8_t *PG, uint8_t *PB) { *PR = R; *PG = G; *PB = B; }
-    uint8_t RGBTo565_HiByte() {
+    void Get(uint8_t *PR, uint8_t *PG, uint8_t *PB) const { *PR = R; *PG = G; *PB = B; }
+    uint8_t RGBTo565_HiByte() const {
         uint32_t rslt = R & 0b11111000;
         rslt |= G >> 5;
         return (uint8_t)rslt;
     }
-    uint8_t RGBTo565_LoByte() {
+    uint8_t RGBTo565_LoByte() const {
         uint32_t rslt = (G << 3) & 0b11100000;
         rslt |= B >> 3;
         return (uint8_t)rslt;

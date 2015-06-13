@@ -74,12 +74,15 @@ protected:
     BaseSequencer_t() : IPStartChunk(nullptr), IPCurrentChunk(nullptr) {}
     void SetupDelay(uint32_t ms) { chVTSetI(&ITmr, MS2ST(ms), GeneralSequencerTmrCallback, this); }
 public:
-    void StartSequence(const TChunk *PLedChunk) {
-        chSysLock();
-        IPStartChunk = PLedChunk;   // Save first chunk
-        IPCurrentChunk = PLedChunk;
-        IProcessSequenceI();
-        chSysUnlock();
+    void StartSequence(const TChunk *PChunk) {
+        if(PChunk == nullptr) Stop();
+        else {
+            chSysLock();
+            IPStartChunk = PChunk;   // Save first chunk
+            IPCurrentChunk = PChunk;
+            IProcessSequenceI();
+            chSysUnlock();
+        }
     }
     void Stop() {
         chSysLock();

@@ -191,16 +191,6 @@ const LedChunk_t lsqBlinkGreenX2[] = {
 
 #if 1 // ============================ LED RGB ==================================
 // ==== Door ====
-#define clIndication    ((Color_t){0, 255, 0})
-
-const LedRGBChunk_t lsqStart[] = {
-        {csSetup, 90, clRed},
-        {csSetup, 90, clGreen},
-        {csSetup, 90, clBlue},
-        {csSetup, 90, clBlack},
-        {csEnd}
-};
-
 const LedRGBChunk_t lsqFailure[] = {
         {csSetup, 0, clRed},
         {csWait, 99},
@@ -216,10 +206,6 @@ const LedRGBChunk_t lsqFailure[] = {
         {csEnd}
 };
 
-const LedRGBChunk_t lsqIndicationOn[] = {
-        {csSetup, 720, clIndication},
-        {csEnd}
-};
 const LedRGBChunk_t lsqIndicationOff[] = {
         {csSetup, 720, clBlack},
         {csEnd}
@@ -317,7 +303,7 @@ const LedRGBChunk_t lsqRxTxVibroMax[] = {
 };
 
 // TxRxLight
-#define TXRX_LIGHT_CL   clCyan
+#define TXRX_LIGHT_CL   clGreen
 const LedRGBChunk_t lsqRxTxLightLow[] = {
         {csSetup, RXTX_ON_DUR_MS, TXRX_LIGHT_CL},
         {csSetup, IND_DUR_MS, clBlack},
@@ -353,7 +339,7 @@ const LedRGBChunk_t lsqRxTxLightMax[] = {
 
 // Table of colors
 const LedRGBChunk_t *lsqModesTable[] = {
-        lsqFailure,
+        nullptr,
         lsqRxVibro, lsqRxLight, lsqRxVibroLight,
         lsqTxLow, lsqTxMid, lsqTxHigh, lsqTxMax,
         lsqRxTxVibroLow, lsqRxTxVibroMid, lsqRxTxVibroHigh, lsqRxTxVibroMax,

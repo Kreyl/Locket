@@ -13,6 +13,7 @@
 #include "hal.h"
 #include "evt_mask.h"
 #include "uart.h"
+#include "color.h"
 
 #define APP_NAME        "Klaus"
 #define APP_VERSION     _TIMENOW_
@@ -21,16 +22,24 @@
 #define ID_MIN                  1
 #define ID_MAX                  10
 #define ID_DEFAULT              ID_MIN
+// Colors
+#define CLR_DEFAULT             clGreen
+const Color_t ClrTable[] = {
+        clRed, clGreen, clBlue, clYellow, clMagenta, clCyan, clWhite
+};
+#define CLRTABLE_CNT    countof(ClrTable)
+
 // Timings
-#define RXBUF_CHECK_PERIOD_MS   3600
+#define INDICATION_PERIOD_MS    3600
 
 #if 1 // ==== Eeprom ====
 // Addresses
 #define EE_ADDR_DEVICE_ID       0
+#define EE_ADDR_COLOR           4
 #endif
 
 enum Mode_t {
-    mError = 0b0000,
+    mColorSelect = 0b0000,
     mRxVibro  = 0b0001, mRxLight  = 0b0010, mRxVibroLight = 0b0011,
     mTxLowPwr = 0b0100, mTxMidPwr = 0b0101, mTxHiPwr = 0b0110, mTxMaxPwr = 0b0111,
     mRxTxVibroLow = 0b1000, mRxTxVibroMid = 0b1001, mRxTxVibroHi = 0b1010, mRxTxVibroMax = 0b1011,
@@ -46,9 +55,12 @@ private:
 public:
     int32_t ID;
     Mode_t Mode;
-    VirtualTimer TmrSecond, TmrCheck;
+    VirtualTimer TmrSecond, TmrIndication;
+    void CheckRxTable();
     uint8_t GetDipSwitch();
     void ReadIDfromEE();
+    void ReadColorFromEE();
+    uint8_t SaveColorToEE();
     // Eternal methods
     void InitThread() { PThread = chThdSelf(); }
     void SignalEvt(eventmask_t Evt) {
@@ -60,7 +72,7 @@ public:
     void OnUartCmd(Uart_t *PUart);
     // Inner use
     void ITask();
-    App_t(): PThread(nullptr), ID(ID_DEFAULT), Mode(mError) {}
+    App_t(): PThread(nullptr), ID(ID_DEFAULT), Mode(mRxVibro) {}
 };
 
 extern App_t App;
