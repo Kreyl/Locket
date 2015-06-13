@@ -49,8 +49,6 @@ void TmrCheckCallback(void *p) {
 }
 #endif
 
-
-
 int main(void) {
     // ==== Init Vcore & clock system ====
     SetupVCore(vcore1V2);
@@ -79,7 +77,10 @@ int main(void) {
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
 
-    if(Radio.Init() != OK) Led.StartSequence(lsqFailure);
+    if(Radio.Init() != OK) {
+        Led.StartSequence(lsqFailure);
+        chThdSleepMilliseconds(2700);
+    }
 
     // Main cycle
     App.ITask();

@@ -66,18 +66,21 @@ void rLevel1_t::ITask() {
 #else
         // ==== RX ====
         if(App.Mode >= mRxVibro and App.Mode <= mRxVibroLight) {
-            int8_t Rssi;
-            // Iterate channels
-            for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
-                if(i == App.ID) continue;   // Do not listen self
-                CC.SetChannel(ID2RCHNL(i));
-                uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-                if(RxRslt == OK) {
-//                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
-                    RxTable.Add(Pkt.DWord);
-                    break;
-                }
-            } // for
+            // Listen if still nobody found, and do not if found
+            if(RxTable.GetCount() == 0) {
+                int8_t Rssi;
+                // Iterate channels
+                for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
+                    if(i == App.ID) continue;   // Do not listen self
+                    CC.SetChannel(ID2RCHNL(i));
+                    uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+                    if(RxRslt == OK) {
+    //                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
+                        RxTable.Add(Pkt.DWord);
+                        break; // No need to listen anymore if someone already found
+                    }
+                } // for
+            } // if there is someone
             TryToSleep(RX_SLEEP_T_MS);
         } // if rx
 
@@ -85,7 +88,7 @@ void rLevel1_t::ITask() {
         else if(App.Mode >= mTxLowPwr and App.Mode <= mTxMaxPwr) {
             CC.SetChannel(ID2RCHNL(App.ID));
             Transmit();
-            TryToSleep(TX_PERIOD_MS);
+            chThdSleepMilliseconds(TX_PERIOD_MS); // To little time to even try sleeping
         } // if tx
 
         // ==== RxTx: see each other ====
@@ -98,18 +101,17 @@ void rLevel1_t::ITask() {
                 // If TX slot is not zero: receive at zero cycle or sleep otherwise
                 uint32_t Delay = TxSlot * SLOT_DURATION_MS;
                 if(Delay != 0) {
-                    if(CycleN == 0) Receive(Delay);
+                    if(CycleN < RXTABLE_MAX_CNT) Receive(Delay);  // Do not receive if already received, save power
                     else TryToSleep(Delay);
                 }
                 Transmit();
                 // If TX slot is not last, receive at zero cycle or sleep otherwise
                 Delay = (SLOT_CNT - TxSlot - 1) * SLOT_DURATION_MS;
                 if(Delay != 0) {
-                    if(CycleN == 0) Receive(Delay);
+                    if(CycleN < RXTABLE_MAX_CNT) Receive(Delay);
                     else TryToSleep(Delay);
                 }
             } // for CycleN
-//            Uart.Printf("\rRcvd: %u", IdBuf.GetFullCount());
         } // If RxTx
 
         // Errorneous mode
