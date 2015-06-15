@@ -233,6 +233,13 @@ const LedRGBChunk_t lsqRxVibroLight[] = {
 };
 
 // TX
+// Operating indication
+const LedRGBChunk_t lsqTxOperating[] = {
+        {csSetup, 72, {7, 7, 0}},
+        {csSetup, 72, clBlack},
+        {csEnd}
+};
+
 #define TX_ON_DUR_MS    IND_DUR_MS
 const LedRGBChunk_t lsqTxLow[] = {
         {csSetup, TX_ON_DUR_MS, clYellow},

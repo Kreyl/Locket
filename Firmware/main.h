@@ -1,5 +1,5 @@
 /*
- * main.h
+\ * main.h
  *
  *  Created on: 21 дек. 2014 г.
  *      Author: Kreyl
@@ -24,9 +24,7 @@
 #define ID_DEFAULT              ID_MIN
 // Colors
 #define CLR_DEFAULT             clGreen
-const Color_t ClrTable[] = {
-        clRed, clGreen, clBlue, clYellow, clCyan, clMagenta, clWhite
-};
+const Color_t ClrTable[] = {clRed, clGreen, clBlue, clYellow, clCyan, clMagenta, clWhite};
 #define CLRTABLE_CNT    countof(ClrTable)
 
 // Timings

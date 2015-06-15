@@ -150,17 +150,17 @@ void rLevel1_t::Transmit() {
         case mTxLowPwr:
         case mRxTxVibroLow:
         case mRxTxLightLow:
-            CC.SetTxPower(CC_PwrMinus10dBm);
+            CC.SetTxPower(CC_PwrMinus20dBm);
             break;
         case mTxMidPwr:
         case mRxTxVibroMid:
         case mRxTxLightMid:
-            CC.SetTxPower(CC_Pwr0dBm);
+            CC.SetTxPower(CC_PwrMinus10dBm);
             break;
         case mTxHiPwr:
         case mRxTxVibroHi:
         case mRxTxLightHi:
-            CC.SetTxPower(CC_PwrPlus5dBm);
+            CC.SetTxPower(CC_Pwr0dBm);
             break;
         case mTxMaxPwr:
         case mRxTxVibroMax:

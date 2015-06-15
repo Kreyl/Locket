@@ -125,7 +125,7 @@ void App_t::ITask() {
         } // if EVTMSK_EVERY_SECOND
 #endif
 
-#if 1   // ==== Rx buf check ====
+#if 1   // ==== Indication ====
         if(EvtMsk & EVTMSK_INDICATION) {
             if(Mode == mColorSelect) {
                 Color_t *pcl = &lsqIndicationOn[0].Color;
@@ -144,6 +144,8 @@ void App_t::ITask() {
                 lsqShowColor[0].Color = ClrTable[ClrIndx];
                 Led.StartSequence(lsqShowColor);
             }
+            // Transmitter
+            else if(Mode >= mTxLowPwr and Mode <= mTxMaxPwr) Led.StartSequence(lsqTxOperating);
             // In other modes, check radio
             else CheckRxTable();
         } // if evtmsk
@@ -288,7 +290,7 @@ void App_t::ReadColorFromEE() {
     for(uint32_t i=0; i<CLRTABLE_CNT; i++) {
         if(*pcl == ClrTable[i]) return;
     }
-    *pcl = CLR_DEFAULT;
+    *pcl = CLR_DEFAULT; // Allowed color not found, use default one
 }
 uint8_t App_t::SaveColorToEE() {
     Color_t *pcl = &lsqIndicationOn[0].Color;
