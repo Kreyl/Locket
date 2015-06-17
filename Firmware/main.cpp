@@ -113,7 +113,8 @@ void App_t::ITask() {
             // Get mode
             uint8_t b = GetDipSwitch();
             Mode_t NewMode = static_cast<Mode_t>(b);
-            if(Mode != NewMode) {
+            if(Mode != NewMode or FirstTimeModeIndication) {
+                FirstTimeModeIndication = false;
                 Mode = NewMode;
                 Led.Stop();
                 Vibro.Stop();
