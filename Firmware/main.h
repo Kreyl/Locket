@@ -24,19 +24,30 @@
 #define ID_DEFAULT              ID_MIN
 
 // Timings
-#define OFF_PERIOD_MS           2700    // TODO: increase
+#define OFF_PERIOD_MS           4500
+#define BTN_CHECK_PERIOD_MS     360
 
 // Button
 #define BTN_GPIO                GPIOA
 #define BTN_PIN                 0
 #define BtnIsPressed()          PinIsSet(BTN_GPIO, BTN_PIN)
 
+#if 1 // ==== Eeprom ====
+// Addresses
+#define EE_ADDR_DEVICE_ID       0
+#define EE_ADDR_COLOR           4
+#endif
+
 class App_t {
 private:
     Thread *PThread;
+    Eeprom_t EE;
+    uint8_t ISetID(int32_t NewID);
 public:
     int32_t ID;
-    VirtualTimer TmrOff, TmrSecond;
+    VirtualTimer TmrOff, TmrCheckBtn;
+    void ReadIDfromEE();
+
     // Eternal methods
     uint8_t GetDipSwitch();
     void InitThread() { PThread = chThdSelf(); }

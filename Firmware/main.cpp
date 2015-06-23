@@ -28,10 +28,10 @@ LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 #if 1 // ============================ Timers ===================================
 // Once-a-second timer
-void TmrSecondCallback(void *p) {
+void TmrCheckBtnCallback(void *p) {
     chSysLockFromIsr();
-    App.SignalEvtI(EVTMSK_EVERY_SECOND);
-    chVTSetI(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    App.SignalEvtI(EVTMSK_BTN_CHECK);
+    chVTSetI(&App.TmrCheckBtn, MS2ST(BTN_CHECK_PERIOD_MS), TmrCheckBtnCallback, nullptr);
     chSysUnlockFromIsr();
 }
 // Universal VirtualTimer callback
@@ -53,8 +53,7 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     App.InitThread();
-
-//    Read ID from DIP
+    App.ReadIDfromEE();
 
     Uart.Init(115200);
 //    Beeper.Init();
@@ -73,19 +72,15 @@ int main(void) {
         chThdSleepMilliseconds(2700);
     }
 
-    chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
-
+    chVTSet(&App.TmrCheckBtn, MS2ST(BTN_CHECK_PERIOD_MS), TmrCheckBtnCallback, nullptr);
+    // Switch off after the time
+    chVTRestart(&App.TmrOff, MS2ST(OFF_PERIOD_MS), EVTMSK_OFF);
     // Main cycle
     App.ITask();
 }
 
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
-    // Start On sequence
-    Led.StartSequence(lsqOn);
-    // Switch off after the time
-    chVTRestart(&TmrOff, MS2ST(OFF_PERIOD_MS), EVTMSK_OFF);
-
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
 #if 1   // ==== Uart cmd ====
@@ -95,11 +90,12 @@ void App_t::ITask() {
         }
 #endif
 
-#if 1   // ==== Every second ====
-        if(EvtMsk & EVTMSK_EVERY_SECOND) {
+#if 1   // ==== Button ====
+        if(EvtMsk & EVTMSK_BTN_CHECK) {
             // Check button
             if(BtnIsPressed()) {
                 chVTRestart(&TmrOff, MS2ST(OFF_PERIOD_MS), EVTMSK_OFF); // Postpone switching off
+                Led.StartSequence(lsqOn);
             }
             else {
                 Led.StartSequence(lsqOff);  // start switching off
@@ -130,8 +126,36 @@ void App_t::OnUartCmd(Uart_t *PUart) {
 
     else if(PCmd->NameIs("GetID")) Uart.Reply("ID", ID);
 
+    else if(PCmd->NameIs("SetID")) {
+        if(PCmd->GetNextToken() != OK) { PUart->Ack(CMD_ERROR); return; }
+        if(PCmd->TryConvertTokenToNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
+        uint8_t r = ISetID(dw32);
+        PUart->Ack(r);
+    }
+
     else PUart->Ack(CMD_UNKNOWN);
 }
+
+void App_t::ReadIDfromEE() {
+    ID = EE.Read32(EE_ADDR_DEVICE_ID);  // Read device ID
+    if(ID < ID_MIN or ID > ID_MAX) ID = ID_DEFAULT;
+}
+
+uint8_t App_t::ISetID(int32_t NewID) {
+    if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
+    uint8_t rslt = EE.Write32(EE_ADDR_DEVICE_ID, NewID);
+    if(rslt == OK) {
+        ID = NewID;
+        Uart.Printf("\rNew ID: %u", ID);
+        return OK;
+    }
+    else {
+        Uart.Printf("\rEE error: %u", rslt);
+        return FAILURE;
+    }
+    return FAILURE;
+}
+
 
 uint8_t App_t::GetDipSwitch() {
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN1, pudPullUp);
