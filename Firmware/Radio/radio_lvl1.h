@@ -17,15 +17,13 @@
 class rLevel1_t {
 private:
     rPkt_t Pkt;
-    void Transmit();
-    void Receive(uint32_t RxDuration);
-    void TryToSleep(uint32_t SleepDuration);
+    bool MayTx;
 public:
     uint8_t Init();
-    CountingBuf_t<uint32_t, RXTABLE_SZ> RxTable;
     // Inner use
     void ITask();
-    rLevel1_t(): Pkt({0}) {}
+    void StopTx() { MayTx = false; }
+    rLevel1_t(): Pkt({0}), MayTx(true) {}
 };
 
 extern rLevel1_t Radio;

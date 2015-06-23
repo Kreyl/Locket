@@ -15,5 +15,7 @@
 #define EVTMSK_EVERY_SECOND     EVENT_MASK(2)
 #define EVTMSK_INDICATION       EVENT_MASK(3)
 
+#define EVTMSK_OFF              EVENT_MASK(4)
+
 
 #endif /* EVT_MASK_H_ */

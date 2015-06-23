@@ -506,6 +506,26 @@ public:
 };
 #endif
 
+#if 1 // ============================== Power ==================================
+#if 1 // ========================== Sleep ======================================
+namespace Sleep {
+static inline void EnterStandby() {
+    SCB->SCR |= SCB_SCR_SLEEPDEEP;
+    PWR->CR = PWR_CR_PDDS;
+    PWR->CR |= PWR_CR_CWUF;
+    __WFI();
+}
+
+static inline void EnableWakeup1Pin()  { PWR->CSR |=  PWR_CSR_EWUP1; }
+static inline void DisableWakeup1Pin() { PWR->CSR &= ~PWR_CSR_EWUP1; }
+
+static inline bool WasInStandby() { return (PWR->CSR & PWR_CSR_SBF); }
+static inline void ClearStandbyFlag() { PWR->CR |= PWR_CR_CSBF; }
+
+}; // namespace
+#endif
+#endif
+
 #if 1 // ============================== SPI ====================================
 enum CPHA_t {cphaFirstEdge, cphaSecondEdge};
 enum CPOL_t {cpolIdleLow, cpolIdleHigh};

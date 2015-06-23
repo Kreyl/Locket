@@ -24,7 +24,7 @@
 static inline uint32_t ICalcDelay(uint32_t CurrentBrightness, uint32_t SmoothVar) { return (uint32_t)((SmoothVar / (CurrentBrightness+4)) + 1); }
 #endif
 
-#if 1 // ========================= Single LED blinker ==========================
+#if 0 // ========================= Single LED blinker ==========================
 #define LED_RGB_BLINKER
 
 class LedBlinker_t : public BaseSequencer_t<BaseChunk_t> {
@@ -93,7 +93,7 @@ public:
 #endif
 
 
-#if 1 // ==================== RGB blinker (no smooth switch) ===================
+#if 0 // ==================== RGB blinker (no smooth switch) ===================
 #define LED_RGB_BLINKER
 class LedRgbBlinker_t : public BaseSequencer_t<LedRGBChunk_t> {
 protected:
