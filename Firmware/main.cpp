@@ -28,6 +28,13 @@ LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
 
 #if 1 // ============================ Timers ===================================
 // Once-a-second timer
+void TmrSecondCallback(void *p) {
+    chSysLockFromIsr();
+    App.SignalEvtI(EVTMSK_SECOND);
+    chVTSetI(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    chSysUnlockFromIsr();
+}
+
 void TmrCheckBtnCallback(void *p) {
     chSysLockFromIsr();
     App.SignalEvtI(EVTMSK_BTN_CHECK);
@@ -52,10 +59,12 @@ int main(void) {
     chSysInit();
 
     // ==== Init Hard & Soft ====
+    Uart.Init(115200);
+
     App.InitThread();
     App.ReadIDfromEE();
+    App.DipToTxPwr();
 
-    Uart.Init(115200);
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
 
@@ -72,6 +81,8 @@ int main(void) {
         chThdSleepMilliseconds(2700);
     }
 
+    // Timers
+    chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
     chVTSet(&App.TmrCheckBtn, MS2ST(BTN_CHECK_PERIOD_MS), TmrCheckBtnCallback, nullptr);
     // Switch off after the time
     chVTRestart(&App.TmrOff, MS2ST(OFF_PERIOD_MS), EVTMSK_OFF);
@@ -90,16 +101,19 @@ void App_t::ITask() {
         }
 #endif
 
+#if 1   // ==== Once a second ====
+        if(EvtMsk & EVTMSK_SECOND) {
+            DipToTxPwr();               // Check DIP switch
+        }
+#endif
+
 #if 1   // ==== Button ====
         if(EvtMsk & EVTMSK_BTN_CHECK) {
-            // Check button
             if(BtnIsPressed()) {
                 chVTRestart(&TmrOff, MS2ST(OFF_PERIOD_MS), EVTMSK_OFF); // Postpone switching off
-                Led.StartSequence(lsqOn);
+                Led.StartSequence(lsqOn);   // LED on
             }
-            else {
-                Led.StartSequence(lsqOff);  // start switching off
-            }
+            else Led.StartSequence(lsqOff);  // start switching off
         }
 #endif
 
@@ -115,6 +129,18 @@ void App_t::ITask() {
         }
 #endif
     } // while true
+}
+
+void App_t::DipToTxPwr() {
+    uint8_t Dip = GetDipSwitch();
+    if(Dip > 0x0F) Dip = 0x0F;
+    const uint8_t PwrTable[16] = {
+            CC_PwrMinus30dBm, CC_PwrMinus27dBm, CC_PwrMinus25dBm, CC_PwrMinus20dBm,
+            CC_PwrMinus15dBm, CC_PwrMinus10dBm, CC_PwrMinus6dBm,  CC_Pwr0dBm,
+            CC_PwrPlus5dBm,   CC_PwrPlus7dBm,   CC_PwrPlus10dBm, CC_PwrPlus12dBm,
+            CC_PwrPlus12dBm,  CC_PwrPlus12dBm,  CC_PwrPlus12dBm, CC_PwrPlus12dBm
+    };
+    Radio.TxPower = PwrTable[Dip];
 }
 
 void App_t::OnUartCmd(Uart_t *PUart) {
@@ -162,15 +188,14 @@ uint8_t App_t::GetDipSwitch() {
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN2, pudPullUp);
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN3, pudPullUp);
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN4, pudPullUp);
-    uint8_t Rslt;
-    Rslt  = static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN1));
+    uint8_t Rslt = 0;
+    if(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN1)) Rslt = 2; // <=> { Rslt=1; Rslt<<=1; }
+    if(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN2)) Rslt |= 1;
     Rslt <<= 1;
-    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN2));
+    if(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN3)) Rslt |= 1;
     Rslt <<= 1;
-    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN3));
-    Rslt <<= 1;
-    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN4));
-    Rslt ^= 0xF;    // Invert switches
+    if(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN4)) Rslt |= 1;
+    Rslt ^= 0x0F;    // Invert switches
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN1);
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN2);
     PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN3);

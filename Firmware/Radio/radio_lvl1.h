@@ -20,6 +20,7 @@ private:
     bool MayTx;
 public:
     uint8_t Init();
+    uint8_t TxPower = CC_Pwr0dBm;
     // Inner use
     void ITask();
     void StopTx() { MayTx = false; }

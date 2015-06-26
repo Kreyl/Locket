@@ -24,8 +24,8 @@
 #define ID_DEFAULT              ID_MIN
 
 // Timings
-#define OFF_PERIOD_MS           4500
-#define BTN_CHECK_PERIOD_MS     360
+#define OFF_PERIOD_MS           7200
+#define BTN_CHECK_PERIOD_MS     72
 
 // Button
 #define BTN_GPIO                GPIOA
@@ -45,9 +45,9 @@ private:
     uint8_t ISetID(int32_t NewID);
 public:
     int32_t ID;
-    VirtualTimer TmrOff, TmrCheckBtn;
+    VirtualTimer TmrSecond, TmrOff, TmrCheckBtn;
     void ReadIDfromEE();
-
+    void DipToTxPwr();
     // Eternal methods
     uint8_t GetDipSwitch();
     void InitThread() { PThread = chThdSelf(); }

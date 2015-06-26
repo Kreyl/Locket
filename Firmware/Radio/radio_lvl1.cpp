@@ -37,6 +37,7 @@ static void rLvl1Thread(void *arg) {
 
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
+    uint8_t OldPower = 0;
     while(true) {
 #if 0        // Demo
         if(App.Mode == 0b0001) { // RX
@@ -65,6 +66,11 @@ void rLevel1_t::ITask() {
         }
 #else
         if(MayTx) {
+            if(TxPower != OldPower) {
+                OldPower = TxPower;
+                CC.SetTxPower(TxPower);
+                Uart.Printf("\rTxPwr=0x%02X", TxPower);
+            }
             DBG1_SET();
             CC.TransmitSync(&Pkt);
             DBG1_CLR();
@@ -86,7 +92,7 @@ uint8_t rLevel1_t::Init() {
 #endif    // Init radioIC
     if(CC.Init() == OK) {
         Pkt.DWord = App.ID;
-        CC.SetTxPower(CC_Pwr0dBm);
+        CC.SetTxPower(TxPower);
         CC.SetPktSize(RPKT_LEN);
         CC.SetChannel(ID2RCHNL(App.ID));
 
