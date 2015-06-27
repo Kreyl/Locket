@@ -211,7 +211,7 @@ const LedRGBChunk_t lsqOn[] = {
 };
 
 const LedRGBChunk_t lsqOff[] = {
-        {csSetup, 720, clBlack},
+        {csSetup, 0, clBlack},
         {csEnd}
 };
 
