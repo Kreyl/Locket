@@ -15,7 +15,7 @@
 #include "uart.h"
 #include "color.h"
 
-#define APP_NAME        "LettersOfEast"
+#define APP_NAME        "BtnTxAllRx"
 #define APP_VERSION     _TIMENOW_
 
 // ==== Constants and default values ====
@@ -24,13 +24,16 @@
 #define ID_DEFAULT              ID_MIN
 
 // Timings
-#define OFF_PERIOD_MS           7200
-#define BTN_CHECK_PERIOD_MS     72
+#define TX_OFF_PERIOD_MS        999
 
-// Button
-#define BTN_GPIO                GPIOA
-#define BTN_PIN                 0
-#define BtnIsPressed()          PinIsSet(BTN_GPIO, BTN_PIN)
+#define BTN_ENABLED             TRUE
+
+// Dip Switch
+#define DIPSWITCH_GPIO          GPIOA
+#define DIPSWITCH_PIN1          8
+#define DIPSWITCH_PIN2          11
+#define DIPSWITCH_PIN3          12
+#define DIPSWITCH_PIN4          15
 
 #if 1 // ==== Eeprom ====
 // Addresses
@@ -45,10 +48,10 @@ private:
     uint8_t ISetID(int32_t NewID);
 public:
     int32_t ID;
-    VirtualTimer TmrSecond, TmrOff, TmrCheckBtn;
-    void ReadIDfromEE();
-    void DipToTxPwr();
+    bool MustTransmit = false;
+    TmrVirtual_t TmrTxOff;
     // Eternal methods
+    void ReadIDfromEE();
     uint8_t GetDipSwitch();
     void InitThread() { PThread = chThdSelf(); }
     void SignalEvt(eventmask_t Evt) {

@@ -42,15 +42,19 @@ public:
         else if(Cnt < BufSz-1) IString[Cnt++] = c;  // Add char if buffer not full
         return pdrProceed;
     }
-    uint8_t GetNextToken() {
+    uint8_t GetNextTokenString() {
         Token = strtok(NULL, DELIMITERS);
         return (*Token == '\0')? FAILURE : OK;
     }
-    uint8_t TryConvertTokenToNumber(int32_t *POutput) {
-        if(*Token == '\0') return EMPTY_STRING;
-        char *p;
-        *POutput = strtol(Token, &p, 0);
-        return (*p == '\0')? OK : NOT_A_NUMBER;
+    uint8_t GetNextNumber(int32_t *POutput) {
+        uint8_t r;
+        if((r = GetNextTokenString()) == OK) {
+            if(*Token == '\0') return EMPTY_STRING;
+            char *p;
+            *POutput = strtol(Token, &p, 0);
+            return (*p == '\0')? OK : NOT_A_NUMBER;
+        }
+        else return r;
     }
     bool NameIs(const char *SCmd) { return (strcasecmp(Name, SCmd) == 0); }
     Cmd_t() {

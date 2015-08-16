@@ -37,7 +37,7 @@ static void rLvl1Thread(void *arg) {
 
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
-    uint8_t OldPower = 0;
+    uint8_t OldID = 0;
     while(true) {
 #if 0        // Demo
         if(App.Mode == 0b0001) { // RX
@@ -65,19 +65,24 @@ void rLevel1_t::ITask() {
 //            chThdSleepMilliseconds(99);
         }
 #else
-        if(MayTx) {
-            if(TxPower != OldPower) {
-                OldPower = TxPower;
-                CC.SetTxPower(TxPower);
-                Uart.Printf("\rTxPwr=0x%02X", TxPower);
+        // ==== Transmitter ====
+        if(App.MustTransmit) {
+            if(App.ID != OldID) {
+                OldID = App.ID;
+                CC.SetChannel(ID2RCHNL(App.ID));
+                Pkt.DWord = App.ID;
             }
             DBG1_SET();
             CC.TransmitSync(&Pkt);
             DBG1_CLR();
         }
+
+        // ==== Receiver ====
         else {
-            CC.EnterPwrDown();
-            chThdSleep(TIME_INFINITE);
+            // Iterate channels
+
+            //CC.EnterPwrDown();
+            chThdSleep(99);
         }
 #endif
     } // while true
@@ -91,10 +96,8 @@ uint8_t rLevel1_t::Init() {
     PinSetupOut(DBG_GPIO2, DBG_PIN2, omPushPull);
 #endif    // Init radioIC
     if(CC.Init() == OK) {
-        Pkt.DWord = App.ID;
-        CC.SetTxPower(TxPower);
+        CC.SetTxPower(CC_Pwr0dBm);
         CC.SetPktSize(RPKT_LEN);
-        CC.SetChannel(ID2RCHNL(App.ID));
 
         // Thread
         chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);

@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <uart.h>
+#include "main.h"   // App is there
 
 #if 1 // ============================= Timer ===================================
 void Timer_t::Init() {
@@ -34,6 +35,23 @@ void Timer_t::Init() {
     else if(ITmr == TIM17) { RCC->APB2ENR |= RCC_APB2ENR_TIM17EN; }
     // Clock src
     PClk = &Clk.APBFreqHz;
+#elif defined STM32F2XX
+    if(ANY_OF_5(ITmr, TIM1, TIM8, TIM9, TIM10, TIM11)) PClk = &Clk.APB2FreqHz;
+    else PClk = &Clk.APB1FreqHz;
+    if     (ITmr == TIM1)  { rccEnableTIM1(FALSE); }
+    else if(ITmr == TIM2)  { rccEnableTIM2(FALSE); }
+    else if(ITmr == TIM3)  { rccEnableTIM3(FALSE); }
+    else if(ITmr == TIM4)  { rccEnableTIM4(FALSE); }
+    else if(ITmr == TIM5)  { rccEnableTIM5(FALSE); }
+    else if(ITmr == TIM6)  { rccEnableTIM6(FALSE); }
+    else if(ITmr == TIM7)  { rccEnableTIM7(FALSE); }
+    else if(ITmr == TIM8)  { rccEnableTIM8(FALSE); }
+    else if(ITmr == TIM9)  { rccEnableTIM9(FALSE); }
+    else if(ITmr == TIM10)  { RCC->APB2ENR |= RCC_APB2ENR_TIM10EN; }
+    else if(ITmr == TIM11)  { rccEnableTIM11(FALSE); }
+    else if(ITmr == TIM12)  { rccEnableTIM12(FALSE); }
+    else if(ITmr == TIM13)  { RCC->APB1ENR |= RCC_APB1ENR_TIM13EN; }
+    else if(ITmr == TIM14)  { rccEnableTIM14(FALSE); }
 #endif
 }
 
@@ -58,6 +76,11 @@ void Timer_t::InitPwm(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATo
         if(GPIO == GPIOA) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF5);
         else PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
     }
+#elif defined STM32F2XX
+    if(ANY_OF_2(ITmr, TIM1, TIM2)) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF1);
+    else if(ANY_OF_3(ITmr, TIM3, TIM4, TIM5)) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF2);
+    else if(ANY_OF_4(ITmr, TIM8, TIM9, TIM10, TIM11)) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF3);
+    else if(ANY_OF_3(ITmr, TIM12, TIM13, TIM14)) PinSetupAlterFunc(GPIO, N, OutputType, pudNone, AF9);
 #endif
 
     ITmr->ARR = ATopValue;
@@ -68,36 +91,51 @@ void Timer_t::InitPwm(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATo
             ITmr->CCMR1 |= (tmp << 4);
             ITmr->CCER  |= TIM_CCER_CC1E;
             break;
-
         case 2:
             ITmr->CCMR1 |= (tmp << 12);
             ITmr->CCER  |= TIM_CCER_CC2E;
             break;
-
         case 3:
             ITmr->CCMR2 |= (tmp << 4);
             ITmr->CCER  |= TIM_CCER_CC3E;
             break;
-
         case 4:
             ITmr->CCMR2 |= (tmp << 12);
             ITmr->CCER  |= TIM_CCER_CC4E;
             break;
-
         default: break;
     }
 }
 
 void Timer_t::SetUpdateFrequency(uint32_t FreqHz) {
+#if defined STM32F2XX
+    uint32_t UpdFreqMax;
+    if(ANY_OF_5(ITmr, TIM1, TIM8, TIM9, TIM10, TIM11))  // APB2 is clock src
+        UpdFreqMax = (*PClk) * Clk.TimerAPB2ClkMulti / (ITmr->ARR + 1);
+    else // APB1 is clock src
+        UpdFreqMax = (*PClk) * Clk.TimerAPB1ClkMulti / (ITmr->ARR + 1);
+#else
     uint32_t UpdFreqMax = *PClk / (ITmr->ARR + 1);
+#endif
     uint32_t div = UpdFreqMax / FreqHz;
     if(div != 0) div--;
     ITmr->PSC = div;
-//    uint32_t divider = ITmr->ARR * FreqHz;
-//    if(divider == 0) return;
-//    uint32_t FPrescaler = *PClk / divider;
-//    if(FPrescaler != 0) FPrescaler--;   // do not decrease in case of high freq
-//    ITmr->PSC = (uint16_t)FPrescaler;
+//    Uart.Printf("\r  FMax=%u; div=%u", UpdFreqMax, div);
+}
+#endif
+
+#if 1 // ========================== Virtual Timers =============================
+//void chVTRestart(VirtualTimer *vtp, systime_t time, eventmask_t Evt) {
+//    chSysLock();
+////    Uart.PrintfI("\r Restart t=%u msk=%X Armed=%u", time, Evt, chVTIsArmedI(vtp));
+//    if(chVTIsArmedI(vtp)) chVTResetI(vtp);
+//    chVTSetI(vtp, time, TmrOneShotCallback, (void*)Evt);
+//    chSysUnlock();
+//}
+
+// Universal VirtualTimer callbacks
+void TmrVirtualCallback(void *p) {
+    reinterpret_cast<TmrVirtual_t*>(p)->CallbackHandler();
 }
 
 #endif
@@ -398,3 +436,67 @@ uint8_t Eeprom_t::WriteBuf(void *PSrc, uint32_t Sz, uint32_t Addr) {
 }
 
 #endif
+
+namespace Convert { // ============== Conversion operations ====================
+void U16ToArrAsBE(uint8_t *PArr, uint16_t N) {
+    uint8_t *p8 = (uint8_t*)&N;
+    *PArr++ = *(p8 + 1);
+    *PArr   = *p8;
+}
+void U32ToArrAsBE(uint8_t *PArr, uint32_t N) {
+    uint8_t *p8 = (uint8_t*)&N;
+    *PArr++ = *(p8 + 3);
+    *PArr++ = *(p8 + 2);
+    *PArr++ = *(p8 + 1);
+    *PArr   = *p8;
+}
+uint16_t ArrToU16AsBE(uint8_t *PArr) {
+    uint16_t N;
+    uint8_t *p8 = (uint8_t*)&N;
+    *p8++ = *(PArr + 1);
+    *p8 = *PArr;
+    return N;
+}
+uint32_t ArrToU32AsBE(uint8_t *PArr) {
+    uint32_t N;
+    uint8_t *p8 = (uint8_t*)&N;
+    *p8++ = *(PArr + 3);
+    *p8++ = *(PArr + 2);
+    *p8++ = *(PArr + 1);
+    *p8 = *PArr;
+    return N;
+}
+void U16ChangeEndianness(uint16_t *p) { *p = __REV16(*p); }
+void U32ChangeEndianness(uint32_t *p) { *p = __REV(*p); }
+inline uint8_t TryStrToUInt32(char* S, uint32_t *POutput) {
+    if(*S == '\0') return EMPTY_STRING;
+    char *p;
+    *POutput = strtoul(S, &p, 0);
+    return (*p == 0)? OK : NOT_A_NUMBER;
+}
+inline uint8_t TryStrToInt32(char* S, int32_t *POutput) {
+    if(*S == '\0') return EMPTY_STRING;
+    char *p;
+    *POutput = strtol(S, &p, 0);
+    return (*p == '\0')? OK : NOT_A_NUMBER;
+}
+
+inline uint16_t BuildUint16(uint8_t Lo, uint8_t Hi) {
+    uint16_t r = Hi;
+    r <<= 8;
+    r |= Lo;
+    return r;
+}
+
+inline uint32_t BuildUint32(uint8_t Lo, uint8_t MidLo, uint8_t MidHi, uint8_t Hi) {
+    uint32_t r = Hi;
+    r <<= 8;
+    r |= MidHi;
+    r <<= 8;
+    r |= MidLo;
+    r <<= 8;
+    r |= Lo;
+    return r;
+}
+
+}; // namespace

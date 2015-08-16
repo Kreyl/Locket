@@ -13,7 +13,7 @@
 
 #define EVTMSK_UART_NEW_CMD     EVENT_MASK(1)
 #define EVTMSK_SECOND           EVENT_MASK(2)
-#define EVTMSK_BTN_CHECK        EVENT_MASK(3)
+#define EVTMSK_TXOFF            EVENT_MASK(3)
 
 #define EVTMSK_OFF              EVENT_MASK(4)
 

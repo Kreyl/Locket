@@ -11,23 +11,20 @@
  *
  */
 
-
 #ifndef PINSNSSETTINGS_H_
 #define PINSNSSETTINGS_H_
 
 #include "ch.h"
 #include "hal.h"
-#ifdef STM32F2XX
-#include "kl_lib_f2xx.h"
-#elif defined STM32L1XX_MD || defined STM32L1XX_HD
 #include <kl_lib.h>
-#endif
 
 #include "main.h" // App.thd here
 #include "evt_mask.h"
 
-#define SNS_POLL_PERIOD_MS  72
+#define SIMPLESENSORS_ENABLED   TRUE
+#define SNS_POLL_PERIOD_MS      72
 
+#if SIMPLESENSORS_ENABLED
 enum PinSnsState_t {pssLo, pssHi, pssRising, pssFalling};
 typedef void (*ftVoidPSnsStLen)(PinSnsState_t *PState, uint32_t Len);
 
@@ -43,15 +40,15 @@ struct PinSns_t {
 };
 
 // ================================= Settings ==================================
-// Buttons handler
-extern void ProcessButtons(PinSnsState_t *PState, uint32_t Len);
-
-#define BUTTONS_CNT     1   // Setup appropriately. Required for buttons handler
+// Button handler
+extern void ProcessButton(PinSnsState_t *PState, uint32_t Len);
 
 const PinSns_t PinSns[] = {
         // Buttons
-        {GPIOA,  0, pudNone, ProcessButtons},
+        {GPIOA,  0, pudPullUp, ProcessButton},
 };
 #define PIN_SNS_CNT     countof(PinSns)
+
+#endif  // if enabled
 
 #endif /* PINSNSSETTINGS_H_ */

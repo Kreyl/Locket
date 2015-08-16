@@ -10,16 +10,10 @@
 
 /*
  * Simple sensors are sensors with two logic states: Low and High.
- * Every time state changes (edge occures) new event generated.
- * Single event generated per pin change.
  */
 
 #include "hal.h"
-#ifdef STM32F2XX
-#include "kl_lib_f2xx.h"
-#elif defined STM32L1XX_MD || defined STM32L1XX_HD
 #include <kl_lib.h>
-#endif
 #include <PinSnsSettings.h>
 
 #if SIMPLESENSORS_ENABLED
