@@ -88,7 +88,7 @@ void rLevel1_t::ITask() {
                 CC.SetChannel(ID2RCHNL(i));
                 uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
                 if(RxRslt == OK) {
-                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
+//                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
                     App.SignalEvt(EVTMSK_SOMEONE_NEAR);
                     break; // No need to listen anymore if someone already found
                 }
@@ -109,7 +109,7 @@ uint8_t rLevel1_t::Init() {
     PinSetupOut(DBG_GPIO2, DBG_PIN2, omPushPull);
 #endif    // Init radioIC
     if(CC.Init() == OK) {
-        CC.SetTxPower(CC_PwrMinus10dBm);
+        CC.SetTxPower(CC_PwrPlus10dBm);
         CC.SetPktSize(RPKT_LEN);
 
         // Thread
