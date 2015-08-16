@@ -20,11 +20,10 @@
 
 // ==== Constants and default values ====
 #define ID_MIN                  1
-#define ID_MAX                  10
+#define ID_MAX                  25
 #define ID_DEFAULT              ID_MIN
 
 // Timings
-#define TX_OFF_PERIOD_MS        999
 
 #define BTN_ENABLED             TRUE
 

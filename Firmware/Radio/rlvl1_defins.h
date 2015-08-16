@@ -71,9 +71,9 @@ struct rPkt_t {
 #endif
 
 #if 1 // =========================== Timings ===================================
-#define TX_PERIOD_MS            4
+#define TX_DURATION_MS          1800
 #define RX_T_MS                 7
-#define RX_SLEEP_T_MS           630
+#define RX_SLEEP_T_MS           810
 
 #define SLOT_DURATION_MS        3
 #define MIN_SLEEP_DURATION_MS   18

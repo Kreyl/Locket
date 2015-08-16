@@ -14,8 +14,10 @@
 #define EVTMSK_UART_NEW_CMD     EVENT_MASK(1)
 #define EVTMSK_SECOND           EVENT_MASK(2)
 #define EVTMSK_TXOFF            EVENT_MASK(3)
+#define EVTMSK_SOMEONE_NEAR     EVENT_MASK(4)
 
-#define EVTMSK_OFF              EVENT_MASK(4)
+
+#define EVTMSK_OFF              EVENT_MASK(31)
 
 
 #endif /* EVT_MASK_H_ */

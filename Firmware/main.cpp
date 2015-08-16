@@ -34,7 +34,7 @@ int main(void) {
     App.InitThread();
     App.ReadIDfromEE();
 
-    App.TmrTxOff.Init(chThdSelf(), MS2ST(TX_OFF_PERIOD_MS), EVTMSK_TXOFF, tvtOneShot);
+    App.TmrTxOff.Init(chThdSelf(), MS2ST(TX_DURATION_MS), EVTMSK_TXOFF, tvtOneShot);
 
 //    Beeper.Init();
 //    Beeper.StartSequence(bsqBeepBeep);
@@ -72,6 +72,10 @@ void App_t::ITask() {
         if(EvtMsk & EVTMSK_TXOFF) {
             App.MustTransmit = false;
             Uart.Printf("\rTx off");
+        }
+
+        if(EvtMsk & EVTMSK_SOMEONE_NEAR) {
+            Vibro.StartSequence(vsqBrrBrr);
         }
 
 #if 0   // ==== Once a second ====

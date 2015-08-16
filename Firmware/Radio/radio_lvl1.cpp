@@ -79,10 +79,23 @@ void rLevel1_t::ITask() {
 
         // ==== Receiver ====
         else {
+            DBG2_SET();
+            // Listen if nobody found, and do not if found
+            int8_t Rssi;
             // Iterate channels
-
-            //CC.EnterPwrDown();
-            chThdSleep(99);
+            for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
+                if(i == App.ID) continue;   // Do not listen self
+                CC.SetChannel(ID2RCHNL(i));
+                uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+                if(RxRslt == OK) {
+                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
+                    App.SignalEvt(EVTMSK_SOMEONE_NEAR);
+                    break; // No need to listen anymore if someone already found
+                }
+            } // for
+            CC.SetChannel(ID2RCHNL(App.ID));    // Set self channel back
+            DBG2_CLR();
+            TryToSleep(RX_SLEEP_T_MS);
         }
 #endif
     } // while true
@@ -96,7 +109,7 @@ uint8_t rLevel1_t::Init() {
     PinSetupOut(DBG_GPIO2, DBG_PIN2, omPushPull);
 #endif    // Init radioIC
     if(CC.Init() == OK) {
-        CC.SetTxPower(CC_Pwr0dBm);
+        CC.SetTxPower(CC_PwrMinus10dBm);
         CC.SetPktSize(RPKT_LEN);
 
         // Thread
