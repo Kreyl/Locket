@@ -15,15 +15,17 @@
 #include "uart.h"
 #include "color.h"
 
-#define APP_NAME        "BtnTxAllRx"
+#define APP_NAME        "WOD: Your Choice"
 #define APP_VERSION     _TIMENOW_
 
 // ==== Constants and default values ====
 #define ID_MIN                  1
 #define ID_MAX                  25
 #define ID_DEFAULT              ID_MIN
-
 // Timings
+#define CLR_SW_TIME_MIN_S       60
+#define CLR_SW_TIME_MAX_S       600
+#define VIBRO_PERIOD_S          3600
 
 #define BTN_ENABLED             TRUE
 
@@ -43,12 +45,13 @@
 class App_t {
 private:
     Thread *PThread;
+    TmrVirtual_t TmrColor, TmrVibro;
+    void ProcessTmrClr();
+    bool IsGreen = false;
     Eeprom_t EE;
     uint8_t ISetID(int32_t NewID);
 public:
     int32_t ID;
-    bool MustTransmit = false;
-    TmrVirtual_t TmrTxOff;
     // Eternal methods
     void ReadIDfromEE();
     uint8_t GetDipSwitch();

@@ -37,33 +37,33 @@ static void rLvl1Thread(void *arg) {
 
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
-    uint8_t OldID = 0;
+//    uint8_t OldID = 0;
     while(true) {
-#if 0        // Demo
-        if(App.Mode == 0b0001) { // RX
-            int8_t Rssi;
-            Color_t Clr;
-            uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-            if(RxRslt == OK) {
-                Uart.Printf("\rRssi=%d", Rssi);
-                Clr = clWhite;
-                if     (Rssi < -100) Clr = clRed;
-                else if(Rssi < -90) Clr = clYellow;
-                else if(Rssi < -80) Clr = clGreen;
-                else if(Rssi < -70) Clr = clCyan;
-                else if(Rssi < -60) Clr = clBlue;
-                else if(Rssi < -50) Clr = clMagenta;
-            }
-            else Clr = clBlack;
-            Led.SetColor(Clr);
+#if 1        // Demo
+//        if(App.Mode == 0b0001) { // RX
+//            int8_t Rssi;
+//            Color_t Clr;
+//            uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+//            if(RxRslt == OK) {
+//                Uart.Printf("\rRssi=%d", Rssi);
+//                Clr = clWhite;
+//                if     (Rssi < -100) Clr = clRed;
+//                else if(Rssi < -90) Clr = clYellow;
+//                else if(Rssi < -80) Clr = clGreen;
+//                else if(Rssi < -70) Clr = clCyan;
+//                else if(Rssi < -60) Clr = clBlue;
+//                else if(Rssi < -50) Clr = clMagenta;
+//            }
+//            else Clr = clBlack;
+//            Led.SetColor(Clr);
             chThdSleepMilliseconds(99);
-        }
-        else {  // TX
-            DBG1_SET();
-            CC.TransmitSync(&Pkt);
-            DBG1_CLR();
-//            chThdSleepMilliseconds(99);
-        }
+//        }
+//        else {  // TX
+//            DBG1_SET();
+//            CC.TransmitSync(&Pkt);
+//            DBG1_CLR();
+////            chThdSleepMilliseconds(99);
+//        }
 #else
         // ==== Transmitter ====
         if(App.MustTransmit) {

@@ -205,13 +205,16 @@ const LedRGBChunk_t lsqFailure[] = {
         {csEnd}
 };
 
-const LedRGBChunk_t lsqOn[] = {
-        {csSetup, 0, clRed},
+#define clDarkRed       ((Color_t){54, 0,   0})
+#define clDarkGreen     ((Color_t){0,  54,  0})
+
+const LedRGBChunk_t lsqGreen[] = {
+        {csSetup, 450, clDarkGreen},
         {csEnd}
 };
 
-const LedRGBChunk_t lsqOff[] = {
-        {csSetup, 0, clBlack},
+const LedRGBChunk_t lsqRed[] = {
+        {csSetup, 450, clDarkRed},
         {csEnd}
 };
 
@@ -283,45 +286,23 @@ const BaseChunk_t vsqBrrBrr[] = {
         {csEnd}
 };
 
+const BaseChunk_t vsqBrrBrrNonStop[] = {
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 99},
+        {csSetup, VIBRO_VOLUME},
+        {csWait, VIBRO_SHORT_MS},
+        {csSetup, 0},
+        {csWait, 999},
+        {csGoto, 0}
+};
+
 const BaseChunk_t vsqError[] = {
         {csSetup, VIBRO_VOLUME},
         {csWait, 999},
         {csSetup, 0},
         {csEnd}
-};
-
-const BaseChunk_t vsqSingle[] = {
-        {csSetup, VIBRO_VOLUME},
-        {csWait, VIBRO_SHORT_MS},
-        {csSetup, 0},
-        {csWait, 1800},
-        {csGoto, 0}
-};
-const BaseChunk_t vsqPair[] = {
-        {csSetup, VIBRO_VOLUME},
-        {csWait, VIBRO_SHORT_MS},
-        {csSetup, 0},
-        {csWait, 99},
-        {csSetup, VIBRO_VOLUME},
-        {csWait, VIBRO_SHORT_MS},
-        {csSetup, 0},
-        {csWait, 1350},
-        {csGoto, 0}
-};
-const BaseChunk_t vsqMany[] = {
-        {csSetup, VIBRO_VOLUME},
-        {csWait, VIBRO_SHORT_MS},
-        {csSetup, 0},
-        {csWait, 99},
-        {csSetup, VIBRO_VOLUME},
-        {csWait, VIBRO_SHORT_MS},
-        {csSetup, 0},
-        {csWait, 99},
-        {csSetup, VIBRO_VOLUME},
-        {csWait, VIBRO_SHORT_MS},
-        {csSetup, 0},
-        {csWait, 1008},
-        {csGoto, 0}
 };
 #endif
 

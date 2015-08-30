@@ -24,42 +24,39 @@ int main(void) {
     // ==== Init Vcore & clock system ====
     SetupVCore(vcore1V2);
     Clk.UpdateFreqValues();
-
     // ==== Init OS ====
     halInit();
     chSysInit();
-
     // ==== Init Hard & Soft ====
     Uart.Init(115200);
     App.InitThread();
     App.ReadIDfromEE();
 
-    App.TmrTxOff.Init(chThdSelf(), MS2ST(TX_DURATION_MS), EVTMSK_TXOFF, tvtOneShot);
-
-//    Beeper.Init();
-//    Beeper.StartSequence(bsqBeepBeep);
-
     Led.Init();
 #if BTN_ENABLED
     PinSensors.Init();
 #endif
-
-    Uart.Printf("\r%S_%S  ID=%d", APP_NAME, APP_VERSION, App.ID);
+    Uart.Printf("\r%S v%S ID=%u", APP_NAME, APP_VERSION, App.ID);
 
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
+    // Init random generator with ID
+    srand(App.ID);
+    // Disable radio
+    if(CC.Init() == OK) CC.EnterPwrDown();
 
-    if(Radio.Init() != OK) {
-        Led.StartSequence(lsqFailure);
-        chThdSleepMilliseconds(2700);
-    }
-
-    // Main cycle
     App.ITask();
 }
 
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
+    // Timer vibro
+    TmrVibro.InitAndStart(chThdSelf(), S2ST(VIBRO_PERIOD_S), EVTMSK_VIBRO, tvtPeriodic);
+    SignalEvt(EVTMSK_VIBRO);    // Start vibro for test
+    // Timer color
+    ProcessTmrClr();
+
+    // Main cycle
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
 #if 1   // ==== Uart cmd ====
@@ -69,14 +66,9 @@ void App_t::ITask() {
         }
 #endif
 
-        if(EvtMsk & EVTMSK_TXOFF) {
-            App.MustTransmit = false;
-            Uart.Printf("\rTx off");
-        }
-
-        if(EvtMsk & EVTMSK_SOMEONE_NEAR) {
-            Vibro.StartSequence(vsqBrrBrr);
-        }
+        if(EvtMsk & EVTMSK_CLR_SWITCH) ProcessTmrClr();
+        if(EvtMsk & EVTMSK_VIBRO) Vibro.StartSequence(vsqBrrBrrNonStop);
+        if(EvtMsk & EVTMSK_BTN) Vibro.Stop();
 
 #if 0   // ==== Once a second ====
         if(EvtMsk & EVTMSK_SECOND) {
@@ -98,18 +90,24 @@ void App_t::ITask() {
     } // while true
 }
 
+void App_t::ProcessTmrClr() {
+    // Switch color
+    if(IsGreen) {
+        IsGreen = false;
+        Led.StartSequence(lsqRed);
+    }
+    else {
+        IsGreen = true;
+        Led.StartSequence(lsqGreen);
+    }
+    // Calculate random time: [CLR_SW_TIME_MIN_S; CLR_SW_TIME_MAX_S]
+    uint32_t Delay = (rand() % ((CLR_SW_TIME_MAX_S + 1) - CLR_SW_TIME_MIN_S)) + CLR_SW_TIME_MIN_S;
+    Uart.Printf("\rDelay=%u", Delay);
+    TmrColor.InitAndStart(PThread, S2ST(Delay), EVTMSK_CLR_SWITCH, tvtOneShot);
+}
+
 void ProcessButton(PinSnsState_t *PState, uint32_t Len) {
-    if(*PState == pssRising) {
-        Led.StartSequence(lsqOn);   // LED on
-        Vibro.Stop();
-        App.MustTransmit = true;
-        Uart.Printf("\rTx on");
-        App.TmrTxOff.Stop();    // do not stop tx after repeated btn press
-    }
-    else if(*PState == pssFalling) {
-        Led.StartSequence(lsqOff);
-        App.TmrTxOff.Start();
-    }
+    if(*PState == pssRising) App.SignalEvt(EVTMSK_BTN);
 }
 
 void App_t::OnUartCmd(Uart_t *PUart) {
@@ -151,7 +149,6 @@ uint8_t App_t::ISetID(int32_t NewID) {
         return FAILURE;
     }
 }
-
 
 uint8_t App_t::GetDipSwitch() {
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN1, pudPullUp);
