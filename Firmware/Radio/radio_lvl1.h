@@ -23,6 +23,7 @@ private:
 public:
     uint8_t Init();
     CountingBuf_t<uint32_t, RXTABLE_SZ> RxTable;
+    uint8_t Pwr = CC_PwrMinus30dBm;
     // Inner use
     void ITask();
     rLevel1_t(): Pkt({0}) {}
