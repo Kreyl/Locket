@@ -43,7 +43,7 @@ void rLevel1_t::ITask() {
         for(uint8_t i = ID_MIN; i <= ID_MAX; i++) {
             CC.SetChannel(i);
             uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-            if(RxRslt == OK and Pkt.DWord == TEST_WORD and Rssi > RSSI_THRESHOLD) {
+            if((RxRslt == OK) and (Pkt.DWord == TEST_WORD) and (Rssi > Sensitivity)) {
 //                Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
                 if(i >= ID_RED_MIN and i <= ID_RED_MAX) RxTable[0].Add(i);
                 else if(i >= ID_GREEN_MIN and i <= ID_GREEN_MAX) RxTable[1].Add(i);

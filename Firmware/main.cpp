@@ -19,7 +19,12 @@ App_t App;
 Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led { {GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2} };
 
-#define BLINK_LEN_MS    99
+const int8_t SensitivityTbl[16] = {
+        -30, -35, -40, -45, -50, -55, -60, -65,
+        -70, -75, -80, -85, -90, -95, -100, -111
+};
+
+#define BLINK_LEN_MS    144
 
 const Color_t Clrs[3] = {clRed, clGreen, clBlue};
 
@@ -28,7 +33,14 @@ __attribute__((__noreturn__))
 static void IndicationThread(void *arg) {
     chRegSetThreadName("Indication");
     while(true) {
-        chThdSleepMilliseconds(1206);
+        chThdSleepMilliseconds(1503);
+        // Set Sensitivity
+        uint8_t indx = App.GetDipSwitch();
+        if(Radio.Sensitivity != SensitivityTbl[indx]) {
+            Radio.Sensitivity = SensitivityTbl[indx];
+            Uart.Printf("Sens = %d\r", Radio.Sensitivity);
+        }
+
         // Indicate Colors one by one
         bool VibroDone = false;
         uint32_t Cnt;
@@ -69,10 +81,10 @@ int main(void) {
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
 
-    if(Radio.Init() != OK) {
-        Led.StartSequence(lsqFailure);
-        chThdSleepMilliseconds(2700);
-    }
+    if(Radio.Init() == OK) Led.StartSequence(lsqOn);
+    else Led.StartSequence(lsqFailure);
+    chThdSleepMilliseconds(900);
+
 
     // Indication thread
     chThdCreateStatic(waIndicationThread, sizeof(waIndicationThread), NORMALPRIO, (tfunc_t)IndicationThread, NULL);

@@ -29,8 +29,6 @@
 #define ID_GREEN_MAX            6
 
 
-// Timings
-
 // Dip Switch
 #define DIPSWITCH_GPIO          GPIOA
 #define DIPSWITCH_PIN1          8

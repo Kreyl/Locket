@@ -58,8 +58,6 @@ struct rPkt_t {
 
 #define TEST_WORD   0xCa115ea1  // Call Seal
 
-#define RSSI_THRESHOLD  (-111)
-
 // ==== Sizes ====
 #define RXTABLE_SZ      18
 

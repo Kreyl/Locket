@@ -18,6 +18,7 @@ class rLevel1_t {
 private:
     rPkt_t Pkt;
 public:
+    int8_t Sensitivity=-111;
     uint8_t Init();
     CountingBuf_t<uint8_t, RXTABLE_SZ> RxTable[3];
     // Inner use
