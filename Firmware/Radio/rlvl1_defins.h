@@ -56,6 +56,9 @@ struct rPkt_t {
 #define RPKT_LEN    sizeof(rPkt_t)
 #endif
 
+#define TEST_WORD   0xCa115ea1  // Call Seal
+
+
 // ==== Sizes ====
 #define RXTABLE_SZ      54
 #define RXTABLE_MAX_CNT 3   // Do not receive if this count reached. Will not indicate more anyway.
