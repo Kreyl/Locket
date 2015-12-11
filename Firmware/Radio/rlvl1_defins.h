@@ -58,28 +58,14 @@ struct rPkt_t {
 
 #define TEST_WORD   0xCa115ea1  // Call Seal
 
+#define RSSI_THRESHOLD  (-111)
 
 // ==== Sizes ====
-#define RXTABLE_SZ      54
-#define RXTABLE_MAX_CNT 3   // Do not receive if this count reached. Will not indicate more anyway.
+#define RXTABLE_SZ      18
 
-#if 1 // ======================= Channels & cycles =============================
-#define RCHNL_MIN       5
-#define ID2RCHNL(ID)    (RCHNL_MIN + ID)
-
-#define RCHNL_RXTX      4
-#define CYCLE_CNT       4
-#define SLOT_CNT        72
-
-#endif
 
 #if 1 // =========================== Timings ===================================
-#define TX_DURATION_MS          1800
 #define RX_T_MS                 7
-#define RX_SLEEP_T_MS           810
-
-#define SLOT_DURATION_MS        3
-#define MIN_SLEEP_DURATION_MS   18
 
 #endif
 

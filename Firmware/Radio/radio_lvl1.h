@@ -17,15 +17,11 @@
 class rLevel1_t {
 private:
     rPkt_t Pkt;
-    void TryToSleep(uint32_t SleepDuration) {
-        if(SleepDuration >= MIN_SLEEP_DURATION_MS) CC.EnterPwrDown();
-        chThdSleepMilliseconds(SleepDuration);
-    }
 public:
     uint8_t Init();
+    CountingBuf_t<uint8_t, RXTABLE_SZ> RxTable[3];
     // Inner use
     void ITask();
-    rLevel1_t(): Pkt({0}) {}
 };
 
 extern rLevel1_t Radio;

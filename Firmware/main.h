@@ -20,8 +20,14 @@
 
 // ==== Constants and default values ====
 #define ID_MIN                  1
-#define ID_MAX                  25
-#define ID_DEFAULT              ID_MIN
+#define ID_MAX                  9
+
+// Indication
+#define ID_RED_MIN              1
+#define ID_RED_MAX              3
+#define ID_GREEN_MIN            4
+#define ID_GREEN_MAX            6
+
 
 // Timings
 

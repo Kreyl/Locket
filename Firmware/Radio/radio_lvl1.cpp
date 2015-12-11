@@ -37,67 +37,19 @@ static void rLvl1Thread(void *arg) {
 
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
-    uint8_t OldID = 0;
     while(true) {
-#if 0        // Demo
-        if(App.Mode == 0b0001) { // RX
-            int8_t Rssi;
-            Color_t Clr;
+        int8_t Rssi;
+        // Iterate channels
+        for(uint8_t i = ID_MIN; i <= ID_MAX; i++) {
+            CC.SetChannel(i);
             uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-            if(RxRslt == OK) {
-                Uart.Printf("\rRssi=%d", Rssi);
-                Clr = clWhite;
-                if     (Rssi < -100) Clr = clRed;
-                else if(Rssi < -90) Clr = clYellow;
-                else if(Rssi < -80) Clr = clGreen;
-                else if(Rssi < -70) Clr = clCyan;
-                else if(Rssi < -60) Clr = clBlue;
-                else if(Rssi < -50) Clr = clMagenta;
+            if(RxRslt == OK and Pkt.DWord == TEST_WORD and Rssi > RSSI_THRESHOLD) {
+//                Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
+                if(i >= ID_RED_MIN and i <= ID_RED_MAX) RxTable[0].Add(i);
+                else if(i >= ID_GREEN_MIN and i <= ID_GREEN_MAX) RxTable[1].Add(i);
+                else RxTable[2].Add(i);
             }
-            else Clr = clBlack;
-            Led.SetColor(Clr);
-            chThdSleepMilliseconds(99);
-        }
-        else {  // TX
-            DBG1_SET();
-            CC.TransmitSync(&Pkt);
-            DBG1_CLR();
-//            chThdSleepMilliseconds(99);
-        }
-#else
-        // ==== Transmitter ====
-        if(App.MustTransmit) {
-            if(App.ID != OldID) {
-                OldID = App.ID;
-                CC.SetChannel(ID2RCHNL(App.ID));
-                Pkt.DWord = App.ID;
-            }
-            DBG1_SET();
-            CC.TransmitSync(&Pkt);
-            DBG1_CLR();
-        }
-
-        // ==== Receiver ====
-        else {
-            DBG2_SET();
-            // Listen if nobody found, and do not if found
-            int8_t Rssi;
-            // Iterate channels
-            for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
-                if(i == App.ID) continue;   // Do not listen self
-                CC.SetChannel(ID2RCHNL(i));
-                uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-                if(RxRslt == OK) {
-//                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
-                    App.SignalEvt(EVTMSK_SOMEONE_NEAR);
-                    break; // No need to listen anymore if someone already found
-                }
-            } // for
-            CC.SetChannel(ID2RCHNL(App.ID));    // Set self channel back
-            DBG2_CLR();
-            TryToSleep(RX_SLEEP_T_MS);
-        }
-#endif
+        } // for
     } // while true
 }
 #endif // task

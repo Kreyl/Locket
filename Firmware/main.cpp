@@ -16,9 +16,38 @@
 
 App_t App;
 
-//Beeper_t Beeper;
 Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led { {GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2} };
+
+#define BLINK_LEN_MS    99
+
+const Color_t Clrs[3] = {clRed, clGreen, clBlue};
+
+static WORKING_AREA(waIndicationThread, 256);
+__attribute__((__noreturn__))
+static void IndicationThread(void *arg) {
+    chRegSetThreadName("Indication");
+    while(true) {
+        chThdSleepMilliseconds(1206);
+        // Indicate Colors one by one
+        bool VibroDone = false;
+        uint32_t Cnt;
+        for(uint8_t j=0; j<3; j++) {
+            Cnt = Radio.RxTable[j].GetCount();
+            if(Cnt != 0) {
+                if(!VibroDone) Vibro.StartSequence(vsqBrrBrr);
+                VibroDone = true;
+                for(uint8_t i=0; i<Cnt; i++) {
+                    Led.SetColor(Clrs[j]);
+                    chThdSleepMilliseconds(BLINK_LEN_MS);
+                    Led.SetColor(clBlack);
+                    chThdSleepMilliseconds(BLINK_LEN_MS);
+                }
+                Radio.RxTable[j].Clear();
+            }
+        } // j
+    } // while
+}
 
 int main(void) {
     // ==== Init Vcore & clock system ====
@@ -32,19 +61,10 @@ int main(void) {
     // ==== Init Hard & Soft ====
     Uart.Init(115200);
     App.InitThread();
-    App.ReadIDfromEE();
-
-    App.TmrTxOff.Init(chThdSelf(), MS2ST(TX_DURATION_MS), EVTMSK_TXOFF, tvtOneShot);
-
-//    Beeper.Init();
-//    Beeper.StartSequence(bsqBeepBeep);
 
     Led.Init();
-#if BTN_ENABLED
-    PinSensors.Init();
-#endif
 
-    Uart.Printf("\r%S_%S  ID=%d", APP_NAME, APP_VERSION, App.ID);
+    Uart.Printf("\r%S_%S\r", APP_NAME, APP_VERSION);
 
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
@@ -53,6 +73,9 @@ int main(void) {
         Led.StartSequence(lsqFailure);
         chThdSleepMilliseconds(2700);
     }
+
+    // Indication thread
+    chThdCreateStatic(waIndicationThread, sizeof(waIndicationThread), NORMALPRIO, (tfunc_t)IndicationThread, NULL);
 
     // Main cycle
     App.ITask();
@@ -69,47 +92,12 @@ void App_t::ITask() {
         }
 #endif
 
-        if(EvtMsk & EVTMSK_TXOFF) {
-            App.MustTransmit = false;
-            Uart.Printf("\rTx off");
-        }
-
-        if(EvtMsk & EVTMSK_SOMEONE_NEAR) {
-            Vibro.StartSequence(vsqBrrBrr);
-        }
-
 #if 0   // ==== Once a second ====
         if(EvtMsk & EVTMSK_SECOND) {
             DipToTxPwr();               // Check DIP switch
         }
 #endif
-
-#if 0 // ==== OFF ====
-        if(EvtMsk & EVTMSK_OFF) {
-            Radio.StopTx();
-            chThdSleepMilliseconds(180);
-            // Enter Standby
-            chSysLock();
-            Sleep::EnableWakeup1Pin();
-            Sleep::EnterStandby();
-            chSysUnlock();
-        }
-#endif
     } // while true
-}
-
-void ProcessButton(PinSnsState_t *PState, uint32_t Len) {
-    if(*PState == pssRising) {
-        Led.StartSequence(lsqOn);   // LED on
-        Vibro.Stop();
-        App.MustTransmit = true;
-        Uart.Printf("\rTx on");
-        App.TmrTxOff.Stop();    // do not stop tx after repeated btn press
-    }
-    else if(*PState == pssFalling) {
-        Led.StartSequence(lsqOff);
-        App.TmrTxOff.Start();
-    }
 }
 
 void App_t::OnUartCmd(Uart_t *PUart) {
@@ -119,39 +107,8 @@ void App_t::OnUartCmd(Uart_t *PUart) {
     // Handle command
     if(PCmd->NameIs("Ping")) PUart->Ack(OK);
 
-    else if(PCmd->NameIs("GetID")) Uart.Reply("ID", ID);
-
-    else if(PCmd->NameIs("SetID")) {
-        if(PCmd->GetNextNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
-        uint8_t r = ISetID(dw32);
-        PUart->Ack(r);
-    }
-
     else PUart->Ack(CMD_UNKNOWN);
 }
-
-void App_t::ReadIDfromEE() {
-    ID = EE.Read32(EE_ADDR_DEVICE_ID);  // Read device ID
-    if(ID < ID_MIN or ID > ID_MAX) {
-        Uart.Printf("\rUsing default ID");
-        ID = ID_DEFAULT;
-    }
-}
-
-uint8_t App_t::ISetID(int32_t NewID) {
-    if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
-    uint8_t rslt = EE.Write32(EE_ADDR_DEVICE_ID, NewID);
-    if(rslt == OK) {
-        ID = NewID;
-        Uart.Printf("\rNew ID: %u", ID);
-        return OK;
-    }
-    else {
-        Uart.Printf("\rEE error: %u", rslt);
-        return FAILURE;
-    }
-}
-
 
 uint8_t App_t::GetDipSwitch() {
     PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN1, pudPullUp);
