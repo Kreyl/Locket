@@ -74,6 +74,7 @@ int main(void) {
     Led.Init();
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
+    chThdSleepMilliseconds(180);
     PinSensors.Init();
 
     if(Radio.Init() != OK) {

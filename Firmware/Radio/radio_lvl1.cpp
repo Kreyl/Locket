@@ -96,17 +96,19 @@ void rLevel1_t::ITask() {
 #endif // task
 
 void rLevel1_t::Receive(uint32_t RxDuration) {
-    int8_t Rssi;
+    int8_t Rssi = 0;
     uint32_t TimeEnd = chTimeNow() + RxDuration;
     while(true) {
         DBG2_SET();
         uint8_t RxRslt = CC.ReceiveSync(RxDuration, &Pkt, &Rssi);
         DBG2_CLR();
         if(RxRslt == OK) {
-            Uart.Printf("\r***RID = %X", Pkt.DWord);
-            chSysLock();
-            RxTable.Add(Pkt.DWord);
-            chSysUnlock();
+            Uart.Printf("\rRID %X; %d dB", Pkt.DWord, Rssi);
+            if(Rssi > -75) {
+                chSysLock();
+                RxTable.Add(Pkt.DWord);
+                chSysUnlock();
+            }
         }
         if(chTimeNow() < TimeEnd) RxDuration = TimeEnd - chTimeNow();
         else break;
