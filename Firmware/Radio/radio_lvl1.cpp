@@ -64,35 +64,7 @@ void rLevel1_t::ITask() {
 //            chThdSleepMilliseconds(99);
         }
 #else
-        // ==== RX ====
-        if(App.Mode >= mRxVibro and App.Mode <= mRxVibroLight) {
-            // Listen if still nobody found, and do not if found
-            if(RxTable.GetCount() == 0) {
-                int8_t Rssi;
-                // Iterate channels
-                for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
-                    if(i == App.ID) continue;   // Do not listen self
-                    CC.SetChannel(ID2RCHNL(i));
-                    uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-                    if(RxRslt == OK) {
-    //                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
-                        RxTable.Add(Pkt.DWord);
-                        break; // No need to listen anymore if someone already found
-                    }
-                } // for
-            } // if there is someone
-            TryToSleep(RX_SLEEP_T_MS);
-        } // if rx
-
-        // ==== TX ====
-        else if(App.Mode >= mTxLowPwr and App.Mode <= mTxMaxPwr) {
-            CC.SetChannel(ID2RCHNL(App.ID));
-            Transmit();
-            chThdSleepMilliseconds(TX_PERIOD_MS); // To little time to even try sleeping
-        } // if tx
-
-        // ==== RxTx: see each other ====
-        else if(App.Mode >= mRxTxVibroLow and App.Mode <= mRxTxLightMax) {
+        if(App.Mode != mBadMode) {
             CC.SetChannel(RCHNL_RXTX);
             // Iterate cycles
             for(uint32_t CycleN=0; CycleN < CYCLE_CNT; CycleN++) {
@@ -101,14 +73,16 @@ void rLevel1_t::ITask() {
                 // If TX slot is not zero: receive at zero cycle or sleep otherwise
                 uint32_t Delay = TxSlot * SLOT_DURATION_MS;
                 if(Delay != 0) {
-                    if(CycleN < RXTABLE_MAX_CNT) Receive(Delay);  // Do not receive if already received, save power
+                    if(CycleN == 0 and RxTable.GetCount() < RXTABLE_MAX_CNT) Receive(Delay);
                     else TryToSleep(Delay);
                 }
-                Transmit();
+                // Transmit if allowed
+                if(App.TxState == tosOff) chThdSleepMilliseconds(SLOT_DURATION_MS);
+                else Transmit();
                 // If TX slot is not last, receive at zero cycle or sleep otherwise
                 Delay = (SLOT_CNT - TxSlot - 1) * SLOT_DURATION_MS;
                 if(Delay != 0) {
-                    if(CycleN < RXTABLE_MAX_CNT) Receive(Delay);
+                    if(CycleN == 0 and RxTable.GetCount() < RXTABLE_MAX_CNT) Receive(Delay);
                     else TryToSleep(Delay);
                 }
             } // for CycleN
@@ -129,7 +103,7 @@ void rLevel1_t::Receive(uint32_t RxDuration) {
         uint8_t RxRslt = CC.ReceiveSync(RxDuration, &Pkt, &Rssi);
         DBG2_CLR();
         if(RxRslt == OK) {
-//            Uart.Printf("\r***RID = %X", Pkt.DWord);
+            Uart.Printf("\r***RID = %X", Pkt.DWord);
             chSysLock();
             RxTable.Add(Pkt.DWord);
             chSysUnlock();
@@ -147,25 +121,17 @@ void rLevel1_t::TryToSleep(uint32_t SleepDuration) {
 void rLevel1_t::Transmit() {
     // Set TX power
     switch(App.Mode) {
-        case mTxLowPwr:
-        case mRxTxVibroLow:
-        case mRxTxLightLow:
+        case mRxTxLo:
+        case mRxTxOffLo:
+        case mTxLo:
+        case mTx1515Lo:
             CC.SetTxPower(CC_PwrMinus20dBm);
             break;
-        case mTxMidPwr:
-        case mRxTxVibroMid:
-        case mRxTxLightMid:
+        case mRxTxHi:
+        case mRxTxOffHi:
+        case mTxHi:
+        case mTx1515Hi:
             CC.SetTxPower(CC_PwrMinus10dBm);
-            break;
-        case mTxHiPwr:
-        case mRxTxVibroHi:
-        case mRxTxLightHi:
-            CC.SetTxPower(CC_Pwr0dBm);
-            break;
-        case mTxMaxPwr:
-        case mRxTxVibroMax:
-        case mRxTxLightMax:
-            CC.SetTxPower(CC_PwrPlus10dBm);
             break;
         default: break;
     }

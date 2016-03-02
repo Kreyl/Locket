@@ -6,13 +6,12 @@
  */
 
 #include <buttons.h>
-#if BUTTONS_ENABLED
 #include "ch.h"
 #include "evt_mask.h"
 #include "uart.h"
 #include "main.h" // App.Thread is here
 
-CircBuf_t<BtnEvtInfo_t, BTNS_EVT_Q_LEN> ButtonEvtBuf;
+CircBuf_t<BtnEvtInfo_t, BTNS_EVT_Q_LEN> EvtBuf;
 
 // ==== Inner use ====
 #if BTN_LONGPRESS
@@ -32,7 +31,7 @@ void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx);
 
 // ========================= Postprocessor for PinSns ==========================
 void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
-//    Uart.Printf("\r%A", p, Len, ' ');
+//    Uart.Printf("\r%A", BtnState, Len, ' ');
     for(uint8_t i=0; i<BUTTONS_CNT; i++) {
         // ==== Button Press ====
         if(BtnState[i] == BTN_PRESS_STATE) {
@@ -65,7 +64,7 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
             // Single key pressed, no combo
             AddEvtToQueue(bePress, i);  // Add single keypress
 #if BTN_LONGPRESS
-            LongPressTimer = chTimeNow();
+            LongPressTimer = chVTGetSystemTimeX();
 #endif
 #if BTN_REPEAT
             RepeatTimer = chTimeNow();
@@ -102,7 +101,8 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
                 ) {
 #if BTN_LONGPRESS // Check if long press
             if(!IsLongPress[i]) {
-                if(TimeElapsed(&LongPressTimer, BTN_LONGPRESS_DELAY_MS)) {
+//                Uart.Printf("Elapsed %u\r", chVTTimeElapsedSinceX(LongPressTimer));
+                if(chVTTimeElapsedSinceX(LongPressTimer) >= MS2ST(BTN_LONGPRESS_DELAY_MS)) {
                     IsLongPress[i] = true;
                     AddEvtToQueue(beLongPress, i);
                 }
@@ -128,7 +128,7 @@ void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len) {
 
 void AddEvtToQueue(BtnEvtInfo_t Evt) {
     chSysLock();
-    ButtonEvtBuf.Put(&Evt);
+    EvtBuf.Put(&Evt);
     App.SignalEvtI(EVTMSK_BUTTONS);
     chSysUnlock();
 }
@@ -136,12 +136,16 @@ void AddEvtToQueue(BtnEvtInfo_t Evt) {
 void AddEvtToQueue(BtnEvt_t AType, uint8_t KeyIndx) {
     BtnEvtInfo_t IEvt;
     IEvt.Type = AType;
+#if BTN_COMBO
     IEvt.BtnCnt = 1;
+#endif
     IEvt.BtnID[0] = KeyIndx;
     chSysLock();
-    ButtonEvtBuf.Put(&IEvt);
+    EvtBuf.Put(&IEvt);
     App.SignalEvtI(EVTMSK_BUTTONS);
     chSysUnlock();
 }
 
-#endif
+uint8_t BtnGetEvt(BtnEvtInfo_t *PEvt) {
+    return(EvtBuf.Get(PEvt));
+}

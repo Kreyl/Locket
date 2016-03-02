@@ -13,6 +13,7 @@
 #include "led.h"
 #include "vibro.h"
 #include "radio_lvl1.h"
+#include "buttons.h"
 
 App_t App;
 // Dip Switch
@@ -22,27 +23,10 @@ App_t App;
 #define DIPSWITCH_PIN3  12
 #define DIPSWITCH_PIN4  15
 
-//Beeper_t Beeper;
 Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
-// LED sequence indicating that someone is near
-LedRGBChunk_t lsqIndicationOn[] = {
-        {csSetup, 720, CLR_DEFAULT},
-        {csEnd}
-};
-LedRGBChunk_t lsqShowColor[] = {
-        {csSetup, 0, CLR_DEFAULT},
-        {csEnd}
-};
 
 #if 1 // ============================ Timers ===================================
-// Once-a-second timer
-void TmrSecondCallback(void *p) {
-    chSysLockFromIsr();
-    App.SignalEvtI(EVTMSK_EVERY_SECOND);
-    chVTSetI(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
-    chSysUnlockFromIsr();
-}
 // Universal VirtualTimer callback
 void TmrGeneralCallback(void *p) {
     chSysLockFromIsr();
@@ -50,12 +34,15 @@ void TmrGeneralCallback(void *p) {
     chSysUnlockFromIsr();
 }
 // Check radio buffer
-void TmrIndicationCallback(void *p) {
+void TmrCheckCallback(void *p) {
     chSysLockFromIsr();
-    App.SignalEvtI(EVTMSK_INDICATION);
-    chVTSetI(&App.TmrIndication, MS2ST(INDICATION_PERIOD_MS), TmrIndicationCallback, nullptr);
+    App.SignalEvtI(EVTMSK_CHECK);
+    chVTSetI(&App.TmrCheck, MS2ST(CHECK_PERIOD_MS), TmrCheckCallback, nullptr);
     chSysUnlockFromIsr();
 }
+
+#define SetTmr15min()   chVTSet(&Tmr15, S2ST(MINUTES_15_S), TmrGeneralCallback, (void*)EVTMSK_15MIN);
+#define SetTmr45min()   chVTSet(&Tmr45, S2ST(MINUTES_45_S), TmrGeneralCallback, (void*)EVTMSK_45MIN);
 #endif
 
 int main(void) {
@@ -71,20 +58,13 @@ int main(void) {
     App.InitThread();
     App.ReadIDfromEE();
 
-    // Timers
-    chVTSet(&App.TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
-    chVTSet(&App.TmrIndication, MS2ST(INDICATION_PERIOD_MS), TmrIndicationCallback, nullptr);
-
     Uart.Init(115200);
-//    Beeper.Init();
-//    Beeper.StartSequence(bsqBeepBeep);
+    Uart.Printf("\r%S_%S  ID=%d", APP_NAME, APP_VERSION, App.ID);
+
+    // Timers
+    chVTSet(&App.TmrCheck, MS2ST(CHECK_PERIOD_MS), TmrCheckCallback, nullptr);
 
     Led.Init();
-    App.ReadColorFromEE();
-
-    Uart.Printf("\r%S_%S  ID=%d   Color: %u %u %u", APP_NAME, APP_VERSION, App.ID,
-                lsqIndicationOn[0].Color.R, lsqIndicationOn[0].Color.G, lsqIndicationOn[0].Color.B);
-
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
 
@@ -109,48 +89,93 @@ void App_t::ITask() {
 #endif
 
 #if 1   // ==== Every second ====
-        if(EvtMsk & EVTMSK_EVERY_SECOND) {
+        if(EvtMsk & EVTMSK_CHECK) {
             // Get mode
             uint8_t b = GetDipSwitch();
+            if((b & 0b0111) > 0b0100) b = 0b1111;   // Bad mode
             Mode_t NewMode = static_cast<Mode_t>(b);
-            if(Mode != NewMode or FirstTimeModeIndication) {
-                FirstTimeModeIndication = false;
+            if(Mode != NewMode) {
                 Mode = NewMode;
+                if(Mode == mRx or Mode == mBadMode) TxState = tosOff;
+                else TxState = tosOn;
                 Led.Stop();
                 Vibro.Stop();
-                LightWasOn = false;
+                VibroSequence = nullptr;
+                // Stop timers
+                chVTReset(&Tmr15);
+                chVTReset(&Tmr45);
+                // Restart timer15 if needed
+                if(Mode == mTx1515Hi or Mode == mTx1515Lo) SetTmr15min();
                 Uart.Printf("\rMode=%u", Mode);
-                // Indicate Mode
-                Led.StartSequence(lsqModesTable[static_cast<uint32_t>(Mode)]);
             }
+            // Indicate led
+            switch(Mode) {
+                case mRxTxOffLo:
+                case mRxTxOffHi:
+                case mTx1515Lo:
+                case mTx1515Hi:
+                    switch(TxState) {
+                        case tosOn:  Led.StartSequence(lsqModesTable[static_cast<uint32_t>(Mode)]); break;
+                        case tosOff: Led.StartSequence(lsqTxDisabled); break;
+                        case tosOnAndSwitchOffDisabled: Led.StartSequence(lsqRxTxOffSwitchOffDisabled); break;
+                    }
+                    break;
+
+                default:
+                    Led.StartSequence(lsqModesTable[static_cast<uint32_t>(Mode)]);
+                    break;
+            } // switch
+            // Indicate vibro
+            if(VibroSequence != nullptr) Vibro.StartSequence(VibroSequence);
         } // if EVTMSK_EVERY_SECOND
 #endif
 
-#if 1   // ==== Indication ====
-        if(EvtMsk & EVTMSK_INDICATION) {
-            if(Mode == mColorSelect) {
-                Color_t *pcl = &lsqIndicationOn[0].Color;
-                // Select next color
-                uint32_t ClrIndx=0;
-                for(uint32_t i=0; i<CLRTABLE_CNT; i++) {
-                    if(*pcl == ClrTable[i]) {
-                        ClrIndx = i+1;
-                        break;
-                    }
-                } // for
-                if(ClrIndx >= CLRTABLE_CNT) ClrIndx = 0;
-                *pcl = ClrTable[ClrIndx];
-                SaveColorToEE();
-                // Show selected
-                lsqShowColor[0].Color = ClrTable[ClrIndx];
-                Led.StartSequence(lsqShowColor);
-            }
-            // Transmitter
-            else if(Mode >= mTxLowPwr and Mode <= mTxMaxPwr) Led.StartSequence(lsqTxOperating);
-            // In other modes, check radio
-            else CheckRxTable();
-        } // if evtmsk
+#if 1 // ==== Button ====
+        if(EvtMsk & EVTMSK_BUTTONS) {
+            BtnEvtInfo_t EInfo;
+            while(BtnGetEvt(&EInfo) == OK) {
+                if(EInfo.Type == bePress) {
+                    Uart.Printf("Btn\r");
+                    // Only RxTxOff reacts on button
+                    if(Mode == mRxTxOffLo or Mode == mRxTxOffHi) {
+                        switch(TxState) {
+                            case tosOn:   // May switch off
+                                TxState = tosOff;
+                                SetTmr15min();
+                                break;
+                            case tosOff:  // Already off
+                            case tosOnAndSwitchOffDisabled:   // Was off, may not off now
+                                Led.StartSequence(lsqFailure);
+                                break;
+                        } // switch
+                    } // if mode
+                } // if press
+            } // while getinfo ok
+        } // EVTMSK_BTN_PRESS
 #endif
+
+#if 1 // ==== 15 min timer ====
+        if(EvtMsk & EVTMSK_15MIN) {
+            if(Mode == mRxTxOffLo or Mode == mRxTxOffHi) {
+                // Will be here after 15 min of silence; switch Tx on
+                TxState = tosOnAndSwitchOffDisabled;
+                SetTmr45min();  // will be able to switch off after 45 min of tx
+            }
+            else if(Mode == mTx1515Lo or Mode == mTx1515Hi) {
+                // Toggle Tx
+                if(TxState == tosOn) TxState = tosOff;
+                else TxState = tosOn;
+                SetTmr15min();  // Restart timer
+            }
+        }
+#endif
+
+#if 1 // ==== 45 min timer ====
+        if(EvtMsk & EVTMSK_45MIN) { // Will be here after 45 min of tx-off-disabled
+            TxState = tosOn;
+        }
+#endif
+
     } // while true
 }
 
@@ -160,50 +185,26 @@ void App_t::CheckRxTable() {
     uint32_t Cnt = Radio.RxTable.GetCount();
     Radio.RxTable.Clear();
     chSysUnlock();
-//    Uart.Printf("\rCnt = %u", Cnt);
+    Uart.Printf("\rCnt = %u", Cnt);
     // ==== Select indication mode depending on received cnt ====
-    const BaseChunk_t *VibroSequence = nullptr;
-    bool LightMustBeOn = false;
-    if(Cnt != 0) {
-        switch(App.Mode) {
-            case mRxLight:
-            case mRxTxLightLow:
-            case mRxTxLightMid:
-            case mRxTxLightHi:
-            case mRxTxLightMax:
-                LightMustBeOn = true;
-                break;
-            case mRxVibro:
-                VibroSequence = vsqSingle;
-                break;
-            case mRxVibroLight:
-                LightMustBeOn = true;
-                VibroSequence = vsqSingle;
-                break;
-            case mRxTxVibroLow:
-            case mRxTxVibroMid:
-            case mRxTxVibroHi:
-            case mRxTxVibroMax:
-                if     (Cnt == 1) VibroSequence = vsqSingle;
-                else if(Cnt == 2) VibroSequence = vsqPair;
-                else              VibroSequence = vsqMany;  // RxTable.Cnt  > 2
-                break;
-            default: break;
-        } // switch
-    } // if Cnt != 0
-    // ==== Indicate ====
-    // Vibro
-    if(VibroSequence == nullptr) Vibro.Stop();
-    else if(Vibro.GetCurrentSequence() != VibroSequence) Vibro.StartSequence(VibroSequence);
-    // Light
-    if(LightMustBeOn and !LightWasOn) {
-        LightWasOn = true;
-        Led.StartSequence(lsqIndicationOn);
-    }
-    else if(!LightMustBeOn and LightWasOn) {
-        LightWasOn = false;
-        Led.StartSequence(lsqIndicationOff);
-    }
+    switch(App.Mode) {
+        case mRx:
+        case mRxTxLo:
+        case mRxTxHi:
+        case mRxTxOffLo:
+        case mRxTxOffHi:
+            switch(Cnt) {
+                case 0:  VibroSequence = nullptr;   break;
+                case 1:  VibroSequence = vsqSingle; break;
+                case 2:  VibroSequence = vsqPair;   break;
+                default: VibroSequence = vsqMany;   break; // RxTable.Cnt  > 2
+            }
+            break;
+
+        default:
+            // TxLo, TxHi, Tx1515Lo, Tx1515Hi
+            break;
+    } // switch
 }
 
 void App_t::OnUartCmd(Uart_t *PUart) {
@@ -220,23 +221,6 @@ void App_t::OnUartCmd(Uart_t *PUart) {
         if(PCmd->TryConvertTokenToNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
         uint8_t r = ISetID(dw32);
         PUart->Ack(r);
-    }
-
-    else if(PCmd->NameIs("GetColor")) PUart->Printf("Color %d,%d,%d", lsqIndicationOn[0].Color.R, lsqIndicationOn[0].Color.G, lsqIndicationOn[0].Color.B);
-
-    else if(PCmd->NameIs("SetColor")) {
-        Color_t cl;
-        if(PCmd->GetNextToken() != OK) { PUart->Ack(CMD_ERROR); return; }
-        if(PCmd->TryConvertTokenToNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
-        cl.R = dw32;
-        if(PCmd->GetNextToken() != OK) { PUart->Ack(CMD_ERROR); return; }
-        if(PCmd->TryConvertTokenToNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
-        cl.G = dw32;
-        if(PCmd->GetNextToken() != OK) { PUart->Ack(CMD_ERROR); return; }
-        if(PCmd->TryConvertTokenToNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
-        cl.B = dw32;
-        lsqIndicationOn[0].Color = cl;
-        PUart->Ack(App.SaveColorToEE());
     }
 
     else PUart->Ack(CMD_UNKNOWN);
@@ -281,19 +265,4 @@ uint8_t App_t::ISetID(int32_t NewID) {
         return FAILURE;
     }
     return FAILURE;
-}
-
-// Read color from EEPROM. Use default color if something strange is read.
-void App_t::ReadColorFromEE() {
-    Color_t *pcl = &lsqIndicationOn[0].Color;
-    pcl->DWord32 = EE.Read32(EE_ADDR_COLOR);
-    // Check if one of allowed colors
-    for(uint32_t i=0; i<CLRTABLE_CNT; i++) {
-        if(*pcl == ClrTable[i]) return;
-    }
-    *pcl = CLR_DEFAULT; // Allowed color not found, use default one
-}
-uint8_t App_t::SaveColorToEE() {
-    Color_t *pcl = &lsqIndicationOn[0].Color;
-    return EE.Write32(EE_ADDR_COLOR, pcl->DWord32);
 }

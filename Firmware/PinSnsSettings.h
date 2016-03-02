@@ -26,7 +26,7 @@
 #include "main.h" // App.thd here
 #include "evt_mask.h"
 
-#define SNS_POLL_PERIOD_MS  72
+#define SNS_POLL_PERIOD_MS  54
 
 enum PinSnsState_t {pssLo, pssHi, pssRising, pssFalling};
 typedef void (*ftVoidPSnsStLen)(PinSnsState_t *PState, uint32_t Len);
