@@ -26,9 +26,10 @@
 #define ID_DEFAULT              ID_MIN
 
 // Timings
-#define CHECK_PERIOD_MS         1800
-#define MINUTES_15_S            7//(15 * 60)
-#define MINUTES_45_S            18//(45 * 60)
+#define CHECK_PERIOD_MS         3600
+#define INDICATION_PERIOD_MS    1800
+#define MINUTES_15_S            11//(15 * 60)
+#define MINUTES_45_S            22//(45 * 60)
 
 #if 1 // ==== Eeprom ====
 // Addresses
@@ -57,7 +58,7 @@ public:
     int32_t ID;
     Mode_t Mode = mBadMode;
     TxState_t TxState = tosOff;
-    VirtualTimer TmrCheck, Tmr15, Tmr45;
+    VirtualTimer TmrCheck, Tmr15, Tmr45, TmrIndication;
     void CheckRxTable();
     uint8_t GetDipSwitch();
     void ReadIDfromEE();

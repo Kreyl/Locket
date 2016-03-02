@@ -41,6 +41,13 @@ void TmrCheckCallback(void *p) {
     chSysUnlockFromIsr();
 }
 
+// Indication
+void TmrIndicationCallback(void *p) {
+    chSysLockFromIsr();
+    App.SignalEvtI(EVTMSK_INDICATION);
+    chSysUnlockFromIsr();
+}
+
 #define SetTmr15min()   chVTSet(&Tmr15, S2ST(MINUTES_15_S), TmrGeneralCallback, (void*)EVTMSK_15MIN);
 #define SetTmr45min()   chVTSet(&Tmr45, S2ST(MINUTES_45_S), TmrGeneralCallback, (void*)EVTMSK_45MIN);
 #endif
@@ -67,12 +74,14 @@ int main(void) {
     Led.Init();
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
+    PinSensors.Init();
 
     if(Radio.Init() != OK) {
         Led.StartSequence(lsqFailure);
         chThdSleepMilliseconds(2700);
     }
 
+    App.SignalEvt(EVTMSK_INDICATION);
     // Main cycle
     App.ITask();
 }
@@ -88,8 +97,8 @@ void App_t::ITask() {
         }
 #endif
 
-#if 1   // ==== Every second ====
-        if(EvtMsk & EVTMSK_CHECK) {
+#if 1   // ==== Indication ====
+        if(EvtMsk & EVTMSK_INDICATION) {
             // Get mode
             uint8_t b = GetDipSwitch();
             if((b & 0b0111) > 0b0100) b = 0b1111;   // Bad mode
@@ -125,9 +134,17 @@ void App_t::ITask() {
                     Led.StartSequence(lsqModesTable[static_cast<uint32_t>(Mode)]);
                     break;
             } // switch
-            // Indicate vibro
             if(VibroSequence != nullptr) Vibro.StartSequence(VibroSequence);
+            // Restart timer
+            chVTReset(&TmrIndication);
+            chVTSet(&TmrIndication, MS2ST(INDICATION_PERIOD_MS), TmrIndicationCallback, nullptr);
         } // if EVTMSK_EVERY_SECOND
+#endif
+
+#if 1 // ==== RxTable check ====
+        if(EvtMsk & EVTMSK_CHECK) {
+            CheckRxTable();
+        }
 #endif
 
 #if 1 // ==== Button ====
@@ -142,6 +159,7 @@ void App_t::ITask() {
                             case tosOn:   // May switch off
                                 TxState = tosOff;
                                 SetTmr15min();
+                                App.SignalEvt(EVTMSK_INDICATION);
                                 break;
                             case tosOff:  // Already off
                             case tosOnAndSwitchOffDisabled:   // Was off, may not off now
