@@ -28,8 +28,8 @@
 // Timings
 #define CHECK_PERIOD_MS         3600
 #define INDICATION_PERIOD_MS    1800
-#define MINUTES_15_S            11//(15 * 60)
-#define MINUTES_45_S            22//(45 * 60)
+#define MINUTES_15_S            (15 * 60)
+#define MINUTES_45_S            (45 * 60)
 
 #if 1 // ==== Eeprom ====
 // Addresses
