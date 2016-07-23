@@ -16,33 +16,15 @@
 #include "ColorTable.h"
 
 #if 1 // ======================= Variables and prototypes ======================
-// Colors and sequences
-LedRGBChunk_t lsqOn[] = {
-        {csSetup, 99, clRed},
-        {csEnd}
-};
-
-LedRGBChunk_t lsqStart[] = {
-        {csSetup, 360, clRed},
-        {csSetup, 360, clBlack},
-        {csEnd}
-};
-
-Color_t *appColor = &lsqOn[0].Color;
-Color_t txColor = clGreen;
-
 // Common variables
 Thread *PThread;
 Eeprom_t EE;
 
+// Eternal
 int32_t appID;
 uint8_t ISetID(int32_t NewID);
-// Eternal methods
 void ReadIDfromEE();
-
-// DIP switch
 uint8_t GetDipSwitch();
-
 void appSignalEvt(eventmask_t Evt) {
     chSysLock();
     chEvtSignalI(PThread, Evt);
@@ -87,13 +69,6 @@ int main(void) {
 #endif
 
     ReadIDfromEE();
-    // Get color from ee
-    ColorTable.Indx = EE.Read32(EE_ADDR_COLOR);
-    if(ColorTable.Indx >= ColorTable.Count) ColorTable.Indx = 0;
-    appColor->Set(ColorTable.GetCurrent());
-    lsqStart[0].Color = *appColor;
-    txColor = *appColor;
-
     Uart.Printf("\r%S_%S  ID=%d\r", APP_NAME, APP_VERSION, appID);
 
     Vibro.Init();
