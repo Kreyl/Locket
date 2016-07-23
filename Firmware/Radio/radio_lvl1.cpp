@@ -38,6 +38,7 @@ static void rLvl1Thread(void *arg) {
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
     uint8_t OldID = 0xFF;
+    uint8_t OldPwr = 0;
     while(true) {
 #if 0        // Demo
         if(App.Mode == 0b0001) { // RX
@@ -73,6 +74,13 @@ void rLevel1_t::ITask() {
             CC.SetChannel(ID2RCHNL(appID));
             Pkt.ID = appID;
         }
+
+        if(OldPwr != Pwr) {
+            OldPwr = Pwr;
+            CC.SetTxPower(Pwr);
+            Uart.Printf("cc Pwr=%02X\r", Pwr);
+        }
+
         DBG1_SET();
         CC.TransmitSync(&Pkt);
         DBG1_CLR();
@@ -109,7 +117,7 @@ uint8_t rLevel1_t::Init() {
     PinSetupOut(DBG_GPIO2, DBG_PIN2, omPushPull);
 #endif    // Init radioIC
     if(CC.Init() == OK) {
-        CC.SetTxPower(CC_Pwr0dBm);
+        CC.SetTxPower(Pwr);
         CC.SetPktSize(RPKT_LEN);
 
         // Thread

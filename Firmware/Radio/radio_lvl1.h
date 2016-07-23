@@ -22,10 +22,10 @@ private:
         chThdSleepMilliseconds(SleepDuration);
     }
 public:
+    uint8_t Pwr = CC_PwrMinus30dBm;
     uint8_t Init();
     // Inner use
     void ITask();
-    rLevel1_t(): Pkt({0}) {}
 };
 
 extern rLevel1_t Radio;

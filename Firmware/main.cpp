@@ -15,13 +15,12 @@
 #include "radio_lvl1.h"
 #include "ColorTable.h"
 
+#if 1 // ======================= Variables and prototypes ======================
+// Colors and sequences
 LedRGBChunk_t lsqOn[] = {
         {csSetup, 99, clRed},
         {csEnd}
 };
-
-Color_t *appColor = &lsqOn[0].Color;
-Color_t txColor = clGreen;
 
 LedRGBChunk_t lsqStart[] = {
         {csSetup, 360, clRed},
@@ -29,6 +28,10 @@ LedRGBChunk_t lsqStart[] = {
         {csEnd}
 };
 
+Color_t *appColor = &lsqOn[0].Color;
+Color_t txColor = clGreen;
+
+// Common variables
 Thread *PThread;
 Eeprom_t EE;
 
@@ -36,7 +39,10 @@ int32_t appID;
 uint8_t ISetID(int32_t NewID);
 // Eternal methods
 void ReadIDfromEE();
+
+// DIP switch
 uint8_t GetDipSwitch();
+
 void appSignalEvt(eventmask_t Evt) {
     chSysLock();
     chEvtSignalI(PThread, Evt);
@@ -45,18 +51,29 @@ void appSignalEvt(eventmask_t Evt) {
 void appSignalEvtI(eventmask_t Evt) { chEvtSignalI(PThread, Evt); }
 void OnUartCmd(Uart_t *PUart);
 
-
 //Beeper_t Beeper;
 Vibro_t Vibro(GPIOB, 8, TIM4, 3);
 LedRGB_t Led { {GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2} };
+#endif
+
+#if 1 // ============================ Timers ===================================
+// Once-a-second timer
+static VirtualTimer TmrSecond;
+
+void TmrSecondCallback(void *p) {
+    chSysLockFromIsr();
+    appSignalEvtI(EVT_SECOND);
+    chVTSetI(&TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    chSysUnlockFromIsr();
+}
+#endif
 
 int main(void) {
 #if 1 // ============================= Init ====================================
-    // ==== Init Vcore & clock system ====
+    // Init Vcore & clock system
     SetupVCore(vcore1V2);
     Clk.UpdateFreqValues();
-
-    // ==== Init OS ====
+    // Init OS
     halInit();
     chSysInit();
 
@@ -87,6 +104,9 @@ int main(void) {
         chThdSleepMilliseconds(2700);
     }
     else Led.StartSequence(lsqStart);
+
+    // Timers
+    chVTSet(&TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
 #endif
 
     // ==== Main cycle ====
@@ -121,9 +141,11 @@ int main(void) {
             }
         }
 
-#if 0   // ==== Once a second ====
-        if(EvtMsk & EVTMSK_SECOND) {
-            DipToTxPwr();               // Check DIP switch
+#if 1   // ==== Once a second ====
+        if(EvtMsk & EVT_SECOND) {
+            // Setup RF power depending on DIP switch
+            uint8_t b = GetDipSwitch();
+            Radio.Pwr = (b > 11)? CC_PwrPlus12dBm : CCPwrTable[b];
         }
 #endif
 
