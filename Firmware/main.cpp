@@ -13,7 +13,7 @@
 #include "led.h"
 #include "vibro.h"
 #include "radio_lvl1.h"
-
+#include "ColorTable.h"
 
 LedRGBChunk_t lsqOn[] = {
         {csSetup, 99, clRed},
@@ -71,7 +71,9 @@ int main(void) {
 
     ReadIDfromEE();
     // Get color from ee
-    appColor->DWord32 = EE.Read32(EE_ADDR_COLOR);
+    ColorTable.Indx = EE.Read32(EE_ADDR_COLOR);
+    if(ColorTable.Indx >= ColorTable.Count) ColorTable.Indx = 0;
+    appColor->Set(ColorTable.GetCurrent());
     lsqStart[0].Color = *appColor;
     txColor = *appColor;
 
@@ -106,14 +108,14 @@ int main(void) {
                 }
                 else if(EInfo.Type == beRepeat) {
 //                    Uart.Printf("Repeat\r");
-                    *appColor = GetNextTableColor();
+                    appColor->Set(ColorTable.GetNext());
                     Led.StartSequence(lsqOn);
                 }
                 else if(EInfo.Type == beRelease) {
 //                    Uart.Printf("Release\r");
                     Led.StartSequence(lsqOff);
-                    // Save color to EE
-                    EE.Write32(EE_ADDR_COLOR, appColor->DWord32);
+                    // Save color indx to EE
+                    EE.Write32(EE_ADDR_COLOR, ColorTable.Indx);
                     txColor = *appColor;
                 }
             }
