@@ -39,5 +39,8 @@
 #define EE_ADDR_COLOR           4
 #endif
 
+extern int32_t appID;
+extern Color_t txColor;
+
 void appSignalEvt(eventmask_t Evt);
 void appSignalEvtI(eventmask_t Evt);

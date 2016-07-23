@@ -20,6 +20,9 @@ LedRGBChunk_t lsqOn[] = {
         {csEnd}
 };
 
+Color_t *appColor = &lsqOn[0].Color;
+Color_t txColor = clGreen;
+
 LedRGBChunk_t lsqStart[] = {
         {csSetup, 360, clRed},
         {csSetup, 360, clBlack},
@@ -29,7 +32,7 @@ LedRGBChunk_t lsqStart[] = {
 Thread *PThread;
 Eeprom_t EE;
 
-int32_t ID;
+int32_t appID;
 uint8_t ISetID(int32_t NewID);
 // Eternal methods
 void ReadIDfromEE();
@@ -68,10 +71,11 @@ int main(void) {
 
     ReadIDfromEE();
     // Get color from ee
-    lsqOn[0].Color.DWord32 = EE.Read32(EE_ADDR_COLOR);
-    lsqStart[0].Color.DWord32 = lsqOn[0].Color.DWord32;
+    appColor->DWord32 = EE.Read32(EE_ADDR_COLOR);
+    lsqStart[0].Color = *appColor;
+    txColor = *appColor;
 
-    Uart.Printf("\r%S_%S  ID=%d\r", APP_NAME, APP_VERSION, ID);
+    Uart.Printf("\r%S_%S  ID=%d\r", APP_NAME, APP_VERSION, appID);
 
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
@@ -102,14 +106,15 @@ int main(void) {
                 }
                 else if(EInfo.Type == beRepeat) {
 //                    Uart.Printf("Repeat\r");
-                    lsqOn[0].Color = GetNextTableColor();
+                    *appColor = GetNextTableColor();
                     Led.StartSequence(lsqOn);
                 }
                 else if(EInfo.Type == beRelease) {
 //                    Uart.Printf("Release\r");
                     Led.StartSequence(lsqOff);
                     // Save color to EE
-                    EE.Write32(EE_ADDR_COLOR, lsqOn[0].Color.DWord32);
+                    EE.Write32(EE_ADDR_COLOR, appColor->DWord32);
+                    txColor = *appColor;
                 }
             }
         }
@@ -141,7 +146,7 @@ void OnUartCmd(Uart_t *PUart) {
     // Handle command
     if(PCmd->NameIs("Ping")) PUart->Ack(OK);
 
-    else if(PCmd->NameIs("GetID")) Uart.Reply("ID", ID);
+    else if(PCmd->NameIs("GetID")) Uart.Reply("ID", appID);
 
     else if(PCmd->NameIs("SetID")) {
         if(PCmd->GetNextNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
@@ -153,10 +158,10 @@ void OnUartCmd(Uart_t *PUart) {
 }
 
 void ReadIDfromEE() {
-    ID = EE.Read32(EE_ADDR_DEVICE_ID);  // Read device ID
-    if(ID < ID_MIN or ID > ID_MAX) {
+    appID = EE.Read32(EE_ADDR_DEVICE_ID);  // Read device ID
+    if(appID < ID_MIN or appID > ID_MAX) {
         Uart.Printf("\rUsing default ID");
-        ID = ID_DEFAULT;
+        appID = ID_DEFAULT;
     }
 }
 
@@ -164,8 +169,8 @@ uint8_t ISetID(int32_t NewID) {
     if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
     uint8_t rslt = EE.Write32(EE_ADDR_DEVICE_ID, NewID);
     if(rslt == OK) {
-        ID = NewID;
-        Uart.Printf("\rNew ID: %u", ID);
+        appID = NewID;
+        Uart.Printf("\rNew ID: %u", appID);
         return OK;
     }
     else {
