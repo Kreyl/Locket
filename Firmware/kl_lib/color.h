@@ -5,10 +5,10 @@
  *      Author: Kreyl
  */
 
-#ifndef COLOR_H_
-#define COLOR_H_
+#pragma once
 
 #include "inttypes.h"
+#include <sys/cdefs.h>
 
 // Mixing two colors
 #define ClrMix(C, B, L)     ((C * L + B * (255 - L)) / 255)
@@ -20,8 +20,8 @@ struct Color_t {
         };
         uint32_t DWord32;
     };
-    bool operator == (const Color_t &AColor) { return ((R == AColor.R) and (G == AColor.G) and (B == AColor.B)); }
-    bool operator != (const Color_t &AColor) { return ((R != AColor.R) or  (G != AColor.G) or  (B != AColor.B)); }
+    bool operator == (const Color_t &AColor) const { return ((R == AColor.R) and (G == AColor.G) and (B == AColor.B)); }
+    bool operator != (const Color_t &AColor) const { return ((R != AColor.R) or  (G != AColor.G) or  (B != AColor.B)); }
     Color_t& operator = (const Color_t &Right) { R = Right.R; G = Right.G; B = Right.B; return *this; }
     void Adjust(const Color_t *PColor) {
         if     (R < PColor->R) R++;
@@ -43,12 +43,52 @@ struct Color_t {
         rslt |= B >> 3;
         return (uint8_t)rslt;
     }
+    uint16_t RGBTo565() const {
+        uint16_t rslt = ((uint16_t)(R & 0b11111000)) << 8;
+        rslt |= ((uint16_t)(G & 0b11111100)) << 3;
+        rslt |= ((uint16_t)B) >> 3;
+        return rslt;
+    }
     void MixOf(Color_t &Fore, Color_t &Back, uint32_t Brt) {
         R = ClrMix(Fore.R, Back.R, Brt);
         G = ClrMix(Fore.G, Back.G, Brt);
         B = ClrMix(Fore.B, Back.B, Brt);
     }
 } __attribute__((packed));
+
+#define RED_OF(c)           (((c) & 0xF800)>>8)
+#define GREEN_OF(c)         (((c)&0x007E)>>3)
+#define BLUE_OF(c)          (((c)&0x001F)<<3)
+
+static inline uint16_t RGBTo565(uint16_t r, uint16_t g, uint16_t b) {
+    uint16_t rslt = (r & 0b11111000) << 8;
+    rslt |= (g & 0b11111100) << 3;
+    rslt |= b >> 3;
+    return rslt;
+}
+
+// Blend two colors according to the alpha;
+// The alpha value (0-255). 0 is all background, 255 is all foreground.
+__unused
+static uint16_t ColorBlend(Color_t fg, Color_t bg, uint16_t alpha) {
+    uint16_t fg_ratio = alpha + 1;
+    uint16_t bg_ratio = 256 - alpha;
+    uint16_t r, g, b;
+
+    r = fg.R * fg_ratio;
+    g = fg.G * fg_ratio;
+    b = fg.B * fg_ratio;
+
+    r += bg.R * bg_ratio;
+    g += bg.G * bg_ratio;
+    b += bg.B * bg_ratio;
+
+    r >>= 8;
+    g >>= 8;
+    b >>= 8;
+
+    return RGBTo565(r, g, b);
+}
 
 // ==== Colors ====
 #define clBlack     ((Color_t){0,   0,   0})
@@ -59,6 +99,15 @@ struct Color_t {
 #define clMagenta   ((Color_t){255, 0, 255})
 #define clCyan      ((Color_t){0, 255, 255})
 #define clWhite     ((Color_t){255, 255, 255})
+
+#define clDarkGreen ((Color_t){0, 54, 00})
+
+#define clLightBlue ((Color_t){90, 90, 255})
+#define clDarkBlue  ((Color_t){0, 0, 90})
+
+#define clGrey      ((Color_t){126, 126, 126})
+#define clLightGrey ((Color_t){180, 180, 180})
+#define clDarkGrey  ((Color_t){54, 54, 54})
 
 #if 0 // ============================ Color table ==============================
 const Color_t ColorTable[] = {
@@ -166,4 +215,44 @@ const Color_t ColorTable[] = {
 #define COLOR_TABLE_SZ  countof(ColorTable)
 #endif
 
-#endif /* COLOR_H_ */
+#if 1 // ========================= Short Color table ===========================
+const Color_t ColorTable[] = {
+        {255,0,0},
+        {255,64,0},
+        {255,128,0},
+        {255,192,0},
+        {255,255,0},
+        {192,255,0},
+        {128,255,0},
+        {64,255,0},
+        {0,255,0},
+        {0,255,64},
+        {0,255,128},
+        {0,255,192},
+        {0,255,255},
+        {0,192,255},
+        {0,128,255},
+        {0,64,255},
+        {0,0,255},
+        {64,0,255},
+        {128,0,255},
+        {192,0,255},
+        {255,0,255},
+        {255,0,192},
+        {255,0,128},
+        {255,0,64},
+        {255,0,0},
+        {64,64,64},
+        {128,128,128},
+        {255,255,255}
+};
+#define COLOR_TABLE_SZ  countof(ColorTable)
+#endif
+
+__unused
+static inline Color_t GetNextTableColor() {
+    static uint32_t N=0;
+    N++;
+    if(N >= COLOR_TABLE_SZ) N=0;
+    return ColorTable[N];
+}

@@ -205,13 +205,13 @@ const LedRGBChunk_t lsqFailure[] = {
         {csEnd}
 };
 
-const LedRGBChunk_t lsqOn[] = {
-        {csSetup, 0, clRed},
-        {csEnd}
-};
+//const LedRGBChunk_t lsqOn[] = {
+//        {csSetup, 0, clRed},
+//        {csEnd}
+//};
 
 const LedRGBChunk_t lsqOff[] = {
-        {csSetup, 0, clBlack},
+        {csSetup, 99, clBlack},
         {csEnd}
 };
 

@@ -37,7 +37,7 @@ static void rLvl1Thread(void *arg) {
 
 __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
-    uint8_t OldID = 0;
+//    uint8_t OldID = 0;
     while(true) {
 #if 0        // Demo
         if(App.Mode == 0b0001) { // RX
@@ -66,37 +66,37 @@ void rLevel1_t::ITask() {
         }
 #else
         // ==== Transmitter ====
-        if(App.MustTransmit) {
-            if(App.ID != OldID) {
-                OldID = App.ID;
-                CC.SetChannel(ID2RCHNL(App.ID));
-                Pkt.DWord = App.ID;
-            }
-            DBG1_SET();
-            CC.TransmitSync(&Pkt);
-            DBG1_CLR();
-        }
+//        if(App.MustTransmit) {
+//            if(App.ID != OldID) {
+//                OldID = App.ID;
+//                CC.SetChannel(ID2RCHNL(App.ID));
+//                Pkt.DWord = App.ID;
+//            }
+//            DBG1_SET();
+//            CC.TransmitSync(&Pkt);
+//            DBG1_CLR();
+//        }
 
         // ==== Receiver ====
-        else {
-            DBG2_SET();
-            // Listen if nobody found, and do not if found
-            int8_t Rssi;
-            // Iterate channels
-            for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
-                if(i == App.ID) continue;   // Do not listen self
-                CC.SetChannel(ID2RCHNL(i));
-                uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
-                if(RxRslt == OK) {
-//                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
-                    App.SignalEvt(EVTMSK_SOMEONE_NEAR);
-                    break; // No need to listen anymore if someone already found
-                }
-            } // for
-            CC.SetChannel(ID2RCHNL(App.ID));    // Set self channel back
-            DBG2_CLR();
+//        else {
+//            DBG2_SET();
+//            // Listen if nobody found, and do not if found
+//            int8_t Rssi;
+//            // Iterate channels
+//            for(int32_t i = ID_MIN; i <= ID_MAX; i++) {
+//                if(i == App.ID) continue;   // Do not listen self
+//                CC.SetChannel(ID2RCHNL(i));
+//                uint8_t RxRslt = CC.ReceiveSync(RX_T_MS, &Pkt, &Rssi);
+//                if(RxRslt == OK) {
+////                    Uart.Printf("\rCh=%d; Rssi=%d", i, Rssi);
+//                    App.SignalEvt(EVTMSK_SOMEONE_NEAR);
+//                    break; // No need to listen anymore if someone already found
+//                }
+//            } // for
+//            CC.SetChannel(ID2RCHNL(App.ID));    // Set self channel back
+//            DBG2_CLR();
             TryToSleep(RX_SLEEP_T_MS);
-        }
+//        }
 #endif
     } // while true
 }

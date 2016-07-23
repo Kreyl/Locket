@@ -9,12 +9,13 @@
 #define EVT_MASK_H_
 
 // Event masks
-#define EVTMSK_NO_MASK          0
+#define EVT_NOTHING             0
 
-#define EVTMSK_UART_NEW_CMD     EVENT_MASK(1)
-#define EVTMSK_SECOND           EVENT_MASK(2)
-#define EVTMSK_TXOFF            EVENT_MASK(3)
-#define EVTMSK_SOMEONE_NEAR     EVENT_MASK(4)
+#define EVT_UART_NEW_CMD        EVENT_MASK(1)
+#define EVT_SECOND              EVENT_MASK(2)
+#define EVT_TXOFF               EVENT_MASK(3)
+#define EVT_SOMEONE_NEAR        EVENT_MASK(4)
+#define EVT_BUTTONS             EVENT_MASK(5)
 
 
 #define EVTMSK_OFF              EVENT_MASK(31)

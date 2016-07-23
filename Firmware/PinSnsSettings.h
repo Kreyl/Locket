@@ -11,15 +11,11 @@
  *
  */
 
-#ifndef PINSNSSETTINGS_H_
-#define PINSNSSETTINGS_H_
+#pragma once
 
 #include "ch.h"
 #include "hal.h"
-#include <kl_lib.h>
-
-#include "main.h" // App.thd here
-#include "evt_mask.h"
+#include "kl_lib.h"
 
 #define SIMPLESENSORS_ENABLED   TRUE
 #define SNS_POLL_PERIOD_MS      72
@@ -41,14 +37,12 @@ struct PinSns_t {
 
 // ================================= Settings ==================================
 // Button handler
-extern void ProcessButton(PinSnsState_t *PState, uint32_t Len);
+extern void ProcessButtons(PinSnsState_t *BtnState, uint32_t Len);
 
 const PinSns_t PinSns[] = {
         // Buttons
-        {GPIOA,  0, pudPullDown, ProcessButton},
+        {GPIOA,  0, pudPullDown, ProcessButtons},
 };
 #define PIN_SNS_CNT     countof(PinSns)
 
 #endif  // if enabled
-
-#endif /* PINSNSSETTINGS_H_ */
