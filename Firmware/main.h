@@ -14,7 +14,7 @@
 #include "uart.h"
 #include "color.h"
 
-#define APP_NAME        "BtnColorChangeTx"
+#define APP_NAME        "DalanBtnTx"
 #define APP_VERSION     _TIMENOW_
 
 // ==== Constants and default values ====
@@ -40,7 +40,6 @@
 #endif
 
 extern int32_t appID;
-extern Color_t txColor;
 
 void appSignalEvt(eventmask_t Evt);
 void appSignalEvtI(eventmask_t Evt);

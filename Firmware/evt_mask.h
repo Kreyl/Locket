@@ -18,7 +18,7 @@
 #define EVT_BUTTONS             EVENT_MASK(5)
 
 
-#define EVTMSK_OFF              EVENT_MASK(31)
+#define EVT_OFF                 EVENT_MASK(31)
 
 
 #endif /* EVT_MASK_H_ */

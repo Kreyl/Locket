@@ -1,7 +1,7 @@
 /*
  * File:   main.cpp
  * Author: Kreyl
- * Project: Salem Box
+ * Project: Rock of Dalan
  *
  * Created on Mar 22, 2015, 01:23
  */
@@ -40,12 +40,20 @@ LedRGB_t Led { {GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2} };
 
 #if 1 // ============================ Timers ===================================
 // Once-a-second timer
-static VirtualTimer TmrSecond;
+static VirtualTimer TmrBtn;
 
-void TmrSecondCallback(void *p) {
+void TmrBtnCallback(void *p) {
     chSysLockFromIsr();
     appSignalEvtI(EVT_SECOND);
-    chVTSetI(&TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    chVTSetI(&TmrBtn, MS2ST(99), TmrBtnCallback, nullptr);
+    chSysUnlockFromIsr();
+}
+
+static VirtualTimer TmrOff;
+
+void TmrOffCallback(void *p) {
+    chSysLockFromIsr();
+    appSignalEvtI(EVT_OFF);
     chSysUnlockFromIsr();
 }
 #endif
@@ -65,11 +73,17 @@ int main(void) {
 
     Led.Init();
 #if BTN_ENABLED
-    PinSensors.Init();
+//    PinSensors.Init();
+    PinSetupIn(GPIOA,  0, pudPullDown);
 #endif
 
-    ReadIDfromEE();
-    Uart.Printf("\r%S_%S  ID=%d\r", APP_NAME, APP_VERSION, appID);
+    // Get ID
+//    ReadIDfromEE();
+    uint8_t b = GetDipSwitch();
+    appID = b & 0b0111;  // 0...7
+    // Get radio Pwr
+    Radio.Pwr = (b & 0b1000)? CC_Pwr0dBm : CC_PwrMinus10dBm;
+    Uart.Printf("\r%S_%S  ID=%d; Pwr=%02X\r", APP_NAME, APP_VERSION, appID, Radio.Pwr);
 
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
@@ -81,9 +95,10 @@ int main(void) {
     else Led.StartSequence(lsqStart);
 
     // Timers
-    chVTSet(&TmrSecond, MS2ST(1000), TmrSecondCallback, nullptr);
+    chVTSet(&TmrBtn, MS2ST(99), TmrBtnCallback, nullptr);
 #endif
 
+    bool LedIsOn = true, PreparingToSleep = false;
     // ==== Main cycle ====
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
@@ -94,40 +109,56 @@ int main(void) {
         }
 #endif
 
-        if(EvtMsk & EVT_BUTTONS) {
-            BtnEvtInfo_t EInfo;
-            while(BtnGetEvt(&EInfo) == OK) {
-                if(EInfo.Type == bePress) {
+//        if(EvtMsk & EVT_BUTTONS) {
+//            BtnEvtInfo_t EInfo;
+//            while(BtnGetEvt(&EInfo) == OK) {
+//                if(EInfo.Type == bePress) {
 //                    Uart.Printf("Press\r");
-                    Led.StartSequence(lsqOn);
-                }
-                else if(EInfo.Type == beRepeat) {
-//                    Uart.Printf("Repeat\r");
-                    appColor->Set(ColorTable.GetNext());
-                    Led.StartSequence(lsqOn);
-                }
-                else if(EInfo.Type == beRelease) {
-//                    Uart.Printf("Release\r");
-                    Led.StartSequence(lsqOff);
-                    // Save color indx to EE
-                    EE.Write32(EE_ADDR_COLOR, ColorTable.Indx);
-                    txColor = *appColor;
-                }
-            }
-        }
+//                    Led.StartSequence(lsqOn);
+//                }
+//                else if(EInfo.Type == beRepeat) {
+////                    Uart.Printf("Repeat\r");
+//                    appColor->Set(ColorTable.GetNext());
+//                    Led.StartSequence(lsqOn);
+//                }
+//                else if(EInfo.Type == beRelease) {
+////                    Uart.Printf("Release\r");
+//                    Led.StartSequence(lsqOff);
+//                    // Save color indx to EE
+//                    EE.Write32(EE_ADDR_COLOR, ColorTable.Indx);
+//                    txColor = *appColor;
+//                }
+//            }
+//        }
 
 #if 1   // ==== Once a second ====
         if(EvtMsk & EVT_SECOND) {
-            // Setup RF power depending on DIP switch
-            uint8_t b = GetDipSwitch();
-            Radio.Pwr = (b > 11)? CC_PwrPlus12dBm : CCPwrTable[b];
+            // Check button
+            if(PinIsSet(GPIOA, 0)) {   // Pressed
+                PreparingToSleep = false;
+                chVTReset(&TmrOff);
+                if(!LedIsOn) {
+                    LedIsOn = true;
+                    Led.StartSequence(lsqStart);
+                }
+            }
+            else {  // Released
+                if(!PreparingToSleep) {
+                    PreparingToSleep = true;
+                    chVTSet(&TmrOff, MS2ST(3600), TmrOffCallback, nullptr);
+                    LedIsOn = false;
+                    Led.StartSequence(lsqOff);
+                }
+            }
         }
 #endif
 
-#if 0 // ==== OFF ====
-        if(EvtMsk & EVTMSK_OFF) {
+#if 1 // ==== OFF ====
+        if(EvtMsk & EVT_OFF) {
+            Uart.PrintfNow("Off\r");
+            chVTReset(&TmrBtn);
             Radio.StopTx();
-            chThdSleepMilliseconds(180);
+            chThdSleepMilliseconds(99);
             // Enter Standby
             chSysLock();
             Sleep::EnableWakeup1Pin();

@@ -39,6 +39,7 @@ __attribute__((__noreturn__))
 void rLevel1_t::ITask() {
     uint8_t OldID = 0xFF;
     uint8_t OldPwr = 0;
+    bool IsOff = false;
     while(true) {
 #if 0        // Demo
         if(App.Mode == 0b0001) { // RX
@@ -67,23 +68,32 @@ void rLevel1_t::ITask() {
         }
 #else
         // ==== Transmitter ====
-        txColor.Get(&Pkt.R, &Pkt.G, &Pkt.B);
-        if(appID != OldID) {
-            Pkt.ID = appID;
-            OldID = appID;
-            CC.SetChannel(ID2RCHNL(appID));
-            Pkt.ID = appID;
+        if(MayTx) {
+            if(appID != OldID) {
+                Pkt.ID = appID;
+                OldID = appID;
+                CC.SetChannel(ID2RCHNL(appID));
+                Pkt.ID = appID;
+            }
+
+            if(OldPwr != Pwr) {
+                OldPwr = Pwr;
+                CC.SetTxPower(Pwr);
+                Uart.Printf("cc Pwr=%02X\r", Pwr);
+            }
+
+            DBG1_SET();
+            CC.TransmitSync(&Pkt);
+            DBG1_CLR();
+        }
+        else {
+            if(!IsOff) {    // Do not enter power dow again and again
+                CC.EnterPwrDown();
+                IsOff = true;
+            }
+            chThdSleepMilliseconds(999);
         }
 
-        if(OldPwr != Pwr) {
-            OldPwr = Pwr;
-            CC.SetTxPower(Pwr);
-            Uart.Printf("cc Pwr=%02X\r", Pwr);
-        }
-
-        DBG1_SET();
-        CC.TransmitSync(&Pkt);
-        DBG1_CLR();
 
         // ==== Receiver ====
 //        else {

@@ -17,6 +17,7 @@
 class rLevel1_t {
 private:
     rPkt_t Pkt;
+    bool MayTx = true;
     void TryToSleep(uint32_t SleepDuration) {
         if(SleepDuration >= MIN_SLEEP_DURATION_MS) CC.EnterPwrDown();
         chThdSleepMilliseconds(SleepDuration);
@@ -24,6 +25,7 @@ private:
 public:
     uint8_t Pwr = CC_PwrMinus30dBm;
     uint8_t Init();
+    void StopTx() { MayTx = false; }
     // Inner use
     void ITask();
 };
