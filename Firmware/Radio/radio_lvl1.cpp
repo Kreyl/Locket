@@ -68,7 +68,7 @@ void rLevel1_t::ITask() {
         }
 #else
         // ==== Transmitter ====
-        if(MayTx) {
+        if(MustTx) {
             if(appID != OldID) {
                 Pkt.ID = appID;
                 OldID = appID;

@@ -157,7 +157,7 @@ int main(void) {
         if(EvtMsk & EVT_OFF) {
             Uart.PrintfNow("Off\r");
             chVTReset(&TmrBtn);
-            Radio.StopTx();
+            Radio.MustTx = false;
             chThdSleepMilliseconds(99);
             // Enter Standby
             chSysLock();
