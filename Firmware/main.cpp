@@ -20,6 +20,9 @@
 Thread *PThread;
 Eeprom_t EE;
 
+#define R_LOW_PWR   CC_PwrMinus10dBm
+#define R_HI_PWR    CC_Pwr0dBm
+
 // Eternal
 int32_t appID;
 uint8_t ISetID(int32_t NewID);
@@ -82,7 +85,7 @@ int main(void) {
     uint8_t b = GetDipSwitch();
     appID = b & 0b0111;  // 0...7
     // Get radio Pwr
-    Radio.Pwr = (b & 0b1000)? CC_Pwr0dBm : CC_PwrMinus10dBm;
+    Radio.Pwr = (b & 0b1000)? R_HI_PWR : R_LOW_PWR;
     Uart.Printf("\r%S_%S  ID=%d; Pwr=%02X\r", APP_NAME, APP_VERSION, appID, Radio.Pwr);
 
     Vibro.Init();
@@ -92,7 +95,10 @@ int main(void) {
         Led.StartSequence(lsqFailure);
         chThdSleepMilliseconds(2700);
     }
-    else Led.StartSequence(lsqStart);
+    else {
+        Led.StartSequence(lsqStart);
+        Radio.MustTx = true;
+    }
 
     // Timers
     chVTSet(&TmrBtn, MS2ST(99), TmrBtnCallback, nullptr);
@@ -133,8 +139,13 @@ int main(void) {
 
 #if 1   // ==== Once a second ====
         if(EvtMsk & EVT_SECOND) {
+            // Check switch
+            b = GetDipSwitch();
+            appID = b & 0b0111;  // 0...7
+            Radio.Pwr = (b & 0b1000)? R_HI_PWR : R_LOW_PWR;
             // Check button
             if(PinIsSet(GPIOA, 0)) {   // Pressed
+                Radio.MustTx = true;
                 PreparingToSleep = false;
                 chVTReset(&TmrOff);
                 if(!LedIsOn) {

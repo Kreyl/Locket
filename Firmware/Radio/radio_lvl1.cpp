@@ -71,9 +71,9 @@ void rLevel1_t::ITask() {
         if(MustTx) {
             if(appID != OldID) {
                 Pkt.ID = appID;
+                Pkt.CheckID = Pkt.ID ^ 0xFF;
                 OldID = appID;
                 CC.SetChannel(ID2RCHNL(appID));
-                Pkt.ID = appID;
             }
 
             if(OldPwr != Pwr) {
@@ -127,9 +127,12 @@ uint8_t rLevel1_t::Init() {
     PinSetupOut(DBG_GPIO2, DBG_PIN2, omPushPull);
 #endif    // Init radioIC
     if(CC.Init() == OK) {
-        CC.SetTxPower(Pwr);
+//        CC.SetTxPower(Pwr);
+        CC.SetTxPower(CC_Pwr0dBm);
+        CC.SetChannel(1);
         CC.SetPktSize(RPKT_LEN);
-
+        Pkt.State = 0x00;
+        Pkt.CheckState = 0xFF;
         // Thread
         chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
         return OK;
