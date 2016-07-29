@@ -62,7 +62,7 @@ struct rPkt_t {
 #define RXTABLE_MAX_CNT 3   // Do not receive if this count reached. Will not indicate more anyway.
 
 #if 1 // ======================= Channels & cycles =============================
-#define RCHNL_MIN       5
+#define RCHNL_MIN       9
 #define ID2RCHNL(ID)    (RCHNL_MIN + ID)
 
 #define RCHNL_RXTX      4

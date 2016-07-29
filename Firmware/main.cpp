@@ -87,6 +87,7 @@ int main(void) {
 #endif
 
     ReadIDfromEE();
+    appID = 0;
     // Get color from ee
     ColorTable.Indx = EE.Read32(EE_ADDR_COLOR);
     if(ColorTable.Indx >= ColorTable.Count) ColorTable.Indx = 0;
