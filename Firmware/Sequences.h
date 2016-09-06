@@ -200,17 +200,31 @@ const LedRGBChunk_t lsqStart[] = {
         {csEnd},
 };
 
-const LedRGBChunk_t lsqDetectorRxMode[] = {
+const LedRGBChunk_t lsqDetectorRxModeStart[] = {
         {csSetup, 0,   clBlack},
         {csSetup, 360, clMagenta},
         {csSetup, 360, clBlack},
-        {csEnd},
+        {csSetup, 360, clDarkMagenta},
+        {csSetup, 360, clBlack},
+        {csWait, 2007},
+        {csGoto, 3},
 };
+const LedRGBChunk_t lsqDetectorRxModeWork[] = {
+        {csSetup, 360, clDarkMagenta},
+        {csSetup, 360, clBlack},
+        {csWait, 2007},
+        {csGoto, 0},
+};
+
+
 const LedRGBChunk_t lsqDetectorTxMode[] = {
         {csSetup, 0,   clBlack},
         {csSetup, 360, clYellow},
         {csSetup, 360, clBlack},
-        {csEnd},
+        {csSetup, 360, clDarkYellow},
+        {csSetup, 360, clBlack},
+        {csWait, 2007},
+        {csGoto, 3},
 };
 const LedRGBChunk_t lsqBindingMode[] = {
         {csSetup, 0, clBlack},

@@ -77,6 +77,7 @@ int main(void) {
 
 __noreturn
 void App_t::ITask() {
+    bool Indicating = false;
     while(true) {
         __unused eventmask_t Evt = chEvtWaitAny(ALL_EVENTS);
         if(Evt & EVT_EVERY_SECOND) {
@@ -86,12 +87,18 @@ void App_t::ITask() {
         if(Evt & EVT_RADIO) {
             // Something received
             if(Mode == modeDetectorRx) {
-                if(Led.IsIdle()) Led.StartSequence(lsqCyan);
+                if(!Indicating) {
+                    Led.StartSequence(lsqCyan);
+                    Indicating = true;
+                }
                 TmrIndication.Restart(); // Reset off timer
             }
         }
 
-        if(Evt & EVT_INDICATION_OFF) Led.StartSequence(lsqOff);
+        if(Evt & EVT_INDICATION_OFF) {
+            Led.StartSequence(lsqDetectorRxModeWork);
+            Indicating = false;
+        }
 
 #if 1   // ==== Uart cmd ====
         if(Evt & EVT_UART_NEW_CMD) {
@@ -122,7 +129,7 @@ void ReadAndSetupMode() {
     }
     else if(App.ID == 42 or App.ID == 44 or App.ID == 46 or App.ID == 48) {
         App.Mode = modeDetectorRx;
-        Led.StartSequence(lsqDetectorRxMode);
+        Led.StartSequence(lsqDetectorRxModeStart);
         Radio.MustSleep = false;
     }
     else {
