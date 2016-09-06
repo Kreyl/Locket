@@ -5,26 +5,15 @@
  *      Author: Kreyl
  */
 
-#ifndef LED_RGB_H_
-#define LED_RGB_H_
+#pragma once
 
 #include "hal.h"
 #include "color.h"
 #include "ChunkTypes.h"
 #include "uart.h"
+#include "kl_lib.h"
 
-#ifdef STM32F2XX
-#include "kl_lib_f2xx.h"
-#elif defined STM32L1XX_MD || defined STM32L1XX_HD
-#include <kl_lib.h>
-#endif
-
-#if 1 // =========================== Common auxilary ===========================
-// TimeToWaitBeforeNextAdjustment = SmoothVar / (N+4) + 1, where N - current LED brightness.
-static inline uint32_t ICalcDelay(uint32_t CurrentBrightness, uint32_t SmoothVar) { return (uint32_t)((SmoothVar / (CurrentBrightness+4)) + 1); }
-#endif
-
-#if 1 // ========================= Single LED blinker ==========================
+#if 0 // ========================= Single LED blinker ==========================
 #define LED_RGB_BLINKER
 
 class LedBlinker_t : public BaseSequencer_t<BaseChunk_t> {
@@ -93,7 +82,7 @@ public:
 #endif
 
 
-#if 1 // ==================== RGB blinker (no smooth switch) ===================
+#if 0 // ==================== RGB blinker (no smooth switch) ===================
 #define LED_RGB_BLINKER
 class LedRgbBlinker_t : public BaseSequencer_t<LedRGBChunk_t> {
 protected:
@@ -121,16 +110,15 @@ public:
 };
 #endif
 
-#if 1 // ============================== LedRGB =================================
-#define LED_RGB
-#define LED_RGB_TOP_VALUE   255 // Intencity 0...255
-#define LED_RGB_INVERTED    invNotInverted
-
-class LedRGB_t : public BaseSequencer_t<LedRGBChunk_t> {
-private:
-    PinOutputPWM_t<LED_RGB_TOP_VALUE, LED_RGB_INVERTED, omPushPull>  R, G, B;
+#if 1 // =========================== LedRGB Parent =============================
+class LedRGBParent_t : public BaseSequencer_t<LedRGBChunk_t> {
+protected:
+    const PinOutputPWM_t  R, G, B;
     Color_t ICurrColor;
-    void ISwitchOff() { SetColor(clBlack); }
+    void ISwitchOff() {
+        SetColor(clBlack);
+        ICurrColor = clBlack;
+    }
     SequencerLoopTask_t ISetup() {
         if(ICurrColor != IPCurrentChunk->Color) {
             if(IPCurrentChunk->Value == 0) {     // If smooth time is zero,
@@ -139,15 +127,15 @@ private:
                 IPCurrentChunk++;                // and goto next chunk
             }
             else {
-                ICurrColor.Adjust(&IPCurrentChunk->Color);
+                ICurrColor.Adjust(IPCurrentChunk->Color);
                 SetColor(ICurrColor);
                 // Check if completed now
                 if(ICurrColor == IPCurrentChunk->Color) IPCurrentChunk++;
                 else { // Not completed
                     // Calculate time to next adjustment
-                    uint32_t DelayR = (ICurrColor.R == IPCurrentChunk->Color.R)? 0 : ICalcDelay(ICurrColor.R, IPCurrentChunk->Value);
-                    uint32_t DelayG = (ICurrColor.G == IPCurrentChunk->Color.G)? 0 : ICalcDelay(ICurrColor.G, IPCurrentChunk->Value);
-                    uint32_t DelayB = (ICurrColor.B == IPCurrentChunk->Color.B)? 0 : ICalcDelay(ICurrColor.B, IPCurrentChunk->Value);
+                    uint32_t DelayR = (ICurrColor.R == IPCurrentChunk->Color.R)? 0 : ClrCalcDelay(ICurrColor.R, IPCurrentChunk->Value);
+                    uint32_t DelayG = (ICurrColor.G == IPCurrentChunk->Color.G)? 0 : ClrCalcDelay(ICurrColor.G, IPCurrentChunk->Value);
+                    uint32_t DelayB = (ICurrColor.B == IPCurrentChunk->Color.B)? 0 : ClrCalcDelay(ICurrColor.B, IPCurrentChunk->Value);
                     uint32_t Delay = DelayR;
                     if(DelayG > Delay) Delay = DelayG;
                     if(DelayB > Delay) Delay = DelayB;
@@ -160,10 +148,10 @@ private:
         return sltProceed;
     }
 public:
-    LedRGB_t(
-            const PinOutputPWM_t<LED_RGB_TOP_VALUE, LED_RGB_INVERTED, omPushPull> ARed,
-            const PinOutputPWM_t<LED_RGB_TOP_VALUE, LED_RGB_INVERTED, omPushPull> AGreen,
-            const PinOutputPWM_t<LED_RGB_TOP_VALUE, LED_RGB_INVERTED, omPushPull> ABlue) :
+    LedRGBParent_t(
+            const PwmSetup_t ARed,
+            const PwmSetup_t AGreen,
+            const PwmSetup_t ABlue) :
         BaseSequencer_t(), R(ARed), G(AGreen), B(ABlue) {}
     void Init() {
         R.Init();
@@ -171,6 +159,19 @@ public:
         B.Init();
         SetColor(clBlack);
     }
+    virtual void SetColor(Color_t AColor);
+};
+#endif
+
+#if 1 // ============================== LedRGB =================================
+class LedRGB_t : public LedRGBParent_t {
+public:
+    LedRGB_t(
+            const PwmSetup_t ARed,
+            const PwmSetup_t AGreen,
+            const PwmSetup_t ABlue) :
+                LedRGBParent_t(ARed, AGreen, ABlue) {}
+
     void SetColor(Color_t AColor) {
         R.Set(AColor.R);
         G.Set(AColor.G);
@@ -179,4 +180,27 @@ public:
 };
 #endif
 
-#endif /* LED_RGB_H_ */
+#if 1 // =========================== RGB LED with power ========================
+class LedRGBwPower_t : public LedRGBParent_t {
+private:
+    const PinOutput_t PwrPin;
+public:
+    LedRGBwPower_t(
+            const PwmSetup_t ARed,
+            const PwmSetup_t AGreen,
+            const PwmSetup_t ABlue,
+            const PinOutput_t APwrPin) :
+                LedRGBParent_t(ARed, AGreen, ABlue), PwrPin(APwrPin) {}
+    void Init() {
+        PwrPin.Init();
+        LedRGBParent_t::Init();
+    }
+    void SetColor(Color_t AColor) {
+        if(AColor == clBlack) PwrPin.Lo();
+        else PwrPin.Hi();
+        R.Set(AColor.R);
+        G.Set(AColor.G);
+        B.Set(AColor.B);
+    }
+};
+#endif

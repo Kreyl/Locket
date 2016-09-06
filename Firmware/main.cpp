@@ -6,16 +6,18 @@
  * Created on Mar 22, 2015, 01:23
  */
 
-#include <buttons.h>
 #include "main.h"
-#include "SimpleSensors.h"
 #include "Sequences.h"
 #include "led.h"
 #include "vibro.h"
 #include "radio_lvl1.h"
-#include "buttons.h"
 
 App_t App;
+
+// EEAddresses
+#define EE_ADDR_DEVICE_ID       0
+#define EE_ADDR_COLOR           4
+
 // Dip Switch
 #define DIPSWITCH_GPIO  GPIOA
 #define DIPSWITCH_PIN1  8
@@ -23,33 +25,20 @@ App_t App;
 #define DIPSWITCH_PIN3  12
 #define DIPSWITCH_PIN4  15
 
-Vibro_t Vibro(GPIOB, 8, TIM4, 3);
-LedRGB_t Led({GPIOB, 1, TIM3, 4}, {GPIOB, 0, TIM3, 3}, {GPIOB, 5, TIM3, 2});
+Vibro_t Vibro {VIBRO_PIN};
+LedRGB_t Led { LED_R_PIN, LED_G_PIN, LED_B_PIN };
+
+static const PinInputSetup_t DipSwPin[DIP_SW_CNT] = { DIP_SW4, DIP_SW3, DIP_SW2, DIP_SW1 };
+static uint8_t GetDipSwitch();
+static void ReadAndSetupMode();
+static uint8_t ISetID(int32_t NewID);
+Eeprom_t EE;
+static void ReadIDfromEE();
 
 #if 1 // ============================ Timers ===================================
-// Universal VirtualTimer callback
-void TmrGeneralCallback(void *p) {
-    chSysLockFromIsr();
-    App.SignalEvtI((eventmask_t)p);
-    chSysUnlockFromIsr();
-}
-// Check radio buffer
-void TmrCheckCallback(void *p) {
-    chSysLockFromIsr();
-    App.SignalEvtI(EVTMSK_CHECK);
-    chVTSetI(&App.TmrCheck, MS2ST(CHECK_PERIOD_MS), TmrCheckCallback, nullptr);
-    chSysUnlockFromIsr();
-}
+static TmrKL_t TmrEverySecond {MS2ST(1000), EVT_EVERY_SECOND, tktPeriodic};
+static TmrKL_t TmrIndication  {MS2ST(3600), EVT_INDICATION_OFF, tktOneShot};
 
-// Indication
-void TmrIndicationCallback(void *p) {
-    chSysLockFromIsr();
-    App.SignalEvtI(EVTMSK_INDICATION);
-    chSysUnlockFromIsr();
-}
-
-#define SetTmr15min()   chVTSet(&Tmr15, S2ST(MINUTES_15_S), TmrGeneralCallback, (void*)EVTMSK_15MIN);
-#define SetTmr45min()   chVTSet(&Tmr45, S2ST(MINUTES_45_S), TmrGeneralCallback, (void*)EVTMSK_45MIN);
 #endif
 
 int main(void) {
@@ -63,225 +52,141 @@ int main(void) {
 
     // ==== Init Hard & Soft ====
     App.InitThread();
-    App.ReadIDfromEE();
 
-    Uart.Init(115200);
-    Uart.Printf("\r%S_%S  ID=%d", APP_NAME, APP_VERSION, App.ID);
-
-    // Timers
-    chVTSet(&App.TmrCheck, MS2ST(CHECK_PERIOD_MS), TmrCheckCallback, nullptr);
+    Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
+    ReadIDfromEE();
+    Uart.Printf("\r%S_%S  ID=%d\r", APP_NAME, APP_VERSION, App.ID);
 
     Led.Init();
     Vibro.Init();
     Vibro.StartSequence(vsqBrr);
     chThdSleepMilliseconds(180);
-    PinSensors.Init();
+//    PinSensors.Init();
 
-    if(Radio.Init() != OK) {
-        Led.StartSequence(lsqFailure);
-        chThdSleepMilliseconds(2700);
-    }
+    TmrEverySecond.InitAndStart();
+    TmrIndication.Init();
+    App.SignalEvt(EVT_EVERY_SECOND); // check it now
 
-    App.SignalEvt(EVTMSK_INDICATION);
+    if(Radio.Init() == OK) Led.StartSequence(lsqStart);
+    else Led.StartSequence(lsqFailure);
+    chThdSleepMilliseconds(1008);
+
     // Main cycle
     App.ITask();
 }
 
-__attribute__ ((__noreturn__))
+__noreturn
 void App_t::ITask() {
     while(true) {
-        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        __unused eventmask_t Evt = chEvtWaitAny(ALL_EVENTS);
+        if(Evt & EVT_EVERY_SECOND) {
+            ReadAndSetupMode();
+        }
+
+        if(Evt & EVT_RADIO) {
+            // Something received
+            if(Mode == modeDetectorRx) {
+                if(Led.IsIdle()) Led.StartSequence(lsqCyan);
+                TmrIndication.Restart(); // Reset off timer
+            }
+        }
+
+        if(Evt & EVT_INDICATION_OFF) Led.StartSequence(lsqOff);
+
 #if 1   // ==== Uart cmd ====
-        if(EvtMsk & EVTMSK_UART_NEW_CMD) {
-            OnUartCmd(&Uart);
+        if(Evt & EVT_UART_NEW_CMD) {
+            OnCmd((Shell_t*)&Uart);
             Uart.SignalCmdProcessed();
         }
 #endif
-
-#if 1   // ==== Indication ====
-        if(EvtMsk & EVTMSK_INDICATION) {
-            // Get mode
-            uint8_t b = GetDipSwitch();
-            if((b & 0b0111) > 0b0100) b = 0b1111;   // Bad mode
-            Mode_t NewMode = static_cast<Mode_t>(b);
-            if(Mode != NewMode) {
-                Mode = NewMode;
-                if(Mode == mRx or Mode == mBadMode) TxState = tosOff;
-                else TxState = tosOn;
-                Led.Stop();
-                Vibro.Stop();
-                VibroSequence = nullptr;
-                // Stop timers
-                chVTReset(&Tmr15);
-                chVTReset(&Tmr45);
-                // Restart timer15 if needed
-                if(Mode == mTx1515Hi or Mode == mTx1515Lo) SetTmr15min();
-                Uart.Printf("\rMode=%u", Mode);
-            }
-            // Indicate led
-            switch(Mode) {
-                case mRxTxOffLo:
-                case mRxTxOffHi:
-                case mTx1515Lo:
-                case mTx1515Hi:
-                    switch(TxState) {
-                        case tosOn:  Led.StartSequence(lsqModesTable[static_cast<uint32_t>(Mode)]); break;
-                        case tosOff: Led.StartSequence(lsqTxDisabled); break;
-                        case tosOnAndSwitchOffDisabled: Led.StartSequence(lsqRxTxOffSwitchOffDisabled); break;
-                    }
-                    break;
-
-                default:
-                    Led.StartSequence(lsqModesTable[static_cast<uint32_t>(Mode)]);
-                    break;
-            } // switch
-            if(VibroSequence != nullptr) Vibro.StartSequence(VibroSequence);
-            // Restart timer
-            chVTReset(&TmrIndication);
-            chVTSet(&TmrIndication, MS2ST(INDICATION_PERIOD_MS), TmrIndicationCallback, nullptr);
-        } // if EVTMSK_EVERY_SECOND
-#endif
-
-#if 1 // ==== RxTable check ====
-        if(EvtMsk & EVTMSK_CHECK) {
-            CheckRxTable();
-        }
-#endif
-
-#if 1 // ==== Button ====
-        if(EvtMsk & EVTMSK_BUTTONS) {
-            BtnEvtInfo_t EInfo;
-            while(BtnGetEvt(&EInfo) == OK) {
-                if(EInfo.Type == bePress) {
-                    Uart.Printf("Btn\r");
-                    // Only RxTxOff reacts on button
-                    if(Mode == mRxTxOffLo or Mode == mRxTxOffHi) {
-                        switch(TxState) {
-                            case tosOn:   // May switch off
-                                TxState = tosOff;
-                                SetTmr15min();
-                                App.SignalEvt(EVTMSK_INDICATION);
-                                break;
-                            case tosOff:  // Already off
-                            case tosOnAndSwitchOffDisabled:   // Was off, may not off now
-                                Led.StartSequence(lsqFailure);
-                                break;
-                        } // switch
-                    } // if mode
-                } // if press
-            } // while getinfo ok
-        } // EVTMSK_BTN_PRESS
-#endif
-
-#if 1 // ==== 15 min timer ====
-        if(EvtMsk & EVTMSK_15MIN) {
-            if(Mode == mRxTxOffLo or Mode == mRxTxOffHi) {
-                // Will be here after 15 min of silence; switch Tx on
-                TxState = tosOnAndSwitchOffDisabled;
-                SetTmr45min();  // will be able to switch off after 45 min of tx
-            }
-            else if(Mode == mTx1515Lo or Mode == mTx1515Hi) {
-                // Toggle Tx
-                if(TxState == tosOn) TxState = tosOff;
-                else TxState = tosOn;
-                SetTmr15min();  // Restart timer
-            }
-        }
-#endif
-
-#if 1 // ==== 45 min timer ====
-        if(EvtMsk & EVTMSK_45MIN) { // Will be here after 45 min of tx-off-disabled
-            TxState = tosOn;
-        }
-#endif
-
     } // while true
 }
 
-void App_t::CheckRxTable() {
-    // Get number of distinct received IDs and clear table
+void ReadAndSetupMode() {
+    static uint8_t OldDipSettings = 0xFF;
+    uint8_t b = GetDipSwitch();
+    if(b == OldDipSettings) return;
+    // Something has changed
+    Radio.MustSleep = true; // Sleep until we decide what to do
+    // Reset everything
+    Vibro.Stop();
+    Led.Stop();
+    // Analyze switch
+    OldDipSettings = b;
+    Uart.Printf("Dip: %02X\r", b);
+    // Get mode
+    if(App.ID == 41 or App.ID == 43 or App.ID == 45 or App.ID == 47) {
+        App.Mode = modeDetectorTx;
+        Led.StartSequence(lsqDetectorTxMode);
+        Radio.MustSleep = false;
+    }
+    else if(App.ID == 42 or App.ID == 44 or App.ID == 46 or App.ID == 48) {
+        App.Mode = modeDetectorRx;
+        Led.StartSequence(lsqDetectorRxMode);
+        Radio.MustSleep = false;
+    }
+    else {
+        App.Mode = modeNone;
+        Led.StartSequence(lsqFailure);
+    }
+    // ==== Setup TX power ====
+    uint8_t pwrIndx = (b & 0b0111);
     chSysLock();
-    uint32_t Cnt = Radio.RxTable.GetCount();
-    Radio.RxTable.Clear();
+    CC.SetTxPower(CCPwrTable[pwrIndx]);
     chSysUnlock();
-    Uart.Printf("\rCnt = %u", Cnt);
-    // ==== Select indication mode depending on received cnt ====
-    switch(App.Mode) {
-        case mRx:
-        case mRxTxLo:
-        case mRxTxHi:
-        case mRxTxOffLo:
-        case mRxTxOffHi:
-            switch(Cnt) {
-                case 0:  VibroSequence = nullptr;   break;
-                case 1:  VibroSequence = vsqSingle; break;
-                case 2:  VibroSequence = vsqPair;   break;
-                default: VibroSequence = vsqMany;   break; // RxTable.Cnt  > 2
-            }
-            break;
-
-        default:
-            // TxLo, TxHi, Tx1515Lo, Tx1515Hi
-            break;
-    } // switch
 }
 
-void App_t::OnUartCmd(Uart_t *PUart) {
-    UartCmd_t *PCmd = &PUart->Cmd;
+void App_t::OnCmd(Shell_t *PShell) {
+    Cmd_t *PCmd = &PShell->Cmd;
     __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations
-    Uart.Printf("\r%S\r", PCmd->Name);
+    Uart.Printf("%S\r", PCmd->Name);
     // Handle command
-    if(PCmd->NameIs("Ping")) PUart->Ack(OK);
-
-    else if(PCmd->NameIs("GetID")) Uart.Reply("ID", ID);
-
-    else if(PCmd->NameIs("SetID")) {
-        if(PCmd->GetNextToken() != OK) { PUart->Ack(CMD_ERROR); return; }
-        if(PCmd->TryConvertTokenToNumber(&dw32) != OK) { PUart->Ack(CMD_ERROR); return; }
-        uint8_t r = ISetID(dw32);
-        PUart->Ack(r);
+    if(PCmd->NameIs("Ping")) {
+        PShell->Ack(OK);
     }
 
-    else PUart->Ack(CMD_UNKNOWN);
+    else if(PCmd->NameIs("GetID")) PShell->Reply("ID", App.ID);
+
+    else if(PCmd->NameIs("SetID")) {
+        if(PCmd->GetNextNumber(&dw32) != OK) { PShell->Ack(CMD_ERROR); return; }
+        uint8_t r = ISetID(dw32);
+        PShell->Ack(r);
+    }
+
+    else PShell->Ack(CMD_UNKNOWN);
 }
 
-uint8_t App_t::GetDipSwitch() {
-    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN1, pudPullUp);
-    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN2, pudPullUp);
-    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN3, pudPullUp);
-    PinSetupIn(DIPSWITCH_GPIO, DIPSWITCH_PIN4, pudPullUp);
-    uint8_t Rslt;
-    Rslt  = static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN1));
-    Rslt <<= 1;
-    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN2));
-    Rslt <<= 1;
-    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN3));
-    Rslt <<= 1;
-    Rslt |= static_cast<uint8_t>(PinIsSet(DIPSWITCH_GPIO, DIPSWITCH_PIN4));
-    Rslt ^= 0xF;    // Invert switches
-    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN1);
-    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN2);
-    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN3);
-    PinSetupAnalog(DIPSWITCH_GPIO, DIPSWITCH_PIN4);
-    return Rslt;
+#if 1 // =========================== ID management =============================
+void ReadIDfromEE() {
+    App.ID = EE.Read32(EE_ADDR_DEVICE_ID);  // Read device ID
+    if(App.ID < ID_MIN or App.ID > ID_MAX) {
+        Uart.Printf("\rUsing default ID\r");
+        App.ID = ID_DEFAULT;
+    }
 }
 
-void App_t::ReadIDfromEE() {
-    ID = EE.Read32(EE_ADDR_DEVICE_ID);  // Read device ID
-    if(ID < ID_MIN or ID > ID_MAX) ID = ID_DEFAULT;
-}
-
-uint8_t App_t::ISetID(int32_t NewID) {
+uint8_t ISetID(int32_t NewID) {
     if(NewID < ID_MIN or NewID > ID_MAX) return FAILURE;
     uint8_t rslt = EE.Write32(EE_ADDR_DEVICE_ID, NewID);
     if(rslt == OK) {
-        ID = NewID;
-        Uart.Printf("\rNew ID: %u", ID);
+        App.ID = NewID;
+        Uart.Printf("New ID: %u\r", App.ID);
         return OK;
     }
     else {
-        Uart.Printf("\rEE error: %u", rslt);
+        Uart.Printf("EE error: %u\r", rslt);
         return FAILURE;
     }
-    return FAILURE;
+}
+#endif
+
+// ====== DIP switch ======
+uint8_t GetDipSwitch() {
+    uint8_t Rslt = 0;
+    for(int i=0; i<DIP_SW_CNT; i++) PinSetupInput(DipSwPin[i].PGpio, DipSwPin[i].Pin, DipSwPin[i].PullUpDown);
+    for(int i=0; i<DIP_SW_CNT; i++) {
+        if(!PinIsHi(DipSwPin[i].PGpio, DipSwPin[i].Pin)) Rslt |= (1 << i);
+        PinSetupAnalog(DipSwPin[i].PGpio, DipSwPin[i].Pin);
+    }
+    return Rslt;
 }

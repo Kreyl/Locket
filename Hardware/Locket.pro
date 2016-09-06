@@ -1,6 +1,6 @@
-update=02.05.2015 14:22:44
+update=06.09.2016 14:49:49
 version=1
-last_client=kicad
+last_client=eeschema
 [pcbnew]
 version=1
 LastNetListRead=
@@ -29,13 +29,14 @@ version=1
 version=1
 LibDir=D:/Libs/Kicad
 [eeschema/libraries]
-LibName1=pcb_details
-LibName2=power
-LibName3=Power_kl
-LibName4=RF ICs
-LibName5=st_kl
-LibName6=Tittar_kl
-LibName7=Transistors_kl
-LibName8=Switches
-LibName9=Sensors
-LibName10=Antennas_kl
+LibName1=Locket-rescue
+LibName2=pcb_details
+LibName3=power
+LibName4=Power_kl
+LibName5=RF ICs
+LibName6=st_kl
+LibName7=Tittar_kl
+LibName8=Transistors_kl
+LibName9=Switches
+LibName10=Sensors
+LibName11=Antennas_kl

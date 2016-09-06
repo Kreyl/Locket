@@ -1,5 +1,5 @@
 /*
-    ChibiOS/RT - Copyright (C) 2006-2013 Giovanni Di Sirio
+    ChibiOS - Copyright (C) 2006..2015 Giovanni Di Sirio
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -30,16 +30,6 @@
 
 #include "mcuconf.h"
 
-// @KL
-#define STM32_DMA_REQUIRED  TRUE
-
-/**
- * @brief   Enables the TM subsystem.
- */
-#if !defined(HAL_USE_TM) || defined(__DOXYGEN__)
-#define HAL_USE_TM                  FALSE
-#endif
-
 /**
  * @brief   Enables the PAL subsystem.
  */
@@ -62,6 +52,13 @@
 #endif
 
 /**
+ * @brief   Enables the DAC subsystem.
+ */
+#if !defined(HAL_USE_DAC) || defined(__DOXYGEN__)
+#define HAL_USE_DAC                 FALSE
+#endif
+
+/**
  * @brief   Enables the EXT subsystem.
  */
 #if !defined(HAL_USE_EXT) || defined(__DOXYGEN__)
@@ -80,6 +77,13 @@
  */
 #if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
 #define HAL_USE_I2C                 FALSE
+#endif
+
+/**
+ * @brief   Enables the I2S subsystem.
+ */
+#if !defined(HAL_USE_I2S) || defined(__DOXYGEN__)
+#define HAL_USE_I2S                 FALSE
 #endif
 
 /**
@@ -159,6 +163,13 @@
 #define HAL_USE_USB                 FALSE
 #endif
 
+/**
+ * @brief   Enables the WDG subsystem.
+ */
+#if !defined(HAL_USE_WDG) || defined(__DOXYGEN__)
+#define HAL_USE_WDG                 FALSE
+#endif
+
 /*===========================================================================*/
 /* ADC driver related settings.                                              */
 /*===========================================================================*/
@@ -168,7 +179,7 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(ADC_USE_WAIT) || defined(__DOXYGEN__)
-#define ADC_USE_WAIT                TRUE
+#define ADC_USE_WAIT                FALSE
 #endif
 
 /**
@@ -198,7 +209,7 @@
  * @brief   Enables the mutual exclusion APIs on the I2C bus.
  */
 #if !defined(I2C_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
-#define I2C_USE_MUTUAL_EXCLUSION    TRUE
+#define I2C_USE_MUTUAL_EXCLUSION    FALSE
 #endif
 
 /*===========================================================================*/
@@ -283,11 +294,34 @@
  * @brief   Serial buffers size.
  * @details Configuration parameter, you can change the depth of the queue
  *          buffers depending on the requirements of your application.
- * @note    The default is 64 bytes for both the transmission and receive
+ * @note    The default is 16 bytes for both the transmission and receive
  *          buffers.
  */
 #if !defined(SERIAL_BUFFERS_SIZE) || defined(__DOXYGEN__)
 #define SERIAL_BUFFERS_SIZE         16
+#endif
+
+/*===========================================================================*/
+/* SERIAL_USB driver related setting.                                        */
+/*===========================================================================*/
+
+/**
+ * @brief   Serial over USB buffers size.
+ * @details Configuration parameter, the buffer size must be a multiple of
+ *          the USB data endpoint maximum packet size.
+ * @note    The default is 256 bytes for both the transmission and receive
+ *          buffers.
+ */
+#if !defined(SERIAL_USB_BUFFERS_SIZE) || defined(__DOXYGEN__)
+#define SERIAL_USB_BUFFERS_SIZE     256
+#endif
+
+/**
+ * @brief   Serial over USB number of buffers.
+ * @note    The default is 2 buffers.
+ */
+#if !defined(SERIAL_USB_BUFFERS_NUMBER) || defined(__DOXYGEN__)
+#define SERIAL_USB_BUFFERS_NUMBER   2
 #endif
 
 /*===========================================================================*/
@@ -308,6 +342,38 @@
  */
 #if !defined(SPI_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
 #define SPI_USE_MUTUAL_EXCLUSION    TRUE
+#endif
+
+/*===========================================================================*/
+/* UART driver related settings.                                             */
+/*===========================================================================*/
+
+/**
+ * @brief   Enables synchronous APIs.
+ * @note    Disabling this option saves both code and data space.
+ */
+#if !defined(UART_USE_WAIT) || defined(__DOXYGEN__)
+#define UART_USE_WAIT               FALSE
+#endif
+
+/**
+ * @brief   Enables the @p uartAcquireBus() and @p uartReleaseBus() APIs.
+ * @note    Disabling this option saves both code and data space.
+ */
+#if !defined(UART_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
+#define UART_USE_MUTUAL_EXCLUSION   FALSE
+#endif
+
+/*===========================================================================*/
+/* USB driver related settings.                                              */
+/*===========================================================================*/
+
+/**
+ * @brief   Enables synchronous APIs.
+ * @note    Disabling this option saves both code and data space.
+ */
+#if !defined(USB_USE_WAIT) || defined(__DOXYGEN__)
+#define USB_USE_WAIT                FALSE
 #endif
 
 #endif /* _HALCONF_H_ */

@@ -5,11 +5,11 @@
  *      Author: Kreyl
  */
 
-#ifndef KL_LIB_CHUNKTYPES_H_
-#define KL_LIB_CHUNKTYPES_H_
+#pragma once
 
 #include "color.h"
 #include "ch.h"
+#include "uart.h"
 
 enum ChunkSort_t {csSetup, csWait, csGoto, csEnd};
 
@@ -60,20 +60,27 @@ public:
 
 // Common Timer callback
 static void GeneralSequencerTmrCallback(void *p) {
-    chSysLockFromIsr();
+    chSysLockFromISR();
     ((BaseSequenceProcess_t*)p)->IProcessSequenceI();
-    chSysUnlockFromIsr();
+    chSysUnlockFromISR();
 }
 
 template <class TChunk>
 class BaseSequencer_t : public BaseSequenceProcess_t {
 private:
-    VirtualTimer ITmr;
+    virtual_timer_t ITmr;
 protected:
     const TChunk *IPStartChunk, *IPCurrentChunk;
-    BaseSequencer_t() : IPStartChunk(nullptr), IPCurrentChunk(nullptr) {}
+    BaseSequencer_t() : IPStartChunk(nullptr), IPCurrentChunk(nullptr),
+            PThread(nullptr), EvtEnd(0) {}
     void SetupDelay(uint32_t ms) { chVTSetI(&ITmr, MS2ST(ms), GeneralSequencerTmrCallback, this); }
+    thread_t *PThread;
+    eventmask_t EvtEnd;
 public:
+    void SetupSeqEndEvt(thread_t *APThread, eventmask_t AEvt = 0) {
+        PThread = APThread;
+        EvtEnd = AEvt;
+    }
     void StartSequence(const TChunk *PChunk) {
         if(PChunk == nullptr) Stop();
         else {
@@ -93,6 +100,8 @@ public:
         chSysUnlock();
     }
     const TChunk* GetCurrentSequence() { return IPStartChunk; }
+
+    bool IsIdle() const { return (IPStartChunk == nullptr); }
 
     void IProcessSequenceI() {
         if(chVTIsArmedI(&ITmr)) chVTResetI(&ITmr);  // Reset timer
@@ -119,6 +128,11 @@ public:
                     break;
 
                 case csEnd:
+                    // Signal End Of Sequence evt
+                    if(PThread != nullptr) chEvtSignalI(PThread, EvtEnd);
+                    // Clear pointers
+                    IPStartChunk = nullptr;
+                    IPCurrentChunk = nullptr;
                     return;
                     break;
             } // switch
@@ -126,5 +140,3 @@ public:
     } // IProcessSequenceI
 };
 #endif
-
-#endif /* KL_LIB_CHUNKTYPES_H_ */
